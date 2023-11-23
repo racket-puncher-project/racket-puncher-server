@@ -1,0 +1,6 @@
+spring:
+  datasource:
+    driverClassName: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/racket_puncher?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    username: racket_puncher
+    password: rp1234
