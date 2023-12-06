@@ -152,7 +152,7 @@ class MatchingServiceImplTest {
                 .nickname("nickname")
                 .email("example@example.com")
                 .phoneNumber("010-1234-5678")
-                .mannerScore(10)
+                .mannerScore(10.0)
                 .penaltyScore(0)
                 .gender(GenderType.MALE)
                 .ntrp(Ntrp.DEVELOPMENT)

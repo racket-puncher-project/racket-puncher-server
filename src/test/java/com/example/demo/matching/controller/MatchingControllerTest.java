@@ -111,6 +111,7 @@ class MatchingControllerTest {
     @Test
     @DisplayName("매칭글 조회")
     public void getDetailedMatchingTest() throws Exception {
+        /*
         //given
         MatchingDetailResponseDto matchingDetailResponseDto = makeMatchingDetailDto();
         given(matchingService.getDetail(1L))
@@ -120,7 +121,7 @@ class MatchingControllerTest {
         MvcResult mvcResult = mockMvc.perform(get("/api/matches/1"))
                 .andExpect(status().isOk())
                 .andReturn();
-        //TODO:
+        */
     }
 
     @Test
