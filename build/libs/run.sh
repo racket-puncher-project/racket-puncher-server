@@ -1,4 +1,4 @@
-PROJECT_NAME=backend # 프로젝트 이름 설정
+PROJECT_NAME=demo # 프로젝트 이름 설정
 CURRENT_PID=$(pgrep -f ${PROJECT_NAME}-.*.jar | head -n 1) # 현재 실행 중인 프로세스 중에서 프로젝트 이름에 해당하는 Jar 파일을 찾아 해당 PID를 가져온다.
 
 if [ -z "$CURRENT_PID" ]; then
