@@ -13,5 +13,5 @@ echo "\n SpringBoot 애플리케이션을 실행합니다.\n"
 
 JAR_NAME=$(ls /home/ubuntu/ | grep .jar | head -n 1)
 
-sudo -E nohup java -jar /home/ubuntu/$JAR_NAME & # 해당 JAR 파일을 백그라운드에서 실행한다.
+sudo -E nohup java -Xmx1024m -Xms1024m -jar /home/ubuntu/$JAR_NAME & # 해당 JAR 파일을 백그라운드에서 실행한다.
 # -E는 환경 변수를 유지하고 nohup은 로그아웃 후에도 프로세스가 계속 실행되도록 한다.
