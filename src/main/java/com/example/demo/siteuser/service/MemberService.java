@@ -5,7 +5,6 @@ import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.impl.AuthAlreadyExistEmailException;
 import com.example.demo.exception.impl.AuthEmailNotFoundException;
 import com.example.demo.exception.impl.AuthWrongPasswordException;
-import com.example.demo.exception.impl.EmailNotVerifiedException;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,12 +57,6 @@ public class MemberService implements UserDetailsService {
         if (!this.passwordEncoder.matches(member.getPassword(), user.getPassword())) {
             throw new AuthWrongPasswordException();
         }
-
-/* // 이메일
-        if(!user.getIsMailVerified()){
-            throw new EmailNotVerifiedException();
-        }
-*/
 
         return user;
     }

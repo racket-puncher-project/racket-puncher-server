@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
-    private final CustomAuthFailureHandler customFailurHandler;
+    private final CustomAuthFailureHandler customAuthFailureHandler;
     private final JwtAuthenticationFilter authenticationFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
 

@@ -1,42 +1,34 @@
 package com.example.demo.siteuser.controller;
 
+import com.example.demo.aws.S3Uploader;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
-import com.example.demo.aws.S3Uploader;
 import com.example.demo.entity.Auth;
-import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.impl.NicknameUnavailableException;
 import com.example.demo.oauth2.dto.AccessToken;
 import com.example.demo.oauth2.dto.ProfileDto;
 import com.example.demo.oauth2.service.ProviderService;
-import com.example.demo.siteuser.dto.SiteUserLoginResponseDto;
-import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.siteuser.dto.EmailRequestDto;
 import com.example.demo.siteuser.dto.NicknameRequestDto;
+import com.example.demo.siteuser.dto.SiteUserLoginResponseDto;
+import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.siteuser.security.TokenProvider;
-//import com.example.demo.siteuser.service.EmailService;
 import com.example.demo.siteuser.service.MemberService;
-import com.example.demo.type.Authority;
+import java.util.concurrent.TimeUnit;
+import javax.naming.CommunicationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.connector.Response;
-import org.springframework.data.redis.core.ReactiveSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.naming.CommunicationException;
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RestController
@@ -50,16 +42,11 @@ public class AuthController {
     private final TokenProvider tokenProvider;
     private final S3Uploader s3Uploader;
     private final ProviderService providerService;
-    // private final EmailService emailService; // 이메일
 
-    @PostMapping("/signup")
+    @PostMapping("/sign-up")
     public ResponseEntity<ResponseDto<String>> signup(@RequestBody Auth.SignUp request) {
         try {
             memberService.register(request);
-            // 이메일
-            // SiteUser siteUser = memberService.register(request);
-            // emailService.sendEmail(siteUser.getId(), siteUser.getEmail());
-
             return ResponseEntity.ok(ResponseUtil.SUCCESS("회원 가입 성공"));
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,7 +54,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/sign-in")
     public ResponseEntity<?> signin(@RequestBody Auth.SignIn request) {
         // 로그인용 API
         var member = this.memberService.authenticate(request);
@@ -83,7 +70,7 @@ public class AuthController {
         return ResponseEntity.ok(siteUserLoginResponseDto);
     }
 
-    @PostMapping("/signin/kakao")
+    @PostMapping("/sign-in/kakao")
     public ResponseEntity<?> signinKakao(@RequestBody Auth.SignKakao request) {
         // 카카오용 API
 
@@ -133,7 +120,7 @@ public class AuthController {
         return ResponseEntity.ok(token);
     }
 
-    @PostMapping("/signout")
+    @PostMapping("/sign-out")
     public ResponseEntity<?> signout(@RequestBody Auth.SignOut signOut) {
         var accessToken = signOut.getAccessToken();
         if (!StringUtils.hasText(accessToken) || !this.tokenProvider.validateToken(accessToken)) {
@@ -183,11 +170,4 @@ public class AuthController {
             return ResponseEntity.ok(ResponseUtil.SUCCESS("사용 가능한 닉네임 입니다."));
         }
     }
-
-/*
-    @GetMapping("/email-verify")
-    public void viewConfirmEmail(@RequestParam String token) {
-        emailService.verifyEmail(token);
-    }*/
-
 }

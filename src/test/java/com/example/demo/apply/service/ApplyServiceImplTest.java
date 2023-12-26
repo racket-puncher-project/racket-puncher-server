@@ -48,9 +48,6 @@ class ApplyServiceImplTest {
     private ApplyRepository applyRepository;
 
     @Mock
-    private MatchingRepository matchingRepository;
-
-    @Mock
     private FindEntity findEntity;
 
     @Mock
