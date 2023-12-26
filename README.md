@@ -126,7 +126,7 @@
         - [등록자 & 신청자] 날씨 알림
 
 ## ERD
-![image](Exerd.png)
+![image](Exerd_m.png)
 
 ### Tech Stack
 - Language: Java 17
