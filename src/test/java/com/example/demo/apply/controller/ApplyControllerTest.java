@@ -43,7 +43,6 @@ class ApplyControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    @WithMockUser(roles = "USER")
     void successApply() throws Exception {
         // given
         given(applyService.apply(anyString(), anyLong()))
@@ -58,7 +57,6 @@ class ApplyControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
     void successCancelApply() throws Exception {
         // given
         given(applyService.cancel(anyLong()))
@@ -73,7 +71,6 @@ class ApplyControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "USER")
     void successAcceptApply() throws Exception {
         // given
         String request = "{\n"

@@ -19,7 +19,6 @@ public class SiteUserMyInfoDto {
     private String email;
     private String phoneNumber;
     private Integer mannerScore;
-    private Integer penaltyScore;
     private GenderType gender;
     private Ntrp ntrp;
     private String address;
@@ -34,13 +33,12 @@ public class SiteUserMyInfoDto {
 
         return SiteUserMyInfoDto.builder()
                 .id(siteUser.getId())
-                .siteUserName(siteUser.getSiteusername())
+                .siteUserName(siteUser.getSiteUserName())
                 .password(siteUser.getPassword())
                 .nickname(siteUser.getNickname())
                 .email(siteUser.getEmail())
                 .phoneNumber(siteUser.getPhoneNumber())
                 .mannerScore(roundedMannerScore)
-                .penaltyScore(siteUser.getPenaltyScore())
                 .gender(siteUser.getGender())
                 .ntrp(siteUser.getNtrp())
                 .address(siteUser.getAddress())

@@ -1,12 +1,15 @@
 package com.example.demo.siteuser.service;
 
-import com.example.demo.entity.Auth;
+import com.example.demo.siteuser.dto.QuitDto;
+import com.example.demo.siteuser.dto.SignInDto;
+import com.example.demo.siteuser.dto.SignUpDto;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.impl.AuthAlreadyExistEmailException;
 import com.example.demo.exception.impl.AuthEmailNotFoundException;
 import com.example.demo.exception.impl.AuthWrongPasswordException;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,7 +19,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MemberService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
@@ -27,18 +30,16 @@ public class MemberService implements UserDetailsService {
                 .orElseThrow(() -> new AuthEmailNotFoundException());
     }
 
-    public SiteUser register(Auth.SignUp member) {
-        boolean exists = this.siteUserRepository.existsByEmail(member.getEmail());
+    public SiteUser register(SignUpDto signUpDto) {
+        boolean exists = this.siteUserRepository.existsByEmail(signUpDto.getEmail());
         if (exists) {
             throw new AuthAlreadyExistEmailException();
         }
-
-        member.setPassword(this.passwordEncoder.encode(member.getPassword()));
-        var result = this.siteUserRepository.save(member.fromUser());
-        return result;
+        signUpDto.setPassword(this.passwordEncoder.encode(signUpDto.getPassword()));
+        return this.siteUserRepository.save(SiteUser.fromDto(signUpDto));
     }
 
-    public SiteUser withdraw(Auth.Quit member) {
+    public SiteUser withdraw(QuitDto member) {
         var user = this.siteUserRepository.findByEmail(member.getEmail())
                 .orElseThrow(() -> new AuthEmailNotFoundException());
 
@@ -49,7 +50,7 @@ public class MemberService implements UserDetailsService {
         return user;
     }
 
-    public SiteUser authenticate(Auth.SignIn member) {
+    public SiteUser authenticate(SignInDto member) {
 
         var user = this.siteUserRepository.findByEmail(member.getEmail())
                 .orElseThrow(() -> new AuthEmailNotFoundException());

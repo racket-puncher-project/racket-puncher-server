@@ -21,23 +21,20 @@ public class ApplyController {
 
     private final ApplyService applyService;
 
-    @PreAuthorize("hasRole('USER')")
     @PostMapping("/matches/{match_id}")
     public void apply(@PathVariable(value = "match_id") long matchingId, Principal principal) {
 
-        String email = principal.getName();
+        String email = principal.getName(); // 로그인 정보 검증 필요
 
         applyService.apply(email, matchingId);
     }
 
-    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{apply_id}")
     public void cancelApply(@PathVariable(value = "apply_id") long applyId) {
 
         applyService.cancel(applyId);
     }
 
-    @PreAuthorize("hasRole('USER')")
     @PatchMapping("/matches/{matching_id}")
     public void acceptApply(@RequestBody AppliedListAndConfirmedList appliedListAndConfirmedList,
                                    @PathVariable(value = "matching_id") long matchingId) {
