@@ -4,7 +4,6 @@ import com.example.demo.entity.SiteUser;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
-import java.time.LocalDateTime;
 import lombok.*;
 
 @Getter
@@ -15,12 +14,11 @@ import lombok.*;
 public class SiteUserMyInfoDto {
     private Long id;
     private String password;
-    private String siteusername;
+    private String siteUserName;
     private String nickname;
     private String email;
     private String phoneNumber;
     private Integer mannerScore;
-    private Integer penaltyScore;
     private GenderType gender;
     private Ntrp ntrp;
     private String address;
@@ -35,13 +33,12 @@ public class SiteUserMyInfoDto {
 
         return SiteUserMyInfoDto.builder()
                 .id(siteUser.getId())
-                .siteusername(siteUser.getSiteusername())
+                .siteUserName(siteUser.getSiteUserName())
                 .password(siteUser.getPassword())
                 .nickname(siteUser.getNickname())
                 .email(siteUser.getEmail())
                 .phoneNumber(siteUser.getPhoneNumber())
                 .mannerScore(roundedMannerScore)
-                .penaltyScore(siteUser.getPenaltyScore())
                 .gender(siteUser.getGender())
                 .ntrp(siteUser.getNtrp())
                 .address(siteUser.getAddress())

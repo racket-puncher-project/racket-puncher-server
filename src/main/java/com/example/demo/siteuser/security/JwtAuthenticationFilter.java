@@ -74,7 +74,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     }
 
-
     @Data
     @Builder
     public static class ErrorResponse {

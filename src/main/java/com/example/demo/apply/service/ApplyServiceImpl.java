@@ -2,6 +2,7 @@ package com.example.demo.apply.service;
 
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
+import com.example.demo.common.FindEntity;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.exception.impl.AlreadyCanceledApplyException;
@@ -11,13 +12,11 @@ import com.example.demo.exception.impl.ClosedMatchingException;
 import com.example.demo.exception.impl.OverRecruitNumberException;
 import com.example.demo.exception.impl.UserNotFoundException;
 import com.example.demo.exception.impl.YourOwnPostingCancelException;
-import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.RecruitStatus;
-import com.example.demo.common.FindEntity;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplyServiceImpl implements ApplyService {
 
     private final ApplyRepository applyRepository;
-    private final MatchingRepository matchingRepository;
     private final SiteUserRepository siteUserRepository;
     private final NotificationService notificationService;
     private final FindEntity findEntity;

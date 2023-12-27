@@ -30,16 +30,14 @@ public class TokenProvider {
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60; // 1분
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 10; // 10분
 
-    private static final String KEY_ROLES = "roles";
     private final MemberService memberService;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Value("{spring.jwt.secret}")
     private String secretKey;
 
-    public String generateAccessToken(String email, List<String> roles) {
+    public String generateAccessToken(String email) {
         Claims claims = Jwts.claims().setSubject(email);
-        claims.put(KEY_ROLES, roles);
 
         var now = new Date();
         var expiredDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
@@ -87,7 +85,6 @@ public class TokenProvider {
             return Jwts.parser().setSigningKey(this.secretKey).parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
             log.error("만료된 토큰입니다.");
-            //throw new TokenExpiredException();
             return e.getClaims();
         }
     }

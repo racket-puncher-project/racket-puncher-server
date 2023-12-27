@@ -19,7 +19,6 @@ public class SiteUserInfoDto{
     private Ntrp ntrp;
     private GenderType gender;
     private Integer mannerScore;
-    private Integer penaltyScore;
     private AgeGroup ageGroup;
 
 
@@ -34,7 +33,6 @@ public class SiteUserInfoDto{
                 .ntrp(siteUser.getNtrp())
                 .gender(siteUser.getGender())
                 .mannerScore(roundedMannerScore)
-                .penaltyScore(siteUser.getPenaltyScore())
                 .ageGroup(siteUser.getAgeGroup())
                 .build();
     }

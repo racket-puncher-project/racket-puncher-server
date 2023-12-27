@@ -9,13 +9,4 @@ package com.example.demo.siteuser.dto;
 @Builder
 public class NicknameRequestDto {
     private String nickname;
-
-    // Getter and Setter
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
 }

@@ -1,7 +1,6 @@
 package com.example.demo.siteuser.security;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.redis.core.RedisHash;
 
 public class RefreshToken {
 
