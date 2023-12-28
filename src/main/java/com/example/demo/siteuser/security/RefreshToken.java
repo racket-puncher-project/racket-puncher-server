@@ -1,25 +1,19 @@
 package com.example.demo.siteuser.security;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RefreshToken {
 
     @Id
     private String email;
 
     private String refreshToken;
-
-
-    public RefreshToken(final String email, final String refreshToken) {
-        this.email = email;
-        this.refreshToken = refreshToken;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public String getEmail() {
-        return email;
-    }
 }
