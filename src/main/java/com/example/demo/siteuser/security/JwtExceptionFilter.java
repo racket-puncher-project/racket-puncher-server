@@ -1,5 +1,6 @@
 package com.example.demo.siteuser.security;
 
+import com.example.demo.exception.ErrorResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.jsonwebtoken.JwtException;
@@ -41,7 +42,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         objectMapper.registerModule(new JavaTimeModule());
         response.setStatus(status.value());
         response.setContentType("application/json; charset=UTF-8");
-        JwtAuthenticationFilter.ErrorResponse errorResponse = new JwtAuthenticationFilter.ErrorResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
         try {
             response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
         } catch (IOException e) {

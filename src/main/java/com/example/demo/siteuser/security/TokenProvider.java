@@ -43,11 +43,11 @@ public class TokenProvider {
         var expiredDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_TIME);
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now) // 토큰 생성시간
-                .setExpiration(expiredDate) // 토큰 만료시간
+                .setClaims(claims) // 발행 유저 정보 저장
+                .setIssuedAt(now) // 토큰 생성 시간
+                .setExpiration(expiredDate) // 토큰 만료 시간
                 .signWith(SignatureAlgorithm.HS512, this.secretKey) // 사용할 암호화 알고리즘, 비밀키
-                .compact();
+                .compact(); // 생성
     }
 
     public String generateRefreshToken(String email) {
@@ -56,12 +56,11 @@ public class TokenProvider {
         String token = refreshToken.getRefreshToken();
 
         redisTemplate.opsForValue().set(
-                email,
-                token,
-                REFRESH_TOKEN_EXPIRE_TIME,
+                email, // redis에서 사용할 key
+                token, // redis에서 사용할 value
+                REFRESH_TOKEN_EXPIRE_TIME, // refresh token이 저장되는 기간
                 TimeUnit.MILLISECONDS
         );
-
         return token;
     }
 

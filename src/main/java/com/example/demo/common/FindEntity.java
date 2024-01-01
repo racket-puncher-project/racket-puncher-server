@@ -1,12 +1,12 @@
 package com.example.demo.common;
 
+import static com.example.demo.exception.type.ErrorCode.*;
+
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
-import com.example.demo.exception.impl.ApplyNotFoundException;
-import com.example.demo.exception.impl.MatchingNotFoundException;
-import com.example.demo.exception.impl.UserNotFoundException;
+import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,16 +22,16 @@ public class FindEntity {
 
     public Matching findMatching(long matchingId) {
         return matchingRepository.findById(matchingId).orElseThrow(
-                () -> new MatchingNotFoundException());
+                () -> new RacketPuncherException(MATCHING_NOT_FOUND));
     }
 
     public SiteUser findUser(long userId) {
         return siteUserRepository.findById(userId).orElseThrow(
-                () -> new UserNotFoundException());
+                () -> new RacketPuncherException(USER_NOT_FOUND));
     }
 
     public Apply findApply(long applyId) {
         return applyRepository.findById(applyId)
-                .orElseThrow(() -> new ApplyNotFoundException());
+                .orElseThrow(() -> new RacketPuncherException(APPLY_NOT_FOUND));
     }
 }

@@ -1,17 +1,13 @@
 package com.example.demo.apply.service;
 
+import static com.example.demo.exception.type.ErrorCode.*;
+
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
-import com.example.demo.exception.impl.AlreadyCanceledApplyException;
-import com.example.demo.exception.impl.AlreadyClosedMatchingException;
-import com.example.demo.exception.impl.AlreadyExistedApplyException;
-import com.example.demo.exception.impl.ClosedMatchingException;
-import com.example.demo.exception.impl.OverRecruitNumberException;
-import com.example.demo.exception.impl.UserNotFoundException;
-import com.example.demo.exception.impl.YourOwnPostingCancelException;
+import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
@@ -33,7 +29,7 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     public Apply apply(String email, long matchingId) {
-        var user = siteUserRepository.findByEmail(email).orElseThrow(() -> new  UserNotFoundException());
+        var user = siteUserRepository.findByEmail(email).orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
         var matching = findEntity.findMatching(matchingId);
         var organizer = matching.getSiteUser();
 
@@ -63,13 +59,13 @@ public class ApplyServiceImpl implements ApplyService {
     private static void validateApplyDuplication(Apply existApply) {
 
         if (!existApply.getApplyStatus().equals(ApplyStatus.CANCELED)) {
-            throw new AlreadyExistedApplyException();
+            throw new RacketPuncherException(APPLY_ALREADY_EXISTED);
         }
     }
 
     private static void validateRecruitStatus(Matching matching) {
         if (matching.getRecruitStatus().equals(RecruitStatus.CLOSED)) {
-            throw new ClosedMatchingException();
+            throw new RacketPuncherException(MATCHING_ALREADY_CLOSED);
         }
     }
 
@@ -113,19 +109,19 @@ public class ApplyServiceImpl implements ApplyService {
 
     private static void validateMatchingClosed(Matching matching) {
         if (matching.getRecruitStatus().equals(RecruitStatus.CLOSED)) {
-            throw new AlreadyClosedMatchingException();
+            throw new RacketPuncherException(MATCHING_ALREADY_CLOSED);
         }
     }
 
     private static void validateNotYourOwnPosting(Matching matching, Apply apply) {
         if (matching.getSiteUser().getId() == apply.getSiteUser().getId()) {
-            throw new YourOwnPostingCancelException();
+            throw new RacketPuncherException(SELF_APPLY_CANCEL_DENIED);
         }
     }
 
     private static void validateCancelDuplication(Apply apply) {
         if (apply.getApplyStatus().equals(ApplyStatus.CANCELED)) {
-            throw new AlreadyCanceledApplyException();
+            throw new RacketPuncherException(APPLY_ALREADY_CANCELED);
         }
     }
 
@@ -165,7 +161,7 @@ public class ApplyServiceImpl implements ApplyService {
 
     private static void validateOverRecruitNumber(int recruitNum, int confirmedNum) {
         if (confirmedNum > recruitNum) {
-            throw new OverRecruitNumberException();
+            throw new RacketPuncherException(RECRUIT_NUMBER_OVERED);
         }
     }
 }
