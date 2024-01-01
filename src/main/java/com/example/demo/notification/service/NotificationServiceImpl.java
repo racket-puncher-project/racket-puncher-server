@@ -1,9 +1,11 @@
 package com.example.demo.notification.service;
 
+import static com.example.demo.exception.type.ErrorCode.*;
+
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.Notification;
 import com.example.demo.entity.SiteUser;
-import com.example.demo.exception.impl.NotificationConnectionException;
+import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.notification.dto.NotificationDto;
 import com.example.demo.notification.repository.EmitterRepository;
 import com.example.demo.notification.repository.NotificationRepository;
@@ -37,7 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
         try {
             sseEmitter.send(SseEmitter.event().id("").name(NOTIFICATION_NAME).data("Connection succeed"));
         } catch (IOException e) {
-            throw new NotificationConnectionException();
+            throw new RacketPuncherException(NOTIFICATION_CONNECTION_FAILED);
         }
         return sseEmitter;
     }
@@ -52,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
                         .data(notification.getNotificationType().getMessage()));
             } catch (IOException e) {
                 emitterRepository.delete(userId);
-                throw new NotificationConnectionException();
+                throw new RacketPuncherException(NOTIFICATION_CONNECTION_FAILED);
             }
         }, () -> log.info("No emitter found"));
     }

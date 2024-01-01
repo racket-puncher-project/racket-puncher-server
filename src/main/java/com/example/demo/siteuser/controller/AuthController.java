@@ -1,12 +1,15 @@
 package com.example.demo.siteuser.controller;
 
+import static com.example.demo.exception.type.ErrorCode.INVALID_NICKNAME;
+
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
-import com.example.demo.exception.impl.NicknameUnavailableException;
+import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.oauth2.dto.AccessToken;
 import com.example.demo.oauth2.dto.ProfileDto;
 import com.example.demo.oauth2.service.ProviderService;
 import com.example.demo.siteuser.dto.EmailRequestDto;
+import com.example.demo.siteuser.dto.LoginResponseDto;
 import com.example.demo.siteuser.dto.NicknameRequestDto;
 import com.example.demo.siteuser.dto.QuitDto;
 import com.example.demo.siteuser.dto.ReissueDto;
@@ -14,7 +17,6 @@ import com.example.demo.siteuser.dto.SignInDto;
 import com.example.demo.siteuser.dto.SignKakao;
 import com.example.demo.siteuser.dto.SignOutDto;
 import com.example.demo.siteuser.dto.SignUpDto;
-import com.example.demo.siteuser.dto.LoginResponseDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.siteuser.security.TokenProvider;
 import com.example.demo.siteuser.service.MemberService;
@@ -74,9 +76,10 @@ public class AuthController {
             if (member.isPresent()) {
                 var refreshToken = this.tokenProvider.generateRefreshToken(member.get().getEmail());
                 var acsToken = this.tokenProvider.generateAccessToken(member.get().getEmail());
-                LoginResponseDto loginResponseDto = new LoginResponseDto();
-                loginResponseDto.setAccessToken(acsToken);
-                loginResponseDto.setRefreshToken(refreshToken);
+                LoginResponseDto loginResponseDto = LoginResponseDto.builder()
+                        .accessToken(acsToken)
+                        .refreshToken(refreshToken)
+                        .build();
                 return ResponseEntity.ok(loginResponseDto);
             } else {
                 LoginResponseDto loginResponseDto = new LoginResponseDto();
@@ -151,7 +154,7 @@ public class AuthController {
         boolean exists = memberService.isNicknameExist(nicknameRequestDto.getNickname());
 
         if (exists) {
-            throw new NicknameUnavailableException();
+            throw new RacketPuncherException(INVALID_NICKNAME);
         } else {
             return ResponseEntity.ok(ResponseUtil.SUCCESS("사용 가능한 닉네임 입니다."));
         }

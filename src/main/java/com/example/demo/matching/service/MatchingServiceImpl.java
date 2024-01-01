@@ -1,25 +1,36 @@
 package com.example.demo.matching.service;
 
+import static com.example.demo.exception.type.ErrorCode.APPLY_NOT_FOUND;
+import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
+import static com.example.demo.exception.type.ErrorCode.JSON_PARSING_FAILED;
+import static com.example.demo.exception.type.ErrorCode.MATCHING_NOT_FOUND;
+import static com.example.demo.exception.type.ErrorCode.PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING;
+import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
+
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
-import com.example.demo.exception.impl.*;
-import com.example.demo.matching.dto.*;
+import com.example.demo.exception.RacketPuncherException;
+import com.example.demo.matching.dto.ApplyContents;
+import com.example.demo.matching.dto.ApplyMember;
+import com.example.demo.matching.dto.FilterRequestDto;
+import com.example.demo.matching.dto.LocationDto;
+import com.example.demo.matching.dto.MatchingDetailRequestDto;
+import com.example.demo.matching.dto.MatchingDetailResponseDto;
+import com.example.demo.matching.dto.MatchingPreviewDto;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.RecruitStatus;
-
+import com.example.demo.util.geometry.GeometryUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.example.demo.util.geometry.GeometryUtil;
 import lombok.RequiredArgsConstructor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -52,7 +63,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Override
     public Matching create(String email, MatchingDetailRequestDto matchingDetailRequestDto) {
-        SiteUser siteUser = siteUserRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        SiteUser siteUser = siteUserRepository.findByEmail(email).orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
         List<Double> latAndLon = getLatLon(getUserAddressInfo(matchingDetailRequestDto.getLocation()));
         matchingDetailRequestDto.setLat(latAndLon.get(0));
         matchingDetailRequestDto.setLon(latAndLon.get(1));
@@ -72,12 +83,12 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Override
     public Matching update(String email, Long matchingId, MatchingDetailRequestDto matchingDetailRequestDto) {
-        SiteUser siteUser = siteUserRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        SiteUser siteUser = siteUserRepository.findByEmail(email).orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
 
         Matching matching = validateMatchingGivenId(matchingId);
 
         if (!isUserMadeThisMatching(matchingId, siteUser)) {
-            throw new NoPermissionToEditAndDeleteMatching();
+            throw new RacketPuncherException(PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING);
         }
 
         // 주소 다르다면 위경도 업데이트
@@ -107,12 +118,13 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Override
     public void delete(String email, Long matchingId) {
-        SiteUser siteUser = siteUserRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
 
         Matching matching = validateMatchingGivenId(matchingId);
 
         if (!isUserMadeThisMatching(matchingId, siteUser)) {
-            throw new NoPermissionToEditAndDeleteMatching();
+            throw new RacketPuncherException(PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING);
         }
 
         sendNotificationToApplyUser(matchingId, siteUser, matching, NotificationType.DELETE_MATCHING);
@@ -189,7 +201,7 @@ public class MatchingServiceImpl implements MatchingService {
         try {
             jsonObject = (JSONObject) jsonParser.parse(address);
         } catch (ParseException e) {
-            throw new JsonParsingException();
+            throw new RacketPuncherException(JSON_PARSING_FAILED);
         }
 
         JSONArray documents = (JSONArray) jsonObject.get("documents");
@@ -206,15 +218,9 @@ public class MatchingServiceImpl implements MatchingService {
         return MatchingDetailResponseDto.fromEntity(matching);
     }
 
-    public SiteUser validateUserGivenId(Long userId) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException());
-        return siteUser;
-    }
-
     private Matching validateMatchingGivenId(Long matchingId) {
         Matching matching = matchingRepository.findById(matchingId)
-                .orElseThrow(() -> new MatchingNotFoundException());
+                .orElseThrow(() -> new RacketPuncherException(MATCHING_NOT_FOUND));
         return matching;
     }
 
@@ -265,7 +271,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     private List<ApplyMember> findAppliedMembers(long matchingId) {
         return applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.PENDING)
-                .orElseThrow(() -> new ApplyNotFoundException())
+                .orElseThrow(() -> new RacketPuncherException(APPLY_NOT_FOUND))
                 .stream().map((apply)
                         -> ApplyMember.builder()
                         .applyId(apply.getId())
