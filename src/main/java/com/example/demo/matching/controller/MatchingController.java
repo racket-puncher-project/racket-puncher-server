@@ -30,7 +30,6 @@ public class MatchingController {
     private final AddressService addressService;
 
     @PostMapping
-    @PreAuthorize("hasRole('USER')")
     public void createMatching(
             @RequestBody MatchingDetailRequestDto matchingDetailRequestDto,
             Principal principal) {
@@ -49,7 +48,6 @@ public class MatchingController {
     }
 
     @PatchMapping("/{matchingId}")
-    @PreAuthorize("hasRole('USER')")
     public void editMatching(
             @RequestBody MatchingDetailRequestDto matchingDetailRequestDto,
             @PathVariable Long matchingId,
@@ -60,7 +58,6 @@ public class MatchingController {
     }
 
     @DeleteMapping("/{matchingId}")
-    @PreAuthorize("hasRole('USER')")
     public void deleteMatching(
             @PathVariable Long matchingId,
             Principal principal) {
@@ -108,7 +105,6 @@ public class MatchingController {
     }
 
     @SneakyThrows
-    @PreAuthorize("hasRole('USER')")
     @GetMapping("/{matching_id}/apply")
     public ResponseDto<ApplyContents> getApplyContents(@PathVariable(value = "matching_id") long matchingId,
                                                        Principal principal) {

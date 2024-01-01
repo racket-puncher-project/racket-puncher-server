@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.oauth2.service.ProviderService;
+import com.example.demo.siteuser.dto.SignInDto;
 import com.example.demo.siteuser.dto.SignUpDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.siteuser.security.CustomAuthFailureHandler;
@@ -65,6 +66,19 @@ class AuthControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void signIn() throws Exception {
+        // given
+        given(memberService.authenticate(getSignInDto()))
+                .willReturn(SiteUser.fromDto(getSignUpDto()));
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/sign-in"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SignUpDto getSignUpDto() {
         return SignUpDto.builder()
                 .email("email@naver.com")
@@ -79,5 +93,9 @@ class AuthControllerTest {
                 .profileImg("test.url")
                 .ageGroup(AgeGroup.TWENTIES)
                 .build();
+    }
+
+    private SignInDto getSignInDto() {
+        return new SignInDto("email@nave.com", "`1234");
     }
 }

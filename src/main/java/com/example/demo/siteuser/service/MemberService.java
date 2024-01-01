@@ -24,6 +24,7 @@ public class MemberService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
     private final SiteUserRepository siteUserRepository;
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return this.siteUserRepository.findByEmail(email)
@@ -50,15 +51,14 @@ public class MemberService implements UserDetailsService {
         return user;
     }
 
-    public SiteUser authenticate(SignInDto member) {
+    public SiteUser authenticate(SignInDto signInDto) {
 
-        var user = this.siteUserRepository.findByEmail(member.getEmail())
+        var user = siteUserRepository.findByEmail(signInDto.getEmail())
                 .orElseThrow(() -> new AuthEmailNotFoundException());
 
-        if (!this.passwordEncoder.matches(member.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(signInDto.getPassword(), user.getPassword())) {
             throw new AuthWrongPasswordException();
         }
-
         return user;
     }
 

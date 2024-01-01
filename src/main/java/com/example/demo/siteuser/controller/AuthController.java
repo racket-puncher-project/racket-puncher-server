@@ -1,6 +1,5 @@
 package com.example.demo.siteuser.controller;
 
-import com.example.demo.aws.S3Uploader;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
 import com.example.demo.exception.impl.NicknameUnavailableException;
@@ -15,7 +14,7 @@ import com.example.demo.siteuser.dto.SignInDto;
 import com.example.demo.siteuser.dto.SignKakao;
 import com.example.demo.siteuser.dto.SignOutDto;
 import com.example.demo.siteuser.dto.SignUpDto;
-import com.example.demo.siteuser.dto.SiteUserLoginResponseDto;
+import com.example.demo.siteuser.dto.LoginResponseDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.siteuser.security.TokenProvider;
 import com.example.demo.siteuser.service.MemberService;
@@ -53,16 +52,15 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseEntity<?> signIn(@RequestBody SignInDto request) {
-        var member = this.memberService.authenticate(request);
-        var token = this.tokenProvider.generateAccessToken(member.getEmail());
-        var refreshToken = this.tokenProvider.generateRefreshToken(member.getEmail());
-        var id = member.getId();
-        SiteUserLoginResponseDto siteUserLoginResponseDto = new SiteUserLoginResponseDto();
-        siteUserLoginResponseDto.setId(id);
-        siteUserLoginResponseDto.setAccessToken(token);
-        siteUserLoginResponseDto.setRefreshToken(refreshToken);
-        return ResponseEntity.ok(siteUserLoginResponseDto);
+    public ResponseDto<LoginResponseDto> signIn(@RequestBody SignInDto signInDto) {
+        memberService.authenticate(signInDto);
+        var token = tokenProvider.generateAccessToken(signInDto.getEmail());
+        var refreshToken = tokenProvider.generateRefreshToken(signInDto.getEmail());
+        var result = LoginResponseDto.builder()
+                .accessToken(token)
+                .refreshToken(refreshToken)
+                .build();
+        return ResponseUtil.SUCCESS(result);
     }
 
     @PostMapping("/sign-in/kakao")
@@ -76,23 +74,17 @@ public class AuthController {
             if (member.isPresent()) {
                 var refreshToken = this.tokenProvider.generateRefreshToken(member.get().getEmail());
                 var acsToken = this.tokenProvider.generateAccessToken(member.get().getEmail());
-                SiteUserLoginResponseDto siteUserLoginResponseDto = new SiteUserLoginResponseDto();
-                siteUserLoginResponseDto.setId(member.get().getId());
-                siteUserLoginResponseDto.setEmail(member.get().getEmail());
-                siteUserLoginResponseDto.setAccessToken(acsToken);
-                siteUserLoginResponseDto.setRefreshToken(refreshToken);
-                return ResponseEntity.ok(siteUserLoginResponseDto);
+                LoginResponseDto loginResponseDto = new LoginResponseDto();
+                loginResponseDto.setAccessToken(acsToken);
+                loginResponseDto.setRefreshToken(refreshToken);
+                return ResponseEntity.ok(loginResponseDto);
             } else {
-                SiteUserLoginResponseDto siteUserLoginResponseDto = new SiteUserLoginResponseDto();
-                siteUserLoginResponseDto.setNickname(profile.getNickname());
-                siteUserLoginResponseDto.setProfileImage(profile.getProfileImage());
-                siteUserLoginResponseDto.setRedirectUrl("redirect:/register");
-                return ResponseEntity.ok(siteUserLoginResponseDto);
+                LoginResponseDto loginResponseDto = new LoginResponseDto();
+                return ResponseEntity.ok(loginResponseDto);
             }
         } catch (CommunicationException e) {
             return new ResponseEntity<>("Wrong Request", HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @PostMapping("/reissue")
