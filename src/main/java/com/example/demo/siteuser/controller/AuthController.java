@@ -1,6 +1,8 @@
 package com.example.demo.siteuser.controller;
 
 import static com.example.demo.exception.type.ErrorCode.INVALID_NICKNAME;
+import static com.example.demo.exception.type.ErrorCode.REFRESH_TOKEN_EXPIRED;
+import static com.example.demo.exception.type.ErrorCode.TOKEN_EXPIRED;
 
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
@@ -12,7 +14,7 @@ import com.example.demo.siteuser.dto.EmailRequestDto;
 import com.example.demo.siteuser.dto.LoginResponseDto;
 import com.example.demo.siteuser.dto.NicknameRequestDto;
 import com.example.demo.siteuser.dto.QuitDto;
-import com.example.demo.siteuser.dto.ReissueDto;
+import com.example.demo.siteuser.dto.AccessTokenDto;
 import com.example.demo.siteuser.dto.SignInDto;
 import com.example.demo.siteuser.dto.SignKakao;
 import com.example.demo.siteuser.dto.SignOutDto;
@@ -91,19 +93,17 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestBody ReissueDto reissue) {
-        Authentication authentication = tokenProvider.getAuthentication(reissue.getAccessToken());
+    public ResponseDto<AccessTokenDto> reissue(@RequestBody AccessTokenDto accessTokenDto) {
+        Authentication authentication = tokenProvider.getAuthentication(accessTokenDto.getAccessToken());
         String refreshToken = redisTemplate.opsForValue().get(authentication.getName());
-        if (refreshToken == null || ObjectUtils.isEmpty(refreshToken)) {
-            return new ResponseEntity<>("Wrong Request", HttpStatus.BAD_REQUEST);
+        if (ObjectUtils.isEmpty(refreshToken)) {
+            throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
         }
-        if (!refreshToken.equals(reissue.getRefreshToken())) {
-            return new ResponseEntity<>("Refresh Token Information Does Not Match.", HttpStatus.BAD_REQUEST);
-        }
-        var member = siteUserRepository.findByEmail(authentication.getName());
-        var token = tokenProvider.generateAccessToken(authentication.getName());
+        var newAccessToken = tokenProvider.generateAccessToken(authentication.getName());
+        redisTemplate.delete(authentication.getName());
+        tokenProvider.generateRefreshToken(authentication.getName());
 
-        return ResponseEntity.ok(token);
+        return ResponseUtil.SUCCESS(new AccessTokenDto(newAccessToken));
     }
 
     @PostMapping("/sign-out")

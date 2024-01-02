@@ -10,10 +10,7 @@ package com.example.demo.siteuser.dto;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReissueDto {
+public class AccessTokenDto {
     @NotBlank(message = "accessToken을 입력해주세요.")
     private String accessToken;
-
-    @NotBlank(message = "refreshToken을 입력해주세요.")
-    private String refreshToken;
 }

@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 import com.example.demo.apply.service.ApplyService;
 import com.example.demo.entity.Apply;
-import com.example.demo.siteuser.security.CustomAuthFailureHandler;
 import com.example.demo.siteuser.security.JwtAuthenticationFilter;
 import com.example.demo.siteuser.security.SecurityConfiguration;
 import com.example.demo.siteuser.security.TokenProvider;
@@ -30,9 +29,6 @@ class ApplyControllerTest {
 
     @MockBean
     private TokenProvider tokenProvider;
-
-    @MockBean
-    private CustomAuthFailureHandler customAuthFailureHandler;
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
