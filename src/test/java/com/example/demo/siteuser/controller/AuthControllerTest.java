@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-import com.example.demo.common.ResponseDto;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.oauth2.service.ProviderService;
 import com.example.demo.siteuser.dto.AccessTokenDto;
@@ -21,7 +20,6 @@ import com.example.demo.siteuser.service.MemberService;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +102,7 @@ class AuthControllerTest {
         when(redisTemplate.opsForValue().get(authentication.getName())).thenReturn(refreshToken);
         when(tokenProvider.generateAccessToken(username)).thenReturn(newAccessToken);
         when(redisTemplate.delete(authentication.getName())).thenReturn(null);
-        when(tokenProvider.generateRefreshToken(authentication.getName())).thenReturn(newRefreshToken);
+        when(tokenProvider.generateAndSaveRefreshToken(authentication.getName())).thenReturn(newRefreshToken);
 
         // when
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/reissue")
