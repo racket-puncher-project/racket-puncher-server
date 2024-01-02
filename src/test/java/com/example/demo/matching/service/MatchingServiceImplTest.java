@@ -91,8 +91,6 @@ class MatchingServiceImplTest {
         assertThat(savedMatching.getMatchingType()).isEqualTo(matchingDetailRequestDto.getMatchingType());
     }
 
-
-
     @Test
     @DisplayName("수정한 값이 제대로 저장됨")
     void update() {

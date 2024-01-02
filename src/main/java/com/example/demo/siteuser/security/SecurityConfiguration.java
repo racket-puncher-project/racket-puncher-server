@@ -51,9 +51,4 @@ public class SecurityConfiguration {
 
         return http.build();
     }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        return (web) -> web.ignoring().requestMatchers("/api/auth/sign-up");
-    }
 }

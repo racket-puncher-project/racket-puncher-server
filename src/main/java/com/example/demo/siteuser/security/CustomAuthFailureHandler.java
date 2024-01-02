@@ -33,7 +33,6 @@ public class CustomAuthFailureHandler extends SimpleUrlAuthenticationFailureHand
 
         errorMessage = URLEncoder.encode(errorMessage, "UTF-8");
         setDefaultFailureUrl("/api/matches/list");
-        //setDefaultFailureUrl("/api/matches/list?error=" + errorMessage);
         super.onAuthenticationFailure(request, response, exception);
     }
 }

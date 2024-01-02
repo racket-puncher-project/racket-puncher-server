@@ -102,9 +102,7 @@ public class AuthController {
         }
         var member = siteUserRepository.findByEmail(authentication.getName());
         var token = tokenProvider.generateAccessToken(authentication.getName());
-        //var rftoken = tokenProvider.generateRefreshToken(authentication.getName());
-        //String[] tokenList = {token, rftoken};
-        //return new ResponseEntity<>("The token information has been updated.", HttpStatus.OK);
+
         return ResponseEntity.ok(token);
     }
 

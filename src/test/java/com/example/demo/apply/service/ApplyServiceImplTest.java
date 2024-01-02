@@ -12,12 +12,7 @@ import com.example.demo.common.FindEntity;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
-import com.example.demo.exception.impl.AlreadyCanceledApplyException;
-import com.example.demo.exception.impl.AlreadyClosedMatchingException;
-import com.example.demo.exception.impl.AlreadyExistedApplyException;
-import com.example.demo.exception.impl.ClosedMatchingException;
-import com.example.demo.exception.impl.OverRecruitNumberException;
-import com.example.demo.exception.impl.YourOwnPostingCancelException;
+import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
@@ -57,7 +52,6 @@ class ApplyServiceImplTest {
 
     @InjectMocks
     private ApplyServiceImpl applyService;
-
 
     @Test
     void applySuccess() {
@@ -105,14 +99,12 @@ class ApplyServiceImplTest {
                 .willReturn(Optional.of(apply));
 
         // when
-        AlreadyExistedApplyException exception = assertThrows(AlreadyExistedApplyException.class,
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
                 () -> applyService.apply("emial2@gmail.com", 1L));
 
         // then
-        assertEquals(exception.getMessage(), "이미 참여 신청한 경기입니다.");
+        assertEquals(exception.getMessage(), "이미 참가 신청한 경기입니다.");
     }
-
-
 
     @Test
     void applyFailByRecruitClosed() {
@@ -130,14 +122,12 @@ class ApplyServiceImplTest {
                 .willReturn(matching);
 
         // when
-        ClosedMatchingException exception = assertThrows(ClosedMatchingException.class,
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
                 () -> applyService.apply("emial2@gmail.com", 1L));
 
         // then
-        assertEquals(exception.getMessage(), "신청 마감된 경기입니다.");
+        assertEquals(exception.getMessage(), "이미 매칭이 확정된 경기입니다.");
     }
-
-
 
     @Test
     @Commit
@@ -175,11 +165,11 @@ class ApplyServiceImplTest {
         given(findEntity.findApply(1L))
                 .willReturn(apply);
         // when
-        AlreadyClosedMatchingException exception = assertThrows(AlreadyClosedMatchingException.class,
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
                 () -> applyService.cancel(1L));
 
         // then
-        assertEquals(exception.getMessage(), "매칭 확정된 경기는 참여 취소가 불가능합니다.");
+        assertEquals(exception.getMessage(), "이미 매칭이 확정된 경기입니다.");
     }
 
     @Test
@@ -198,11 +188,11 @@ class ApplyServiceImplTest {
                 .willReturn(apply);
 
         // when
-        YourOwnPostingCancelException exception = assertThrows(YourOwnPostingCancelException.class,
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
                 () -> applyService.cancel(1L));
 
         // then
-        assertEquals("자신이 주최한 매칭은 참가 취소를 할 수 없습니다.", exception.getMessage());
+        assertEquals("본인이 주최한 경기는 참가 신청 취소를 할 수 없습니다.", exception.getMessage());
     }
 
     @Test
@@ -219,14 +209,12 @@ class ApplyServiceImplTest {
         given(findEntity.findApply(1L))
                 .willReturn(apply);
         // when
-        AlreadyCanceledApplyException exception = assertThrows(AlreadyCanceledApplyException.class,
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
                 () -> applyService.cancel(1L));
 
         // then
-        assertEquals(exception.getMessage(), "이미 참가 신청이 취소된 경기입니다.");
+        assertEquals(exception.getMessage(), "해당 매칭에 대한 참가 신청은 이미 취소되었습니다.");
     }
-
-
 
     @Test
     void applyAcceptSuccess() {
@@ -283,7 +271,7 @@ class ApplyServiceImplTest {
         confirmedList.add(5L);
 
         // when
-        OverRecruitNumberException exception = assertThrows(OverRecruitNumberException.class,
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
                 () -> applyService.accept(appliedList, confirmedList, 1L));
 
         // then
