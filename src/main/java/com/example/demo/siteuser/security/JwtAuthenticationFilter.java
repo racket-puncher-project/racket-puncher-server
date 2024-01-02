@@ -39,9 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } else {
                 throw new RacketPuncherException(LOGIN_REQUIRED); // 토큰이 없다면 로그인 요청
             }
-
-        } catch (RacketPuncherException e) {
-        } // permitAll() 적용을 위해, throw하지 않고 catch를 사용해 다음 필터로 넘긴다.
+        } catch (RacketPuncherException e) { // permitAll() 적용을 위해, throw하지 않고 catch를 사용해 다음 필터로 넘긴다.
+        }
         filterChain.doFilter(request, response); // 다음 필터로 요청과 응답 전달
     }
 

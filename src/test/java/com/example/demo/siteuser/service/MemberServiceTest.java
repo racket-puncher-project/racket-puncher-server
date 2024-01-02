@@ -7,7 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.example.demo.entity.SiteUser;
-import com.example.demo.exception.impl.AuthAlreadyExistEmailException;
+import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.siteuser.dto.SignUpDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
@@ -70,7 +70,7 @@ class MemberServiceTest {
                 .willReturn(true);
 
         // when
-        AuthAlreadyExistEmailException exception = assertThrows(AuthAlreadyExistEmailException.class,
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
                 () -> memberService.register(getSignUpDto()));
 
         // then
