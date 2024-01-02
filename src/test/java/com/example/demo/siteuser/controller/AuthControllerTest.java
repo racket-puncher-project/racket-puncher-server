@@ -1,14 +1,18 @@
 package com.example.demo.siteuser.controller;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.oauth2.service.ProviderService;
+import com.example.demo.siteuser.dto.AccessTokenDto;
 import com.example.demo.siteuser.dto.SignInDto;
 import com.example.demo.siteuser.dto.SignUpDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
-import com.example.demo.siteuser.security.CustomAuthFailureHandler;
 import com.example.demo.siteuser.security.JwtAuthenticationFilter;
 import com.example.demo.siteuser.security.SecurityConfiguration;
 import com.example.demo.siteuser.security.TokenProvider;
@@ -16,12 +20,16 @@ import com.example.demo.siteuser.service.MemberService;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -40,9 +48,6 @@ class AuthControllerTest {
 
     @MockBean
     private TokenProvider tokenProvider;
-
-    @MockBean
-    private CustomAuthFailureHandler customAuthFailureHandler;
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -78,6 +83,35 @@ class AuthControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
+
+    @Test
+    public void testReissue() throws Exception {
+        // given
+        String accessToken = "accessToken";
+        String refreshToken = "refreshToken";
+        String newAccessToken = "newAccessToken";
+        String newRefreshToken = "newRefreshToken";
+        String username = "username";
+        AccessTokenDto accessTokenDto = new AccessTokenDto(accessToken);
+        Authentication authentication = mock(Authentication.class);
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+
+        when(authentication.getName()).thenReturn(username);
+        when(tokenProvider.getAuthentication(accessToken)).thenReturn(authentication);
+        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        when(redisTemplate.opsForValue().get(authentication.getName())).thenReturn(refreshToken);
+        when(tokenProvider.generateAccessToken(username)).thenReturn(newAccessToken);
+        when(redisTemplate.delete(authentication.getName())).thenReturn(null);
+        when(tokenProvider.generateAndSaveRefreshToken(authentication.getName())).thenReturn(newRefreshToken);
+
+        // when
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/reissue")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(accessTokenDto)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
 
     private SignUpDto getSignUpDto() {
         return SignUpDto.builder()

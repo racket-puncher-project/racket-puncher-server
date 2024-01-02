@@ -23,7 +23,6 @@ import com.example.demo.matching.dto.MatchingPreviewDto;
 import com.example.demo.matching.service.MatchingService;
 import com.example.demo.openfeign.dto.address.AddressResponseDto;
 import com.example.demo.openfeign.service.address.AddressService;
-import com.example.demo.siteuser.security.CustomAuthFailureHandler;
 import com.example.demo.siteuser.security.JwtAuthenticationFilter;
 import com.example.demo.siteuser.security.SecurityConfiguration;
 import com.example.demo.siteuser.security.TokenProvider;
@@ -67,8 +66,6 @@ class MatchingControllerTest {
     @MockBean
     private TokenProvider tokenProvider;
 
-    @MockBean
-    private CustomAuthFailureHandler customAuthFailureHandler;
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;

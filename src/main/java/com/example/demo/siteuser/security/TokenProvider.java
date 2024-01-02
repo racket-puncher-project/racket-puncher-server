@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +49,7 @@ public class TokenProvider {
                 .compact(); // 생성
     }
 
-    public String generateRefreshToken(String email) {
+    public String generateAndSaveRefreshToken(String email) {
 
         RefreshToken refreshToken = new RefreshToken(email, UUID.randomUUID().toString());
         String token = refreshToken.getRefreshToken();

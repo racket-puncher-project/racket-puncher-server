@@ -25,7 +25,8 @@ public enum ErrorCode {
     NOTIFICATION_CONNECTION_FAILED(HttpStatus.BAD_REQUEST.value(), "알림 연결에 실패하였습니다."),
     RECRUIT_NUMBER_OVERED(HttpStatus.BAD_REQUEST.value(), "모집 인원보다 많은 인원을 수락할 수 없습니다."),
     S3_UPLOAD_FAILED(HttpStatus.BAD_REQUEST.value(), "파일 업로드가 실패했습니다."),
-    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED.value(), "토큰이 만료되었습니다."),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED.value(), "엑세스 토큰이 만료되었습니다."),
+    REFRESH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED.value(), "리프레시 토큰이 만료되었습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND.value(),"사용자를 찾을 수 없습니다."),
     SELF_APPLY_CANCEL_DENIED(HttpStatus.BAD_REQUEST.value(), "본인이 주최한 경기는 참가 신청 취소를 할 수 없습니다.")
     ;

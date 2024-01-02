@@ -1,6 +1,7 @@
 package com.example.demo.siteuser.controller;
 
 import static com.example.demo.exception.type.ErrorCode.INVALID_NICKNAME;
+import static com.example.demo.exception.type.ErrorCode.REFRESH_TOKEN_EXPIRED;
 
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
@@ -12,10 +13,10 @@ import com.example.demo.siteuser.dto.EmailRequestDto;
 import com.example.demo.siteuser.dto.LoginResponseDto;
 import com.example.demo.siteuser.dto.NicknameRequestDto;
 import com.example.demo.siteuser.dto.QuitDto;
-import com.example.demo.siteuser.dto.ReissueDto;
+import com.example.demo.siteuser.dto.AccessTokenDto;
 import com.example.demo.siteuser.dto.SignInDto;
 import com.example.demo.siteuser.dto.SignKakao;
-import com.example.demo.siteuser.dto.SignOutDto;
+;
 import com.example.demo.siteuser.dto.SignUpDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.siteuser.security.TokenProvider;
@@ -57,7 +58,7 @@ public class AuthController {
     public ResponseDto<LoginResponseDto> signIn(@RequestBody SignInDto signInDto) {
         memberService.authenticate(signInDto);
         var token = tokenProvider.generateAccessToken(signInDto.getEmail());
-        var refreshToken = tokenProvider.generateRefreshToken(signInDto.getEmail());
+        var refreshToken = tokenProvider.generateAndSaveRefreshToken(signInDto.getEmail());
         var result = LoginResponseDto.builder()
                 .accessToken(token)
                 .refreshToken(refreshToken)
@@ -74,7 +75,7 @@ public class AuthController {
             ProfileDto profile = providerService.getProfile(accessToken.getAccess_token(), request.getProvider());
             var member = siteUserRepository.findByNickname(profile.getNickname());
             if (member.isPresent()) {
-                var refreshToken = this.tokenProvider.generateRefreshToken(member.get().getEmail());
+                var refreshToken = this.tokenProvider.generateAndSaveRefreshToken(member.get().getEmail());
                 var acsToken = this.tokenProvider.generateAccessToken(member.get().getEmail());
                 LoginResponseDto loginResponseDto = LoginResponseDto.builder()
                         .accessToken(acsToken)
@@ -91,24 +92,22 @@ public class AuthController {
     }
 
     @PostMapping("/reissue")
-    public ResponseEntity<?> reissue(@RequestBody ReissueDto reissue) {
-        Authentication authentication = tokenProvider.getAuthentication(reissue.getAccessToken());
+    public ResponseDto<AccessTokenDto> reissue(@RequestBody AccessTokenDto accessTokenDto) {
+        Authentication authentication = tokenProvider.getAuthentication(accessTokenDto.getAccessToken());
         String refreshToken = redisTemplate.opsForValue().get(authentication.getName());
-        if (refreshToken == null || ObjectUtils.isEmpty(refreshToken)) {
-            return new ResponseEntity<>("Wrong Request", HttpStatus.BAD_REQUEST);
+        if (ObjectUtils.isEmpty(refreshToken)) {
+            throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
         }
-        if (!refreshToken.equals(reissue.getRefreshToken())) {
-            return new ResponseEntity<>("Refresh Token Information Does Not Match.", HttpStatus.BAD_REQUEST);
-        }
-        var member = siteUserRepository.findByEmail(authentication.getName());
-        var token = tokenProvider.generateAccessToken(authentication.getName());
+        var newAccessToken = tokenProvider.generateAccessToken(authentication.getName());
+        redisTemplate.delete(authentication.getName());
+        tokenProvider.generateAndSaveRefreshToken(authentication.getName());
 
-        return ResponseEntity.ok(token);
+        return ResponseUtil.SUCCESS(new AccessTokenDto(newAccessToken));
     }
 
     @PostMapping("/sign-out")
-    public ResponseEntity<?> signOut(@RequestBody SignOutDto signOut) {
-        var accessToken = signOut.getAccessToken();
+    public ResponseEntity<?> signOut(@RequestBody AccessTokenDto accessTokenDto) {
+        var accessToken = accessTokenDto.getAccessToken();
         if (!StringUtils.hasText(accessToken) || !this.tokenProvider.validateToken(accessToken)) {
             return new ResponseEntity<>("Wrong Request", HttpStatus.BAD_REQUEST);
         }
