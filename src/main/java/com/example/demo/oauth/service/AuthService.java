@@ -91,13 +91,14 @@ public class AuthService implements UserDetailsService {
                 .build();
     }
 
-    public void signOut(AccessTokenDto accessTokenDto) {
+    public String signOut(AccessTokenDto accessTokenDto) {
         String email = tokenProvider.getUserEmail(accessTokenDto.getAccessToken());
         if (redisTemplate.opsForValue().get(email) == null) {
             throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
         }
         redisTemplate.delete(tokenProvider.getUserEmail(accessTokenDto.getAccessToken()));
         redisTemplate.opsForValue().set(email, accessTokenDto.getAccessToken());
+        return "로그아웃 성공";
     }
 
     public boolean isEmailExist(String email) {

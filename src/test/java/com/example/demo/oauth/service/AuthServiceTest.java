@@ -98,8 +98,6 @@ class AuthServiceTest {
     @Test
     public void tokenReissueSuccess() {
         // given
-
-        AccessTokenDto newAccessTokenDto = new AccessTokenDto("newAccessToken");
         Authentication authentication = mock(Authentication.class);
         ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
 
@@ -116,5 +114,43 @@ class AuthServiceTest {
 
         // then
         assertEquals("newAccessToken", newAccessToken.getAccessToken());
+    }
+
+    @Test
+    public void signOutSuccess() {
+        // given
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(tokenProvider.getUserEmail(getAccessTokenDto().getAccessToken())).willReturn("email");
+        given(redisTemplate.opsForValue().get("email")).willReturn("refreshToken");
+        given(redisTemplate.delete(tokenProvider.getUserEmail(getAccessTokenDto().getAccessToken())))
+                .willReturn(null);
+        // when
+        String result = authService.signOut(getAccessTokenDto());
+
+        // then
+        assertEquals("로그아웃 성공", result);
+    }
+
+    @Test
+    public void signOutFailedByRefreshTokenExpired() {
+        // given
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(tokenProvider.getUserEmail(getAccessTokenDto().getAccessToken())).willReturn("email");
+        given(redisTemplate.opsForValue().get("email")).willReturn(null);
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.signOut(getAccessTokenDto()));
+
+        // then
+        assertEquals(exception.getMessage(), "리프레시 토큰이 만료되었습니다.");
+    }
+
+    private AccessTokenDto getAccessTokenDto() {
+        return new AccessTokenDto("accessToken");
     }
 }
