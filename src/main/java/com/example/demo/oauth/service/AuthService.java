@@ -8,6 +8,7 @@ import static com.example.demo.exception.type.ErrorCode.WRONG_PASSWORD;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.oauth.dto.AccessTokenDto;
+import com.example.demo.oauth.dto.LoginResponseDto;
 import com.example.demo.oauth.dto.QuitDto;
 import com.example.demo.oauth.dto.SignInDto;
 import com.example.demo.oauth.dto.SignUpDto;
@@ -71,7 +72,7 @@ public class AuthService implements UserDetailsService {
         return user;
     }
 
-    public AccessTokenDto getNewAccessTokenAndSaveNewRefreshToken(AccessTokenDto accessTokenDto) {
+    public AccessTokenDto tokenReissue(AccessTokenDto accessTokenDto) {
         Authentication authentication = tokenProvider.getAuthentication(accessTokenDto.getAccessToken());
         String refreshToken = redisTemplate.opsForValue().get(authentication.getName());
         if (ObjectUtils.isEmpty(refreshToken)) {
@@ -81,6 +82,16 @@ public class AuthService implements UserDetailsService {
         redisTemplate.delete(authentication.getName());
         tokenProvider.generateAndSaveRefreshToken(authentication.getName());
         return new AccessTokenDto(newAccessToken);
+    }
+
+    public LoginResponseDto signIn(SignInDto signInDto) {
+        authenticate(signInDto);
+        var accessToken = tokenProvider.generateAccessToken(signInDto.getEmail());
+        var refreshToken = tokenProvider.generateAndSaveRefreshToken(signInDto.getEmail());
+        return LoginResponseDto.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     public boolean isEmailExist(String email) {

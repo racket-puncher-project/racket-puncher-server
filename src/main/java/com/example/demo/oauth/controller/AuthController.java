@@ -14,7 +14,6 @@ import com.example.demo.oauth.dto.SignInDto;
 import com.example.demo.oauth.dto.SignUpDto;
 import com.example.demo.oauth.security.TokenProvider;
 import com.example.demo.oauth.service.AuthService;
-import com.example.demo.siteuser.repository.SiteUserRepository;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,15 +48,10 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     public ResponseDto<LoginResponseDto> signIn(@RequestBody SignInDto signInDto) {
-        authService.authenticate(signInDto);
-        var token = tokenProvider.generateAccessToken(signInDto.getEmail());
-        var refreshToken = tokenProvider.generateAndSaveRefreshToken(signInDto.getEmail());
-        var result = LoginResponseDto.builder()
-                .accessToken(token)
-                .refreshToken(refreshToken)
-                .build();
+        var result = authService.signIn(signInDto);
         return ResponseUtil.SUCCESS(result);
     }
+
 
 //    @PostMapping("/sign-in/kakao")
 //    public ResponseEntity<?> signInKakao(@RequestBody SignKakao request) {
@@ -86,7 +80,7 @@ public class AuthController {
 
     @PostMapping("/reissue")
     public ResponseDto<AccessTokenDto> reissue(@RequestBody AccessTokenDto accessTokenDto) {
-        var newAccessToken = authService.getNewAccessTokenAndSaveNewRefreshToken(accessTokenDto);
+        var newAccessToken = authService.tokenReissue(accessTokenDto);
         return ResponseUtil.SUCCESS(newAccessToken);
     }
 
