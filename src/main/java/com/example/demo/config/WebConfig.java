@@ -12,9 +12,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("https://racket-puncher.shop",
-                        "http://localhost:3000",
-                        "http://localhost:8080")
+                .allowedOrigins("http://localhost:3000", "http://localhost:8080")
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .allowCredentials(true);
