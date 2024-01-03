@@ -150,6 +150,59 @@ class AuthServiceTest {
         assertEquals(exception.getMessage(), "리프레시 토큰이 만료되었습니다.");
     }
 
+    @Test
+    void checkEmailSuccess() {
+        // given
+        given(siteUserRepository.existsByEmail("email"))
+                .willReturn(false);
+
+        // when
+        var result = authService.checkEmail("email");
+
+        // then
+        assertEquals("사용 가능한 이메일입니다.", result.getMessage());
+    }
+
+    @Test
+    public void checkEmailFailed() {
+        // given
+        given(siteUserRepository.existsByEmail("email"))
+                .willReturn(true);
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.checkEmail("email"));
+
+        // then
+        assertEquals(exception.getMessage(), "이미 사용 중인 이메일입니다.");
+    }
+
+    @Test
+    void checkNicknameSuccess() {
+        // given
+        given(siteUserRepository.existsByNickname("nickname"))
+                .willReturn(false);
+
+        // when
+        var result = authService.checkNickname("nickname");
+
+        // then
+        assertEquals("사용 가능한 닉네임입니다.", result.getMessage());
+    }
+
+    @Test
+    public void checkNicknameFailed() {
+        // given
+        given(siteUserRepository.existsByNickname("nickname"))
+                .willReturn(true);
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.checkNickname("nickname"));
+
+        // then
+        assertEquals(exception.getMessage(), "이미 사용 중인 닉네임입니다.");
+    }
+
+
     private AccessTokenDto getAccessTokenDto() {
         return new AccessTokenDto("accessToken");
     }

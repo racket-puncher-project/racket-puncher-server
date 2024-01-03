@@ -6,8 +6,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.oauth.dto.AccessTokenDto;
+import com.example.demo.oauth.dto.EmailRequestDto;
+import com.example.demo.oauth.dto.NicknameRequestDto;
 import com.example.demo.oauth.dto.SignInDto;
 import com.example.demo.oauth.dto.SignUpDto;
+import com.example.demo.oauth.dto.StringResponseDto;
 import com.example.demo.oauth.security.JwtAuthenticationFilter;
 import com.example.demo.oauth.security.SecurityConfiguration;
 import com.example.demo.oauth.security.TokenProvider;
@@ -102,6 +105,36 @@ class AuthControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    public void checkEmail() throws Exception {
+        // given
+        given(authService.checkEmail(getEmailRequestDto().getEmail()))
+                .willReturn(new StringResponseDto("사용 가능한 이메일입니다."));
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/check-email")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(getEmailRequestDto())))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void checkNickname() throws Exception {
+        // given
+        given(authService.checkNickname(getNicknameRequestDto().getNickname()))
+                .willReturn(new StringResponseDto("사용 가능한 닉네임입니다."));
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/check-nickname")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(getNicknameRequestDto())))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SignUpDto getSignUpDto() {
         return SignUpDto.builder()
                 .email("email@naver.com")
@@ -124,5 +157,12 @@ class AuthControllerTest {
 
     private AccessTokenDto getAccessTokenDto() {
         return new AccessTokenDto("accessToken");
+    }
+    private EmailRequestDto getEmailRequestDto() {
+        return new EmailRequestDto("email");
+    }
+
+    private NicknameRequestDto getNicknameRequestDto() {
+        return new NicknameRequestDto("nickname");
     }
 }
