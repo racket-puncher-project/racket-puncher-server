@@ -1,6 +1,8 @@
 package com.example.demo.oauth.security;
 
-import com.example.demo.oauth.service.AuthService;
+// import com.example.demo.oauth.service.AuthService;
+import com.example.demo.exception.RacketPuncherException;
+import com.example.demo.siteuser.repository.SiteUserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -19,6 +21,8 @@ import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -29,7 +33,7 @@ public class TokenProvider {
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 14; // 2주
 
-    private final AuthService authService;
+    private final SiteUserRepository siteUserRepository;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Value("{spring.jwt.secret}")
@@ -64,7 +68,9 @@ public class TokenProvider {
     }
 
     public Authentication getAuthentication(String jwt) {
-        UserDetails userDetails = this.authService.loadUserByUsername(this.getUserEmail(jwt));
+        UserDetails userDetails = this.siteUserRepository.findByEmail(this.getUserEmail(jwt))
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
