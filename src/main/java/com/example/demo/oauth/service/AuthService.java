@@ -9,6 +9,7 @@ import com.example.demo.oauth.dto.LoginResponseDto;
 import com.example.demo.oauth.dto.QuitDto;
 import com.example.demo.oauth.dto.SignInDto;
 import com.example.demo.oauth.dto.SignUpDto;
+import com.example.demo.oauth.dto.StringResponseDto;
 import com.example.demo.oauth.security.TokenProvider;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,9 @@ import org.springframework.util.ObjectUtils;
 @RequiredArgsConstructor
 public class AuthService implements UserDetailsService {
 
+    public static final String VALID_EMAIL = "사용 가능한 이메일입니다.";
+    public static final String SUCCESS_LOGOUT = "로그아웃 성공";
+    public static final String VALID_NICKNAME = "사용 가능한 닉네임입니다.";
     private final PasswordEncoder passwordEncoder;
     private final SiteUserRepository siteUserRepository;
     private final TokenProvider tokenProvider;
@@ -75,6 +79,9 @@ public class AuthService implements UserDetailsService {
         if (ObjectUtils.isEmpty(refreshToken)) {
             throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
         }
+        if (refreshToken.equals(accessTokenDto.getAccessToken())) {
+            throw new RacketPuncherException(INVALID_TOKEN);
+        }
         var newAccessToken = tokenProvider.generateAccessToken(authentication.getName());
         redisTemplate.delete(authentication.getName());
         tokenProvider.generateAndSaveRefreshToken(authentication.getName());
@@ -98,15 +105,20 @@ public class AuthService implements UserDetailsService {
         }
         redisTemplate.delete(tokenProvider.getUserEmail(accessTokenDto.getAccessToken()));
         redisTemplate.opsForValue().set(email, accessTokenDto.getAccessToken());
-        return "로그아웃 성공";
+        return SUCCESS_LOGOUT;
     }
 
-    public boolean isEmailExist(String email) {
-
-        return siteUserRepository.existsByEmail(email);
+    public StringResponseDto checkEmail(String email) {
+        if (siteUserRepository.existsByEmail(email)) {
+            throw new RacketPuncherException(EMAIL_ALREADY_EXISTED);
+        }
+        return new StringResponseDto(VALID_EMAIL);
     }
 
-    public boolean isNicknameExist(String nickname) {
-        return siteUserRepository.existsByNickname(nickname);
+    public StringResponseDto checkNickname(String nickname) {
+        if (siteUserRepository.existsByNickname(nickname)) {
+            throw new RacketPuncherException(NICKNAME_ALREADY_EXISTED);
+        }
+        return new StringResponseDto(VALID_NICKNAME);
     }
 }
