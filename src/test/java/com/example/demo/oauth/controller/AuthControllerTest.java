@@ -1,4 +1,4 @@
-package com.example.demo.siteuser.controller;
+package com.example.demo.oauth.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -9,14 +9,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.oauth2.service.ProviderService;
-import com.example.demo.siteuser.dto.AccessTokenDto;
-import com.example.demo.siteuser.dto.SignInDto;
-import com.example.demo.siteuser.dto.SignUpDto;
+import com.example.demo.oauth.dto.AccessTokenDto;
+import com.example.demo.oauth.dto.SignInDto;
+import com.example.demo.oauth.dto.SignUpDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
-import com.example.demo.siteuser.security.JwtAuthenticationFilter;
-import com.example.demo.siteuser.security.SecurityConfiguration;
-import com.example.demo.siteuser.security.TokenProvider;
-import com.example.demo.siteuser.service.MemberService;
+import com.example.demo.oauth.security.JwtAuthenticationFilter;
+import com.example.demo.oauth.security.SecurityConfiguration;
+import com.example.demo.oauth.security.TokenProvider;
+import com.example.demo.oauth.service.AuthService;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
@@ -44,7 +44,7 @@ class AuthControllerTest {
     private RedisTemplate<String, String> redisTemplate;
 
     @MockBean
-    private MemberService memberService;
+    private AuthService authService;
 
     @MockBean
     private TokenProvider tokenProvider;
@@ -61,7 +61,7 @@ class AuthControllerTest {
     @Test
     void signUp() throws Exception {
         // given
-        given(memberService.register(getSignUpDto()))
+        given(authService.register(getSignUpDto()))
                 .willReturn(SiteUser.fromDto(getSignUpDto()));
 
         // when
@@ -74,7 +74,7 @@ class AuthControllerTest {
     @Test
     void signIn() throws Exception {
         // given
-        given(memberService.authenticate(getSignInDto()))
+        given(authService.authenticate(getSignInDto()))
                 .willReturn(SiteUser.fromDto(getSignUpDto()));
 
         // when

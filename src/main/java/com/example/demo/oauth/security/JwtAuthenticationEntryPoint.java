@@ -1,4 +1,4 @@
-package com.example.demo.siteuser.security;
+package com.example.demo.oauth.security;
 
 import com.example.demo.exception.ErrorResponse;
 import com.example.demo.exception.RacketPuncherException;

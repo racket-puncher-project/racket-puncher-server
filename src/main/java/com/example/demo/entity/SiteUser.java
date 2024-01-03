@@ -1,6 +1,6 @@
 package com.example.demo.entity;
 
-import com.example.demo.siteuser.dto.SignUpDto;
+import com.example.demo.oauth.dto.SignUpDto;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;

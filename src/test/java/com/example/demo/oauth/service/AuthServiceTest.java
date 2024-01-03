@@ -1,4 +1,4 @@
-package com.example.demo.siteuser.service;
+package com.example.demo.oauth.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.siteuser.dto.SignUpDto;
+import com.example.demo.oauth.dto.SignUpDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
-class MemberServiceTest {
+class AuthServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -31,7 +31,7 @@ class MemberServiceTest {
     private SiteUserRepository siteUserRepository;
 
     @InjectMocks
-    private MemberService memberService;
+    private AuthService authService;
 
     @Test
     void registerSuccess() {
@@ -41,7 +41,7 @@ class MemberServiceTest {
 
         ArgumentCaptor<SiteUser> captor = ArgumentCaptor.forClass(SiteUser.class);
         // when
-        memberService.register(getSignUpDto());
+        authService.register(getSignUpDto());
 
         // then
         verify(siteUserRepository, times(1)).save(captor.capture());
@@ -71,7 +71,7 @@ class MemberServiceTest {
 
         // when
         RacketPuncherException exception = assertThrows(RacketPuncherException.class,
-                () -> memberService.register(getSignUpDto()));
+                () -> authService.register(getSignUpDto()));
 
         // then
         assertEquals(exception.getMessage(), "이미 사용 중인 이메일입니다.");

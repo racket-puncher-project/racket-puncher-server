@@ -1,4 +1,4 @@
-package com.example.demo.siteuser.security;
+package com.example.demo.oauth.security;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
