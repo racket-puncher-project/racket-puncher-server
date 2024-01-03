@@ -13,6 +13,7 @@ import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.oauth.dto.AccessTokenDto;
 import com.example.demo.oauth.dto.SignUpDto;
+import com.example.demo.oauth.security.TokenProvider;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
@@ -24,6 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -39,6 +41,12 @@ class AuthServiceTest {
 
     @Mock
     private SiteUserRepository siteUserRepository;
+
+    @Mock
+    private TokenProvider tokenProvider;
+
+    @Mock
+    private RedisTemplate<String, String> redisTemplate;
 
     @InjectMocks
     private AuthService authService;
@@ -87,31 +95,26 @@ class AuthServiceTest {
         assertEquals(exception.getMessage(), "이미 사용 중인 이메일입니다.");
     }
 
-//    @Test
-//    public void testReissue() throws Exception {
-//        // given
-//        String accessToken = "accessToken";
-//        String refreshToken = "refreshToken";
-//        String newAccessToken = "newAccessToken";
-//        String newRefreshToken = "newRefreshToken";
-//        String username = "username";
-//        AccessTokenDto accessTokenDto = new AccessTokenDto(accessToken);
-//        Authentication authentication = mock(Authentication.class);
-//        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
-//
-//        when(authentication.getName()).thenReturn(username);
-//        when(tokenProvider.getAuthentication(accessToken)).thenReturn(authentication);
-//        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-//        when(redisTemplate.opsForValue().get(authentication.getName())).thenReturn(refreshToken);
-//        when(tokenProvider.generateAccessToken(username)).thenReturn(newAccessToken);
-//        when(redisTemplate.delete(authentication.getName())).thenReturn(null);
-//        when(tokenProvider.generateAndSaveRefreshToken(authentication.getName())).thenReturn(newRefreshToken);
-//
-//        // when
-//        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/reissue")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(new ObjectMapper().writeValueAsString(accessTokenDto)))
-//                .andExpect(MockMvcResultMatchers.status().isOk())
-//                .andDo(print());
-//    }
+    @Test
+    public void tokenReissueSuccess() {
+        // given
+
+        AccessTokenDto newAccessTokenDto = new AccessTokenDto("newAccessToken");
+        Authentication authentication = mock(Authentication.class);
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+
+        given(authentication.getName()).willReturn("username");
+        given(tokenProvider.getAuthentication("accessToken")).willReturn(authentication);
+        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(redisTemplate.opsForValue().get(authentication.getName())).willReturn("refreshToken");
+        given(tokenProvider.generateAccessToken("username")).willReturn("newAccessToken");
+        given(redisTemplate.delete(authentication.getName())).willReturn(null);
+        given(tokenProvider.generateAndSaveRefreshToken(authentication.getName())).willReturn("newRefreshToken");
+
+        // when
+        AccessTokenDto newAccessToken = authService.tokenReissue(new AccessTokenDto("accessToken"));
+
+        // then
+        assertEquals("newAccessToken", newAccessToken.getAccessToken());
+    }
 }
