@@ -28,6 +28,7 @@ import org.springframework.util.StringUtils;
 public class TokenProvider {
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 14; // 2주
+
     private final RedisTemplate<String, String> redisTemplate;
     private final SiteUserRepository siteUserRepository;
 

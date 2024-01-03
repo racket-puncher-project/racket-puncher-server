@@ -202,7 +202,6 @@ class AuthServiceTest {
         assertEquals(exception.getMessage(), "이미 사용 중인 닉네임입니다.");
     }
 
-
     private AccessTokenDto getAccessTokenDto() {
         return new AccessTokenDto("accessToken");
     }
