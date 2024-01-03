@@ -7,9 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 import com.example.demo.apply.service.ApplyService;
 import com.example.demo.entity.Apply;
-import com.example.demo.oauth.security.JwtAuthenticationFilter;
-import com.example.demo.oauth.security.SecurityConfiguration;
-import com.example.demo.oauth.security.TokenProvider;
+import com.example.demo.auth.security.JwtAuthenticationFilter;
+import com.example.demo.auth.security.SecurityConfiguration;
+import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.type.ApplyStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

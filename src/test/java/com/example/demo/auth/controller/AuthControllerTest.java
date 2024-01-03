@@ -1,20 +1,20 @@
-package com.example.demo.oauth.controller;
+package com.example.demo.auth.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import com.example.demo.entity.SiteUser;
-import com.example.demo.oauth.dto.AccessTokenDto;
-import com.example.demo.oauth.dto.EmailRequestDto;
-import com.example.demo.oauth.dto.NicknameRequestDto;
-import com.example.demo.oauth.dto.SignInDto;
-import com.example.demo.oauth.dto.SignUpDto;
-import com.example.demo.oauth.dto.StringResponseDto;
-import com.example.demo.oauth.security.JwtAuthenticationFilter;
-import com.example.demo.oauth.security.SecurityConfiguration;
-import com.example.demo.oauth.security.TokenProvider;
-import com.example.demo.oauth.service.AuthService;
+import com.example.demo.auth.dto.AccessTokenDto;
+import com.example.demo.auth.dto.EmailRequestDto;
+import com.example.demo.auth.dto.NicknameRequestDto;
+import com.example.demo.auth.dto.SignInDto;
+import com.example.demo.auth.dto.SignUpDto;
+import com.example.demo.auth.dto.StringResponseDto;
+import com.example.demo.auth.security.JwtAuthenticationFilter;
+import com.example.demo.auth.security.SecurityConfiguration;
+import com.example.demo.auth.security.TokenProvider;
+import com.example.demo.auth.service.AuthService;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;

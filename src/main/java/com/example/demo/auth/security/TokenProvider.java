@@ -1,4 +1,4 @@
-package com.example.demo.oauth.security;
+package com.example.demo.auth.security;
 
 import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
 import static com.example.demo.exception.type.ErrorCode.TOKEN_EXPIRED;
