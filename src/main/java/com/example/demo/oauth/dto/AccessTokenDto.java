@@ -1,4 +1,4 @@
-package com.example.demo.siteuser.dto;
+package com.example.demo.oauth.dto;
 
         import jakarta.validation.constraints.NotBlank;
         import lombok.AllArgsConstructor;

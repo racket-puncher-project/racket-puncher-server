@@ -1,4 +1,4 @@
-package com.example.demo.siteuser.dto;
+package com.example.demo.oauth.dto;
 
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;

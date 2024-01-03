@@ -1,22 +1,19 @@
-package com.example.demo.siteuser.controller;
+package com.example.demo.oauth.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import com.example.demo.entity.SiteUser;
-import com.example.demo.oauth2.service.ProviderService;
-import com.example.demo.siteuser.dto.AccessTokenDto;
-import com.example.demo.siteuser.dto.SignInDto;
-import com.example.demo.siteuser.dto.SignUpDto;
+import com.example.demo.oauth.dto.AccessTokenDto;
+import com.example.demo.oauth.dto.SignInDto;
+import com.example.demo.oauth.dto.SignUpDto;
+import com.example.demo.oauth.security.JwtAuthenticationFilter;
+import com.example.demo.oauth.security.SecurityConfiguration;
+import com.example.demo.oauth.security.TokenProvider;
+import com.example.demo.oauth.service.AuthService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
-import com.example.demo.siteuser.security.JwtAuthenticationFilter;
-import com.example.demo.siteuser.security.SecurityConfiguration;
-import com.example.demo.siteuser.security.TokenProvider;
-import com.example.demo.siteuser.service.MemberService;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
@@ -37,14 +34,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @WebMvcTest(AuthController.class)
 @Import(SecurityConfiguration.class)
 class AuthControllerTest {
-    @MockBean
-    private SiteUserRepository siteUserRepository;
 
     @MockBean
     private RedisTemplate<String, String> redisTemplate;
 
     @MockBean
-    private MemberService memberService;
+    private AuthService authService;
 
     @MockBean
     private TokenProvider tokenProvider;
@@ -52,16 +47,13 @@ class AuthControllerTest {
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @MockBean
-    private ProviderService providerService;
-
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void signUp() throws Exception {
         // given
-        given(memberService.register(getSignUpDto()))
+        given(authService.register(getSignUpDto()))
                 .willReturn(SiteUser.fromDto(getSignUpDto()));
 
         // when
@@ -74,7 +66,7 @@ class AuthControllerTest {
     @Test
     void signIn() throws Exception {
         // given
-        given(memberService.authenticate(getSignInDto()))
+        given(authService.authenticate(getSignInDto()))
                 .willReturn(SiteUser.fromDto(getSignUpDto()));
 
         // when
@@ -87,27 +79,13 @@ class AuthControllerTest {
     @Test
     public void testReissue() throws Exception {
         // given
-        String accessToken = "accessToken";
-        String refreshToken = "refreshToken";
-        String newAccessToken = "newAccessToken";
-        String newRefreshToken = "newRefreshToken";
-        String username = "username";
-        AccessTokenDto accessTokenDto = new AccessTokenDto(accessToken);
-        Authentication authentication = mock(Authentication.class);
-        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
-
-        when(authentication.getName()).thenReturn(username);
-        when(tokenProvider.getAuthentication(accessToken)).thenReturn(authentication);
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-        when(redisTemplate.opsForValue().get(authentication.getName())).thenReturn(refreshToken);
-        when(tokenProvider.generateAccessToken(username)).thenReturn(newAccessToken);
-        when(redisTemplate.delete(authentication.getName())).thenReturn(null);
-        when(tokenProvider.generateAndSaveRefreshToken(authentication.getName())).thenReturn(newRefreshToken);
-
+       given(authService.tokenReissue(getAccessTokenDto()))
+               .willReturn(new AccessTokenDto("newAccessToken"));
         // when
+        // then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/reissue")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(accessTokenDto)))
+                        .content(new ObjectMapper().writeValueAsString(getAccessTokenDto())))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
@@ -131,5 +109,9 @@ class AuthControllerTest {
 
     private SignInDto getSignInDto() {
         return new SignInDto("email@nave.com", "`1234");
+    }
+
+    private AccessTokenDto getAccessTokenDto() {
+        return new AccessTokenDto("accessToken");
     }
 }

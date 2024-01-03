@@ -1,6 +1,6 @@
-package com.example.demo.siteuser.security;
+package com.example.demo.oauth.security;
 
-import com.example.demo.siteuser.service.MemberService;
+import com.example.demo.oauth.service.AuthService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -29,7 +29,7 @@ public class TokenProvider {
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 14; // 2주
 
-    private final MemberService memberService;
+    private final AuthService authService;
     private final RedisTemplate<String, String> redisTemplate;
 
     @Value("{spring.jwt.secret}")
@@ -64,7 +64,7 @@ public class TokenProvider {
     }
 
     public Authentication getAuthentication(String jwt) {
-        UserDetails userDetails = this.memberService.loadUserByUsername(this.getUserEmail(jwt));
+        UserDetails userDetails = this.authService.loadUserByUsername(this.getUserEmail(jwt));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
