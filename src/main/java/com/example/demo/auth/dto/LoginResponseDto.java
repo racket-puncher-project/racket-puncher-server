@@ -1,4 +1,4 @@
-package com.example.demo.oauth.dto;
+package com.example.demo.auth.dto;
 
 import lombok.*;
 

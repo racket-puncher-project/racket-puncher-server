@@ -1,16 +1,16 @@
-package com.example.demo.oauth.service;
+package com.example.demo.auth.service;
 
 import static com.example.demo.exception.type.ErrorCode.*;
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.oauth.dto.AccessTokenDto;
-import com.example.demo.oauth.dto.LoginResponseDto;
-import com.example.demo.oauth.dto.QuitDto;
-import com.example.demo.oauth.dto.SignInDto;
-import com.example.demo.oauth.dto.SignUpDto;
-import com.example.demo.oauth.dto.StringResponseDto;
-import com.example.demo.oauth.security.TokenProvider;
+import com.example.demo.auth.dto.AccessTokenDto;
+import com.example.demo.auth.dto.LoginResponseDto;
+import com.example.demo.auth.dto.QuitDto;
+import com.example.demo.auth.dto.SignInDto;
+import com.example.demo.auth.dto.SignUpDto;
+import com.example.demo.auth.dto.StringResponseDto;
+import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
