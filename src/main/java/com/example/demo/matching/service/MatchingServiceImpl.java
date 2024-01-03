@@ -57,6 +57,7 @@ public class MatchingServiceImpl implements MatchingService {
     @Value("${kakao.client_id}")
     private String apiKey;
 
+
     private static boolean isOrganizer(long userId, Matching matching) {
         return matching.getSiteUser().getId() == userId;
     }
