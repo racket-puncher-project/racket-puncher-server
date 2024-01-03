@@ -54,7 +54,7 @@ public class MatchingServiceImpl implements MatchingService {
     private final SiteUserRepository siteUserRepository;
     private final NotificationService notificationService;
 
-    @Value("${kakao-rest-api.key}")
+    @Value("${kakao.client_id}")
     private String apiKey;
 
     private static boolean isOrganizer(long userId, Matching matching) {

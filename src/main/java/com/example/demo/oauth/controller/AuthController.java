@@ -39,11 +39,10 @@ public class AuthController {
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthService authService;
     private final TokenProvider tokenProvider;
-//    private final ProviderService providerService;
 
     @PostMapping("/sign-up")
     public void signUp(@RequestBody SignUpDto signUpDto) {
-            authService.register(signUpDto);
+        authService.register(signUpDto);
     }
 
     @PostMapping("/sign-in")
@@ -52,32 +51,6 @@ public class AuthController {
         return ResponseUtil.SUCCESS(result);
     }
 
-
-//    @PostMapping("/sign-in/kakao")
-//    public ResponseEntity<?> signInKakao(@RequestBody SignKakao request) {
-//        // 카카오용 API
-//
-//        try {
-////            AccessToken accessToken = providerService.getAccessToken(request.getCode(), request.getProvider());
-////            ProfileDto profile = providerService.getProfile(accessToken.getAccess_token(), request.getProvider());
-////            var member = siteUserRepository.findByNickname(profile.getNickname());
-//            if (member.isPresent()) {
-//                var refreshToken = this.tokenProvider.generateAndSaveRefreshToken(member.get().getEmail());
-//                var acsToken = this.tokenProvider.generateAccessToken(member.get().getEmail());
-//                LoginResponseDto loginResponseDto = LoginResponseDto.builder()
-//                        .accessToken(acsToken)
-//                        .refreshToken(refreshToken)
-//                        .build();
-//                return ResponseEntity.ok(loginResponseDto);
-//            } else {
-//                LoginResponseDto loginResponseDto = new LoginResponseDto();
-//                return ResponseEntity.ok(loginResponseDto);
-//            }
-//        } catch (CommunicationException e) {
-//            return new ResponseEntity<>("Wrong Request", HttpStatus.BAD_REQUEST);
-//        }
-//    }
-
     @PostMapping("/reissue")
     public ResponseDto<AccessTokenDto> reissue(@RequestBody AccessTokenDto accessTokenDto) {
         var newAccessToken = authService.tokenReissue(accessTokenDto);
@@ -85,19 +58,8 @@ public class AuthController {
     }
 
     @PostMapping("/sign-out")
-    public ResponseEntity<?> signOut(@RequestBody AccessTokenDto accessTokenDto) {
-        var accessToken = accessTokenDto.getAccessToken();
-        if (!StringUtils.hasText(accessToken) || !this.tokenProvider.validateToken(accessToken)) {
-            return new ResponseEntity<>("Wrong Request", HttpStatus.BAD_REQUEST);
-        }
-        Authentication authentication = tokenProvider.getAuthentication(accessToken);
-        if (redisTemplate.opsForValue().get(authentication.getName()) != null) {
-            redisTemplate.delete(authentication.getName());
-        }
-        Long expiration = tokenProvider.getExpiration(accessToken);
-        redisTemplate.opsForValue().set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
-
-        return new ResponseEntity<>("LogOut Completed", HttpStatus.OK);
+    public void signOut(@RequestBody AccessTokenDto accessTokenDto) {
+        authService.signOut(accessTokenDto);
     }
 
     @DeleteMapping("/quit")
