@@ -1,10 +1,7 @@
 package com.example.demo.oauth.controller;
 
-import static com.example.demo.exception.type.ErrorCode.INVALID_NICKNAME;
-
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
-import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.oauth.dto.AccessTokenDto;
 import com.example.demo.oauth.dto.EmailRequestDto;
 import com.example.demo.oauth.dto.LoginResponseDto;
@@ -12,6 +9,7 @@ import com.example.demo.oauth.dto.NicknameRequestDto;
 import com.example.demo.oauth.dto.QuitDto;
 import com.example.demo.oauth.dto.SignInDto;
 import com.example.demo.oauth.dto.SignUpDto;
+import com.example.demo.oauth.dto.StringResponseDto;
 import com.example.demo.oauth.security.TokenProvider;
 import com.example.demo.oauth.service.AuthService;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +60,18 @@ public class AuthController {
         authService.signOut(accessTokenDto);
     }
 
+    @PostMapping("/check-email")
+    public ResponseDto<StringResponseDto> checkEmail(@RequestBody EmailRequestDto emailRequestDto) {
+        var result = authService.checkEmail(emailRequestDto.getEmail());
+        return ResponseUtil.SUCCESS(result);
+    }
+
+    @PostMapping("/check-nickname")
+    public ResponseDto<StringResponseDto> checkNickname(@RequestBody NicknameRequestDto nicknameRequestDto) {
+        var result = authService.checkNickname(nicknameRequestDto.getNickname());
+        return ResponseUtil.SUCCESS(result);
+    }
+
     @DeleteMapping("/quit")
     public ResponseEntity<?> quit(@RequestBody QuitDto request) {
         var accessToken = request.getAccessToken();
@@ -77,24 +87,5 @@ public class AuthController {
 
         var result = this.authService.withdraw(request);
         return new ResponseEntity<>("Quit Completed", HttpStatus.OK);
-    }
-
-    @PostMapping(path = "/check-email")
-    public ResponseEntity<ResponseDto<String>> checkEmailExistence(@RequestBody EmailRequestDto emailRequestDto) {
-        boolean exists = authService.isEmailExist(emailRequestDto.getEmail());
-        String message = exists ? "사용 불가능한 이메일 입니다." : "사용 가능한 이메일 입니다.";
-        return ResponseEntity.ok(ResponseUtil.SUCCESS(message));
-    }
-
-    @PostMapping(path = "/check-nickname")
-    public ResponseEntity<ResponseDto<String>> checkNicknameExistence(
-            @RequestBody NicknameRequestDto nicknameRequestDto) {
-        boolean exists = authService.isNicknameExist(nicknameRequestDto.getNickname());
-
-        if (exists) {
-            throw new RacketPuncherException(INVALID_NICKNAME);
-        } else {
-            return ResponseEntity.ok(ResponseUtil.SUCCESS("사용 가능한 닉네임 입니다."));
-        }
     }
 }

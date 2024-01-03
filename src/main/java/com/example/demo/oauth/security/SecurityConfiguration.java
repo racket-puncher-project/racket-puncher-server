@@ -34,10 +34,11 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequest
                         -> authorizeRequest
-                        .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in/**",
-                                "/api/auth/reissue",
+
+                        .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/reissue",
                                 "/api/auth/upload-profile-image", "/api/matches/list", "/api/matches/**",
-                                "/api/users/**", "/api/aws/**", "/api/auth/check-nickname")
+                                "/api/users/**", "/api/aws/**",
+                                "/api/auth/check-nickname", "/api/auth/check-email", "/api/auth/redis")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

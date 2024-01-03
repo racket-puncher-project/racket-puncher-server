@@ -68,6 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private HashSet<String> getPermitAllEndpoints() {
         var permitAllEndpoints = new HashSet<String>();
 
+        permitAllEndpoints.add("/api/auth/redis");
         permitAllEndpoints.add("/api/auth/sign-up");
         permitAllEndpoints.add("/api/auth/sign-in/**");
         permitAllEndpoints.add("/api/auth/reissue");
@@ -77,6 +78,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/api/users/**");
         permitAllEndpoints.add("/api/aws/**");
         permitAllEndpoints.add("/api/auth/check-nickname");
+        permitAllEndpoints.add("/api/auth/check-email");
 
         return permitAllEndpoints;
     }

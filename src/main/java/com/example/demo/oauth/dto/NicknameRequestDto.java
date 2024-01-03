@@ -6,7 +6,6 @@ package com.example.demo.oauth.dto;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class NicknameRequestDto {
     private String nickname;
 }
