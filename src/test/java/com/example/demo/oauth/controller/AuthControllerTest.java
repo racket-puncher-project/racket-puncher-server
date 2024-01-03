@@ -2,7 +2,6 @@ package com.example.demo.oauth.controller;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import com.example.demo.entity.SiteUser;
@@ -13,7 +12,6 @@ import com.example.demo.oauth.security.JwtAuthenticationFilter;
 import com.example.demo.oauth.security.SecurityConfiguration;
 import com.example.demo.oauth.security.TokenProvider;
 import com.example.demo.oauth.service.AuthService;
-import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
@@ -24,9 +22,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -77,10 +73,11 @@ class AuthControllerTest {
     }
 
     @Test
-    public void testReissue() throws Exception {
+    public void reissue() throws Exception {
         // given
        given(authService.tokenReissue(getAccessTokenDto()))
                .willReturn(new AccessTokenDto("newAccessToken"));
+
         // when
         // then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/reissue")
@@ -90,6 +87,20 @@ class AuthControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    public void signOut() throws Exception {
+        // given
+        given(authService.signOut(getAccessTokenDto()))
+                .willReturn("로그아웃 성공");
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/sign-out")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsString(getAccessTokenDto())))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
 
     private SignUpDto getSignUpDto() {
         return SignUpDto.builder()

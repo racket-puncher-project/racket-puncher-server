@@ -1,5 +1,6 @@
 package com.example.demo.oauth.security;
 
+import com.example.demo.exception.RacketPuncherException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,6 +51,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response); // 다음 필터로 요청과 응답 전달
         } catch (AuthenticationException e) {
             jwtAuthenticationEntryPoint.commence(request, response, e);
+        } catch (RacketPuncherException e) {
+            jwtAuthenticationEntryPoint.customCommence(response);
         }
     }
 
@@ -68,8 +71,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/api/auth/sign-up");
         permitAllEndpoints.add("/api/auth/sign-in/**");
         permitAllEndpoints.add("/api/auth/reissue");
-        permitAllEndpoints.add("/api/auth/sign-out");
-        permitAllEndpoints.add("/api/auth/quit");
         permitAllEndpoints.add("/api/auth/upload-profile-image");
         permitAllEndpoints.add("/api/matches/list");
         permitAllEndpoints.add("/api/matches/**");

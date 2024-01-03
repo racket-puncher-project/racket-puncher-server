@@ -1,12 +1,16 @@
 package com.example.demo.oauth.security;
 
-// import com.example.demo.oauth.service.AuthService;
+import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
+import static com.example.demo.exception.type.ErrorCode.TOKEN_EXPIRED;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Date;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,24 +21,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.Date;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class TokenProvider {
-    /**
-     * 토큰 생성
-     */
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 14; // 2주
 
-    private final SiteUserRepository siteUserRepository;
     private final RedisTemplate<String, String> redisTemplate;
+    private final SiteUserRepository siteUserRepository;
 
     @Value("{spring.jwt.secret}")
     private String secretKey;
@@ -67,10 +62,9 @@ public class TokenProvider {
         return token;
     }
 
-    public Authentication getAuthentication(String jwt) {
-        UserDetails userDetails = this.siteUserRepository.findByEmail(this.getUserEmail(jwt))
+    public Authentication getAuthentication(String token) {
+        UserDetails userDetails = siteUserRepository.findByEmail(this.getUserEmail(token))
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
-
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
@@ -79,9 +73,18 @@ public class TokenProvider {
     }
 
     public boolean validateToken(String token) {
-        if (!StringUtils.hasText(token)) return false;
+        if (!StringUtils.hasText(token)) {
+            return false;
+        }
+        validateRefreshToken(token);
         var claims = this.parseClaims(token);
         return !claims.getExpiration().before(new Date());
+    }
+
+    private void validateRefreshToken(String token) {
+        if (token.equals(redisTemplate.opsForValue().get(getUserEmail(token)))) {
+            throw new RacketPuncherException(TOKEN_EXPIRED);
+        }
     }
 
     private Claims parseClaims(String token) {

@@ -1,9 +1,6 @@
 package com.example.demo.oauth.service;
 
-import static com.example.demo.exception.type.ErrorCode.EMAIL_ALREADY_EXISTED;
-import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.REFRESH_TOKEN_EXPIRED;
-import static com.example.demo.exception.type.ErrorCode.WRONG_PASSWORD;
+import static com.example.demo.exception.type.ErrorCode.*;
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
@@ -92,6 +89,16 @@ public class AuthService implements UserDetailsService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public String signOut(AccessTokenDto accessTokenDto) {
+        String email = tokenProvider.getUserEmail(accessTokenDto.getAccessToken());
+        if (redisTemplate.opsForValue().get(email) == null) {
+            throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
+        }
+        redisTemplate.delete(tokenProvider.getUserEmail(accessTokenDto.getAccessToken()));
+        redisTemplate.opsForValue().set(email, accessTokenDto.getAccessToken());
+        return "로그아웃 성공";
     }
 
     public boolean isEmailExist(String email) {
