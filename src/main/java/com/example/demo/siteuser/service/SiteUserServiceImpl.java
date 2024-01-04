@@ -16,11 +16,13 @@ import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.SiteUserNotificationDto;
+import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +34,7 @@ public class SiteUserServiceImpl implements SiteUserService {
     private final ApplyRepository applyRepository;
     private final NotificationRepository notificationRepository;
     private final FindEntity findEntity;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public SiteUserInfoDto getSiteUserInfo(Long userId) {
@@ -44,6 +47,24 @@ public class SiteUserServiceImpl implements SiteUserService {
         SiteUser siteUser = siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
         return MyInfoDto.fromEntity(siteUser);
+    }
+
+    @Override
+    @Transactional
+    public SiteUser updateSiteUserInfo(String email, UpdateSiteUserInfoDto updateSiteUserInfoDto) {
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+        validatePassword(updateSiteUserInfoDto);
+        updateSiteUserInfoDto.setPassword(passwordEncoder.encode(updateSiteUserInfoDto.getPassword()));
+        siteUser.updateSiteUser(updateSiteUserInfoDto);
+
+        return siteUser;
+    }
+
+    private static void validatePassword(UpdateSiteUserInfoDto updateSiteUserInfoDto) {
+        if (!updateSiteUserInfoDto.getPassword().equals(updateSiteUserInfoDto.getCheckPassword())) {
+            throw new RacketPuncherException(WRONG_PASSWORD);
+        }
     }
 
     @Override
@@ -72,23 +93,6 @@ public class SiteUserServiceImpl implements SiteUserService {
         } else {
             throw new EntityNotFoundException("No matching data found for user with ID: " + userId);
         }
-    }
-
-    @Transactional
-    @Override
-    public void updateProfileImage(Long userId, String imageUrl) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-
-        siteUser.setProfileImg(imageUrl);
-        siteUserRepository.save(siteUser);
-    }
-
-    @Override
-    public String getProfileUrl(Long userId) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-        return siteUser.getProfileImg();
     }
 
     @Override
