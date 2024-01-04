@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import com.example.demo.auth.dto.SignUpDto;
 import com.example.demo.type.AgeGroup;
+import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import jakarta.persistence.Column;
@@ -89,6 +90,10 @@ public class SiteUser implements UserDetails {
     @Column(name = "IS_PHONE_VERIFIED") // 1:true, 0:false, default = 0
     private Boolean isPhoneVerified;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "AUTH_TYPE", length = 50, nullable = false)
+    private AuthType authType;
+
     @OneToMany(mappedBy = "siteUser")
     private List<Matching> hostedMatches; // 주최한 매칭
 
@@ -141,6 +146,7 @@ public class SiteUser implements UserDetails {
                 .ageGroup(signUpDto.getAgeGroup())
                 .profileImg(signUpDto.getProfileImg())
                 .siteUserName(signUpDto.getSiteUserName())
+                .authType(signUpDto.getAuthType())
                 .build();
     }
 }
