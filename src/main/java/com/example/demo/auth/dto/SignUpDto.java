@@ -32,7 +32,7 @@ public class SignUpDto {
     private GenderType gender;
 
     @NotBlank(message = "이름을 입력해 주세요.")
-    private String siteUserName;
+    private String userName;
 
     @NotBlank(message = "ntrp를 입력해 주세요.")
     private Ntrp ntrp;

@@ -14,7 +14,7 @@ import lombok.*;
 public class SiteUserMyInfoDto {
     private Long id;
     private String password;
-    private String siteUserName;
+    private String userName;
     private String nickname;
     private String email;
     private String phoneNumber;
@@ -33,7 +33,7 @@ public class SiteUserMyInfoDto {
 
         return SiteUserMyInfoDto.builder()
                 .id(siteUser.getId())
-                .siteUserName(siteUser.getSiteUserName())
+                .userName(siteUser.getUsername())
                 .password(siteUser.getPassword())
                 .nickname(siteUser.getNickname())
                 .email(siteUser.getEmail())

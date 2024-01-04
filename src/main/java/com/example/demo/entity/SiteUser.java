@@ -140,7 +140,7 @@ public class SiteUser implements UserDetails {
                 .zipCode(signUpDto.getZipCode())
                 .ageGroup(signUpDto.getAgeGroup())
                 .profileImg(signUpDto.getProfileImg())
-                .siteUserName(signUpDto.getSiteUserName())
+                .siteUserName(signUpDto.getUserName())
                 .build();
     }
 }
