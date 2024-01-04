@@ -14,6 +14,7 @@ import com.example.demo.auth.security.SecurityConfiguration;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.auth.service.AuthService;
 import com.example.demo.type.AgeGroup;
+import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,6 +73,19 @@ class AuthControllerTest {
         // when
         // then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/sign-in"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void kakaoSignUp() throws Exception {
+        // given
+        given(authService.register(getKakaoSignUpDto()))
+                .willReturn(SiteUser.fromDto(getKakaoSignUpDto()));
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/sign-up"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
@@ -186,6 +200,23 @@ class AuthControllerTest {
                 .zipCode("12345")
                 .profileImg("test.url")
                 .ageGroup(AgeGroup.TWENTIES)
+                .authType(AuthType.GENERAL)
+                .build();
+    }
+
+    private SignUpDto getKakaoSignUpDto() {
+        return SignUpDto.builder()
+                .email("email@naver.com")
+                .nickname("닉네임")
+                .phoneNumber("010-1234-5678")
+                .gender(GenderType.FEMALE)
+                .siteUserName("홍길동")
+                .ntrp(Ntrp.BEGINNER)
+                .address("삼성동")
+                .zipCode("12345")
+                .profileImg("test.url")
+                .ageGroup(AgeGroup.TWENTIES)
+                .authType(AuthType.KAKAO)
                 .build();
     }
 
