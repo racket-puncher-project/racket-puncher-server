@@ -12,6 +12,7 @@ import com.example.demo.auth.dto.SignUpDto;
 import com.example.demo.auth.dto.StringResponseDto;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.siteuser.repository.SiteUserRepository;
+import com.example.demo.type.AuthType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -47,7 +48,9 @@ public class AuthService implements UserDetailsService {
         if (exists) {
             throw new RacketPuncherException(EMAIL_ALREADY_EXISTED);
         }
-        signUpDto.setPassword(this.passwordEncoder.encode(signUpDto.getPassword()));
+        if(AuthType.GENERAL.equals(signUpDto.getAuthType())){
+            signUpDto.setPassword(this.passwordEncoder.encode(signUpDto.getPassword()));
+        }
         return this.siteUserRepository.save(SiteUser.fromDto(signUpDto));
     }
 
@@ -63,7 +66,6 @@ public class AuthService implements UserDetailsService {
     }
 
     public SiteUser authenticate(SignInDto signInDto) {
-
         var user = siteUserRepository.findByEmail(signInDto.getEmail())
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
 
@@ -120,5 +122,9 @@ public class AuthService implements UserDetailsService {
             throw new RacketPuncherException(NICKNAME_ALREADY_EXISTED);
         }
         return new StringResponseDto(VALID_NICKNAME);
+    }
+
+    public boolean isEmailExist(String email) {
+        return this.siteUserRepository.existsByEmail(email);
     }
 }

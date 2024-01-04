@@ -52,7 +52,8 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/reissue",
                                 "/api/auth/upload-profile-image", "/api/matches/list", "/api/matches/**",
                                 "/api/users/**", "/api/aws/**",
-                                "/api/auth/check-nickname", "/api/auth/check-email", "/api/auth/redis")
+                                "/api/auth/check-nickname", "/api/auth/check-email", "/api/auth/redis",
+                                "/api/auth/kakao")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
