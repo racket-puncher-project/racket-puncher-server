@@ -3,10 +3,10 @@ package com.example.demo.siteuser.controller;
 import com.example.demo.aws.S3Uploader;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
-import com.example.demo.entity.SiteUser;
 import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
+import com.example.demo.siteuser.dto.NotificationDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.service.SiteUserService;
 import java.security.Principal;
@@ -32,18 +32,18 @@ public class SiteUserController {
 
     @GetMapping("/profile/{userId}")
     public ResponseDto<SiteUserInfoDto> getSiteUserInfo(@PathVariable(value = "userId") Long userId) {
-        SiteUserInfoDto siteUserInfoDto = siteUserService.getSiteUserInfo(userId);
+        var result = siteUserService.getSiteUserInfo(userId);
 
-        return ResponseUtil.SUCCESS(siteUserInfoDto);
+        return ResponseUtil.SUCCESS(result);
 
     }
 
     @GetMapping("/my-page")
     public ResponseDto<MyInfoDto> getMyInfo(Principal principal) {
         var email = principal.getName();
-        MyInfoDto myInfoDto = siteUserService.getMyInfo(email);
+        var result = siteUserService.getMyInfo(email);
 
-        return  ResponseUtil.SUCCESS(myInfoDto);
+        return  ResponseUtil.SUCCESS(result);
     }
 
     @GetMapping("/my-page/hosted/{userId}")
@@ -74,6 +74,14 @@ public class SiteUserController {
     public void updateSiteUserInfo(@RequestBody UpdateSiteUserInfoDto updateSiteUserInfoDto, Principal principal) {
         var email = principal.getName();
         siteUserService.updateSiteUserInfo(email, updateSiteUserInfoDto);
+    }
+
+    @GetMapping("/notifications")
+    public ResponseDto<List<NotificationDto>> getNotifications(Principal principal) {
+        var email = principal.getName();
+        var result = siteUserService.getNotifications(email);
+
+        return  ResponseUtil.SUCCESS(result);
     }
 
 }

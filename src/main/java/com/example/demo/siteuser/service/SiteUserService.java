@@ -4,7 +4,7 @@ import com.example.demo.entity.SiteUser;
 import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
-import com.example.demo.siteuser.dto.SiteUserNotificationDto;
+import com.example.demo.siteuser.dto.NotificationDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import java.util.List;
 
@@ -16,5 +16,5 @@ public interface SiteUserService {
     List<MatchingMyMatchingDto> getApplyBySiteUser(Long userId);
     SiteUser updateSiteUserInfo(String email, UpdateSiteUserInfoDto updateSiteUserInfoDto);
 
-    List<SiteUserNotificationDto> getNotificationBySiteUser(Long userId);
+    List<NotificationDto> getNotifications(String email);
 }
