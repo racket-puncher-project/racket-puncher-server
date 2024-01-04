@@ -11,42 +11,35 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SiteUserMyInfoDto {
-    private Long id;
-    private String password;
-    private String userName;
+public class MyInfoDto {
+    private long id;
+    private String siteUserName;
     private String nickname;
     private String email;
     private String phoneNumber;
-    private Integer mannerScore;
+    private double mannerScore;
     private GenderType gender;
     private Ntrp ntrp;
     private String address;
     private String zipCode;
     private AgeGroup ageGroup;
     private String profileImg;
-    private String createDate;
-    private Boolean isPhoneVerified;
 
-    public static SiteUserMyInfoDto fromEntity(SiteUser siteUser) {
-        int roundedMannerScore = (int) Math.round(siteUser.getMannerScore());
+    public static MyInfoDto fromEntity(SiteUser siteUser) {
 
-        return SiteUserMyInfoDto.builder()
+        return MyInfoDto.builder()
                 .id(siteUser.getId())
-                .userName(siteUser.getUsername())
-                .password(siteUser.getPassword())
+                .siteUserName(siteUser.getSiteUserName())
                 .nickname(siteUser.getNickname())
                 .email(siteUser.getEmail())
                 .phoneNumber(siteUser.getPhoneNumber())
-                .mannerScore(roundedMannerScore)
+                .mannerScore(siteUser.getMannerScore())
                 .gender(siteUser.getGender())
                 .ntrp(siteUser.getNtrp())
                 .address(siteUser.getAddress())
                 .zipCode(siteUser.getZipCode())
                 .ageGroup(siteUser.getAgeGroup())
                 .profileImg(siteUser.getProfileImg())
-                .createDate(siteUser.getCreateDate().toString())
-                .isPhoneVerified(siteUser.getIsPhoneVerified())
                 .build();
     }
 }

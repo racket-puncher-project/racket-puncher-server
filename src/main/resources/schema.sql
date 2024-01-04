@@ -16,7 +16,6 @@ CREATE TABLE `SITE_USER`
     `EMAIL`             varchar(255)  NOT NULL,
     `PHONE_NUMBER`      varchar(50)   NOT NULL,
     `MANNER_SCORE`      DOUBLE NULL DEFAULT 0,
-    `PENALTY_SCORE`     INT NULL DEFAULT 0,
     `GENDER`            varchar(50)   NOT NULL COMMENT 'MALE, FEMALE',
     `NTRP`              VARCHAR(50)   NOT NULL,
     `ADDRESS`           varchar(255)  NOT NULL,

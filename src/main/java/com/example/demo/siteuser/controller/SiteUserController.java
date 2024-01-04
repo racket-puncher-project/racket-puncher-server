@@ -5,9 +5,10 @@ import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
 import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
-import com.example.demo.siteuser.dto.SiteUserMyInfoDto;
+import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.service.SiteUserService;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -33,23 +34,22 @@ public class SiteUserController {
     public ResponseDto<SiteUserInfoDto> getSiteUserInfo(@PathVariable(value = "userId") Long userId) {
         SiteUserInfoDto siteUserInfoDto = siteUserService.getSiteUserInfo(userId);
 
-            return ResponseUtil.SUCCESS(siteUserInfoDto);
+        return ResponseUtil.SUCCESS(siteUserInfoDto);
 
     }
 
-    @GetMapping("/my-page/{userId}")
-    public ResponseEntity<ResponseDto<SiteUserMyInfoDto>> getSiteUserMyInfoById(@PathVariable(value = "userId") Long siteUser) {
-        SiteUserMyInfoDto siteUserMyInfoDto = siteUserService.getSiteUserMyInfoById(siteUser);
+    @GetMapping("/my-page")
+    public ResponseDto<MyInfoDto> getMyInfo(Principal principal) {
+        var email = principal.getName();
+        MyInfoDto myInfoDto = siteUserService.getMyInfo(email);
 
-        if (siteUserMyInfoDto != null) {
-            return new ResponseEntity<>(ResponseUtil.SUCCESS(siteUserMyInfoDto), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(ResponseUtil.SUCCESS(null), HttpStatus.NOT_FOUND);
-        }
+        return  ResponseUtil.SUCCESS(myInfoDto);
+
     }
 
     @GetMapping("/my-page/hosted/{userId}")
-    public ResponseEntity<ResponseDto<List<MatchingMyMatchingDto>>> getMatchingBySiteUser(@PathVariable(value = "userId") Long userId) {
+    public ResponseEntity<ResponseDto<List<MatchingMyMatchingDto>>> getMatchingBySiteUser(
+            @PathVariable(value = "userId") Long userId) {
         List<MatchingMyMatchingDto> matchingMyHostedDtos = siteUserService.getMatchingBySiteUser(userId);
 
         if (!matchingMyHostedDtos.isEmpty()) {
@@ -60,7 +60,8 @@ public class SiteUserController {
     }
 
     @GetMapping("/my-page/apply/{userId}")
-    public ResponseEntity<ResponseDto<List<MatchingMyMatchingDto>>> findApplyBySiteUser_Id(@PathVariable(value = "userId") Long userId) {
+    public ResponseEntity<ResponseDto<List<MatchingMyMatchingDto>>> findApplyBySiteUser_Id(
+            @PathVariable(value = "userId") Long userId) {
         List<MatchingMyMatchingDto> matchingMyAppliedDtos = siteUserService.getApplyBySiteUser(userId);
 
         if (!matchingMyAppliedDtos.isEmpty()) {
@@ -71,7 +72,8 @@ public class SiteUserController {
     }
 
     @PostMapping("{userId}/upload-profile-image")
-    public ResponseEntity<?> uploadOrUpdateProfileImage(@PathVariable Long userId, @RequestParam("imageFile") MultipartFile imageFile) {
+    public ResponseEntity<?> uploadOrUpdateProfileImage(@PathVariable Long userId,
+                                                        @RequestParam("imageFile") MultipartFile imageFile) {
         try {
 //            // 기존 이미지 URL 가져오기 및 삭제
 //            String oldImageUrl = siteUserInfoService.getProfileUrl(userId);
