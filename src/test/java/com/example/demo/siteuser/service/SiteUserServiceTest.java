@@ -6,16 +6,21 @@ import static org.mockito.BDDMockito.given;
 
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
+import com.example.demo.entity.Matching;
+import com.example.demo.entity.Notification;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.repository.NotificationRepository;
+import com.example.demo.siteuser.dto.NotificationDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -131,6 +136,35 @@ public class SiteUserServiceTest {
         assertEquals(exception.getMessage(), "비밀번호가 일치하지 않습니다.");
     }
 
+    @Test
+    void getNotificationsSuccess() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(getSiteUser()));
+        given(notificationRepository.findAllBySiteUser_Email("email@naver.com"))
+                .willReturn(Optional.ofNullable(getNotifications()));
+
+        // when
+        var result = siteUserService.getNotifications("email@naver.com");
+
+        // then
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void getNotificationsFailedByEmailNotFound() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(null));
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> siteUserService.getNotifications("email@naver.com"));
+
+        // then
+        assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
+    }
+
     private SiteUserInfoDto getSiteUserInfoDto() {
         return SiteUserInfoDto.builder()
                 .profileImg("img.png")
@@ -193,5 +227,34 @@ public class SiteUserServiceTest {
                 .gender(GenderType.FEMALE)
                 .ageGroup(AgeGroup.TWENTIES)
                 .build();
+    }
+
+    private List<Notification> getNotifications() {
+        List<Notification> notifications = new ArrayList<>();
+
+        Notification notification1 = Notification
+                .builder()
+                .matching(Matching.builder()
+                        .id(1L)
+                        .title("title1")
+                        .build())
+                .content("content1")
+                .createTime(LocalDateTime.now())
+                .build();
+
+        Notification notification2 = Notification
+                .builder()
+                .matching(Matching.builder()
+                        .id(2L)
+                        .title("title2")
+                        .build())
+                .content("content2")
+                .createTime(LocalDateTime.now())
+                .build();
+
+        notifications.add(notification1);
+        notifications.add(notification2);
+
+        return notifications;
     }
 }
