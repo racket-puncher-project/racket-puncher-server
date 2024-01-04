@@ -11,14 +11,14 @@ public class KakaoFirstSignInResponseDto {
     private Boolean registered = false;
     private String email;
     private String profileImageUrl;
-    private String nickName;
+    private String nickname;
 
     public static KakaoFirstSignInResponseDto fromKakaoUserInfo(KakaoUserInfoDto kakaoUserInfoDto){
         return KakaoFirstSignInResponseDto.builder()
                 .registered(false)
-                .email(kakaoUserInfoDto.getKakaoAcount().getEmail())
-                .profileImageUrl(kakaoUserInfoDto.getKakaoAcount().getProfile().getProfileImageUrl())
-                .nickName(kakaoUserInfoDto.getKakaoAcount().getProfile().getNickname())
+                .email(kakaoUserInfoDto.getKakaoAccount().getEmail())
+                .profileImageUrl(kakaoUserInfoDto.getKakaoAccount().getProfile().getProfileImageUrl())
+                .nickname(kakaoUserInfoDto.getKakaoAccount().getProfile().getNickname())
                 .build();
     }
 }

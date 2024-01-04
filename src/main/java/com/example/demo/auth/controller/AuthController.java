@@ -43,7 +43,7 @@ public class AuthController {
     @GetMapping("/kakao")
     public ResponseDto<?> kakaoCallback(@RequestParam String code) {
         KakaoUserInfoDto kakaoUserInfoDto = kakaoOAuthService.getUserInfo(code);
-        String email = kakaoUserInfoDto.getKakaoAcount().getEmail();
+        String email = kakaoUserInfoDto.getKakaoAccount().getEmail();
         boolean isAlreadyRegistered = authService.isEmailExist(email);
         if (isAlreadyRegistered) {
             var result = kakaoOAuthService.kakaoSignIn(email);
