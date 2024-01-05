@@ -10,12 +10,15 @@ import com.example.demo.aws.S3Uploader;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
+import com.example.demo.siteuser.dto.NotificationDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.service.SiteUserService;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -78,6 +81,19 @@ public class SiteUserControllerTest {
         // when
         // then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/users/my-page/modify"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void getNotifications() throws Exception {
+        // given
+        given(siteUserService.getNotifications("email@naver.com"))
+                .willReturn(getNotificationDtoList());
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/my-page/notifications"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
@@ -146,5 +162,30 @@ public class SiteUserControllerTest {
                 .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .build();
+    }
+
+    private List<NotificationDto> getNotificationDtoList() {
+        List<NotificationDto> notificationList = new ArrayList<>();
+
+        NotificationDto notification1 = NotificationDto
+                .builder()
+                .matchingId(1L)
+                .title("title1")
+                .content("content1")
+                .createTime("2024-01-04 10:00:00")
+                .build();
+
+        NotificationDto notification2 = NotificationDto
+                .builder()
+                .matchingId(2L)
+                .title("title2")
+                .content("content2")
+                .createTime("2024-01-04 10:00:00")
+                .build();
+
+        notificationList.add(notification1);
+        notificationList.add(notification2);
+
+        return notificationList;
     }
 }
