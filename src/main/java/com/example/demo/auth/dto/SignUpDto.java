@@ -1,6 +1,7 @@
 package com.example.demo.auth.dto;
 
 import com.example.demo.type.AgeGroup;
+import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import jakarta.validation.constraints.NotBlank;
@@ -19,7 +20,6 @@ public class SignUpDto {
     @NotBlank(message = "이메일을 입력해 주세요.")
     private String email;
 
-    @NotBlank(message = "비밀번호를 입력해 주세요.")
     private String password;
 
     @NotBlank(message = "닉네임을 입력해 주세요.")
@@ -47,4 +47,7 @@ public class SignUpDto {
 
     @NotBlank(message = "연령대를 입력해 주세요.")
     private AgeGroup ageGroup;
+
+    @NotBlank(message = "회원가입 유형을 입력해 주세요.")
+    private AuthType authType;
 }

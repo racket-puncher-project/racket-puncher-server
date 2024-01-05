@@ -1,18 +1,14 @@
 package com.example.demo.auth.controller;
 
+import com.example.demo.auth.dto.*;
+import com.example.demo.auth.service.KakaoOAuthService;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
-import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.EmailRequestDto;
-import com.example.demo.auth.dto.LoginResponseDto;
-import com.example.demo.auth.dto.NicknameRequestDto;
-import com.example.demo.auth.dto.QuitDto;
-import com.example.demo.auth.dto.SignInDto;
-import com.example.demo.auth.dto.SignUpDto;
-import com.example.demo.auth.dto.StringResponseDto;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.auth.service.AuthService;
+
 import java.util.concurrent.TimeUnit;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,13 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -37,6 +27,7 @@ public class AuthController {
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthService authService;
     private final TokenProvider tokenProvider;
+    private final KakaoOAuthService kakaoOAuthService;
 
     @PostMapping("/sign-up")
     public void signUp(@RequestBody SignUpDto signUpDto) {
@@ -44,8 +35,14 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseDto<LoginResponseDto> signIn(@RequestBody SignInDto signInDto) {
+    public ResponseDto<GeneralSignInResponseDto> signIn(@RequestBody SignInDto signInDto) {
         var result = authService.signIn(signInDto);
+        return ResponseUtil.SUCCESS(result);
+    }
+
+    @GetMapping("/kakao")
+    public ResponseDto<?> kakaoCallback(@RequestParam String code) {
+        var result = kakaoOAuthService.processOauth(code);
         return ResponseUtil.SUCCESS(result);
     }
 

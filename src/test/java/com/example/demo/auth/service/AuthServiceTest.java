@@ -15,6 +15,7 @@ import com.example.demo.auth.dto.SignUpDto;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
+import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import org.junit.jupiter.api.Test;
@@ -73,6 +74,7 @@ class AuthServiceTest {
                 .zipCode("12345")
                 .profileImg("test.url")
                 .ageGroup(AgeGroup.TWENTIES)
+                .authType(AuthType.GENERAL)
                 .build();
     }
 
