@@ -11,6 +11,7 @@ import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.repository.NotificationRepository;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
+import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.example.demo.siteuser.repository.SiteUserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 public class SiteUserServiceTest {
@@ -39,6 +41,9 @@ public class SiteUserServiceTest {
 
     @Mock
     private FindEntity findEntity;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private SiteUserServiceImpl siteUserService;
@@ -83,6 +88,49 @@ public class SiteUserServiceTest {
         assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
     }
 
+    @Test
+    void updateSiteUserInfoSuccess() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(getSiteUser()));
+
+        // when
+        var result = siteUserService.updateSiteUserInfo("email@naver.com", getUpdateSiteUserInfoDto());
+
+        // then
+        assertEquals("update.png", result.getProfileImg());
+    }
+
+    @Test
+    void updateSiteUserInfoFailedByEmailNotFound() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(null));
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> siteUserService.updateSiteUserInfo("email@naver.com"
+                        , getUpdateSiteUserInfoDto()));
+
+        // then
+        assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
+    }
+
+    @Test
+    void updateSiteUserInfoFailedByWrongPassword() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(getSiteUser()));
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> siteUserService.updateSiteUserInfo("email@naver.com"
+                        , getWorngUpdateSiteUserInfoDto()));
+
+        // then
+        assertEquals(exception.getMessage(), "비밀번호가 일치하지 않습니다.");
+    }
+
     private SiteUserInfoDto getSiteUserInfoDto() {
         return SiteUserInfoDto.builder()
                 .profileImg("img.png")
@@ -117,4 +165,33 @@ public class SiteUserServiceTest {
                 .build();
     }
 
+    private UpdateSiteUserInfoDto getUpdateSiteUserInfoDto() {
+        return UpdateSiteUserInfoDto.builder()
+                .profileImg("update.png")
+                .nickname("nickName")
+                .password("2222")
+                .checkPassword("2222")
+                .phoneNumber("010-1234-5678")
+                .address("address")
+                .zipCode("zipCode")
+                .ntrp(Ntrp.BEGINNER)
+                .gender(GenderType.FEMALE)
+                .ageGroup(AgeGroup.TWENTIES)
+                .build();
+    }
+
+    private UpdateSiteUserInfoDto getWorngUpdateSiteUserInfoDto() {
+        return UpdateSiteUserInfoDto.builder()
+                .profileImg("update.png")
+                .nickname("nickName")
+                .password("2222")
+                .checkPassword("3333")
+                .phoneNumber("010-1234-5678")
+                .address("address")
+                .zipCode("zipCode")
+                .ntrp(Ntrp.BEGINNER)
+                .gender(GenderType.FEMALE)
+                .ageGroup(AgeGroup.TWENTIES)
+                .build();
+    }
 }

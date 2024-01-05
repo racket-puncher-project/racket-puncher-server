@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.example.demo.auth.dto.SignUpDto;
+import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
@@ -142,5 +143,17 @@ public class SiteUser implements UserDetails {
                 .profileImg(signUpDto.getProfileImg())
                 .siteUserName(signUpDto.getUserName())
                 .build();
+    }
+
+    public void updateSiteUser(UpdateSiteUserInfoDto updateSiteUserInfoDto) {
+        this.nickname = updateSiteUserInfoDto.getNickname();
+        this.password = updateSiteUserInfoDto.getPassword();
+        this.phoneNumber = updateSiteUserInfoDto.getPhoneNumber();
+        this.address = updateSiteUserInfoDto.getAddress();
+        this.zipCode = updateSiteUserInfoDto.getZipCode();
+        this.ntrp = updateSiteUserInfoDto.getNtrp();
+        this.gender = updateSiteUserInfoDto.getGender();
+        this.ageGroup = updateSiteUserInfoDto.getAgeGroup();
+        this.profileImg = updateSiteUserInfoDto.getProfileImg();
     }
 }

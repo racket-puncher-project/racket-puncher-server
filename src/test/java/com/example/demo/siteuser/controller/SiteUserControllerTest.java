@@ -7,12 +7,15 @@ import com.example.demo.auth.security.JwtAuthenticationFilter;
 import com.example.demo.auth.security.SecurityConfiguration;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.aws.S3Uploader;
+import com.example.demo.entity.SiteUser;
 import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
+import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.service.SiteUserService;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -66,6 +69,19 @@ public class SiteUserControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void updateSiteUserInfo() throws Exception {
+        // given
+        given(siteUserService.updateSiteUserInfo("email@naver.com", getUpdateSiteUserInfoDto()))
+                .willReturn(getUpdateSiteUser());
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/my-page/modify"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SiteUserInfoDto getSiteUserInfoDto() {
         return SiteUserInfoDto.builder()
                 .profileImg("img.png")
@@ -94,6 +110,41 @@ public class SiteUserControllerTest {
                 .gender(GenderType.FEMALE)
                 .mannerScore(3.0)
                 .ageGroup(AgeGroup.TWENTIES)
+                .build();
+    }
+
+    private UpdateSiteUserInfoDto getUpdateSiteUserInfoDto() {
+        return UpdateSiteUserInfoDto.builder()
+                .profileImg("update.png")
+                .nickname("nickName")
+                .password("2222")
+                .checkPassword("2222")
+                .phoneNumber("010-1234-5678")
+                .address("address")
+                .zipCode("zipCode")
+                .ntrp(Ntrp.BEGINNER)
+                .gender(GenderType.FEMALE)
+                .ageGroup(AgeGroup.TWENTIES)
+                .build();
+    }
+
+    private SiteUser getUpdateSiteUser() {
+        return SiteUser.builder()
+                .id(1L)
+                .email("email@naver.com")
+                .password("2222")
+                .nickname("nickName")
+                .siteUserName("userName")
+                .phoneNumber("010-1234-5678")
+                .mannerScore(3.0)
+                .gender(GenderType.FEMALE)
+                .ntrp(Ntrp.BEGINNER)
+                .address("address")
+                .zipCode("zipCode")
+                .ageGroup(AgeGroup.TWENTIES)
+                .profileImg("update.png")
+                .isPhoneVerified(true)
+                .createDate(LocalDateTime.now())
                 .build();
     }
 }
