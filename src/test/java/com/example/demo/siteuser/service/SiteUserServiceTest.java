@@ -107,6 +107,19 @@ public class SiteUserServiceTest {
     }
 
     @Test
+    void updateKakaoUserInfoSuccess() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(getSiteUser()));
+
+        // when
+        var result = siteUserService.updateSiteUserInfo("email@naver.com", getUpdateKakaoUserInfoDto());
+
+        // then
+        assertEquals("update.png", result.getProfileImg());
+    }
+
+    @Test
     void updateSiteUserInfoFailedByEmailNotFound() {
         // given
         given(siteUserRepository.findByEmail("email@naver.com"))
@@ -205,6 +218,19 @@ public class SiteUserServiceTest {
                 .nickname("nickName")
                 .password("2222")
                 .checkPassword("2222")
+                .phoneNumber("010-1234-5678")
+                .address("address")
+                .zipCode("zipCode")
+                .ntrp(Ntrp.BEGINNER)
+                .gender(GenderType.FEMALE)
+                .ageGroup(AgeGroup.TWENTIES)
+                .build();
+    }
+
+    private UpdateSiteUserInfoDto getUpdateKakaoUserInfoDto() {
+        return UpdateSiteUserInfoDto.builder()
+                .profileImg("update.png")
+                .nickname("nickName")
                 .phoneNumber("010-1234-5678")
                 .address("address")
                 .zipCode("zipCode")
