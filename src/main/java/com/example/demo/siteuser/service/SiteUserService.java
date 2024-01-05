@@ -7,8 +7,8 @@ import com.example.demo.siteuser.dto.SiteUserNotificationDto;
 import java.util.List;
 
 
-public interface SiteUserInfoService {
-    SiteUserInfoDto getSiteUserInfoById(Long userId);
+public interface SiteUserService {
+    SiteUserInfoDto getSiteUserInfo(Long userId);
     SiteUserMyInfoDto getSiteUserMyInfoById(Long userId);
     List<MatchingMyMatchingDto> getMatchingBySiteUser(Long userId);
     List<MatchingMyMatchingDto> getApplyBySiteUser(Long userId);

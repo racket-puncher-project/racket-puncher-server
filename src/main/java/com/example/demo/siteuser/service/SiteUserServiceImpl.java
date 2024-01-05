@@ -1,6 +1,7 @@
 package com.example.demo.siteuser.service;
 
 import com.example.demo.apply.repository.ApplyRepository;
+import com.example.demo.common.FindEntity;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.Notification;
@@ -21,16 +22,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class SiteUserInfoServiceImpl implements SiteUserInfoService {
+public class SiteUserServiceImpl implements SiteUserService {
     private final SiteUserRepository siteUserRepository;
     private final MatchingRepository matchingRepository;
     private final ApplyRepository applyRepository;
     private final NotificationRepository notificationRepository;
+    private final FindEntity findEntity;
 
     @Override
-    public SiteUserInfoDto getSiteUserInfoById(Long userId) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    public SiteUserInfoDto getSiteUserInfo(Long userId) {
+        SiteUser siteUser = findEntity.findUser(userId);
         return SiteUserInfoDto.fromEntity(siteUser);
     }
 

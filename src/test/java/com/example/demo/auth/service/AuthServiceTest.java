@@ -67,7 +67,7 @@ class AuthServiceTest {
                 .nickname("닉네임")
                 .phoneNumber("010-1234-5678")
                 .gender(GenderType.FEMALE)
-                .siteUserName("홍길동")
+                .userName("홍길동")
                 .ntrp(Ntrp.BEGINNER)
                 .address("삼성동")
                 .zipCode("12345")
