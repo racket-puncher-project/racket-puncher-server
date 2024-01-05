@@ -1,9 +1,9 @@
 package com.example.demo.auth.service;
 
-import com.example.demo.auth.dto.KakaoSignInResponseDto;
-import com.example.demo.auth.dto.KakaoTokenDto;
-import com.example.demo.auth.dto.KakaoUserInfoDto;
+import com.example.demo.auth.dto.*;
 import com.example.demo.auth.security.TokenProvider;
+import com.example.demo.siteuser.repository.SiteUserRepository;
+import com.example.demo.type.AuthType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +30,9 @@ class KakaoOAuthServiceTest {
     private TokenProvider tokenProvider;
 
     @Mock
+    private SiteUserRepository siteUserRepository;
+
+    @Mock
     UriComponentsBuilder uriComponentsBuilder;
 
     @InjectMocks
@@ -44,9 +47,9 @@ class KakaoOAuthServiceTest {
     }
 
     @Test
-    void getUserInfo() {
+    void kakaoFirstSignIn() {
         // given
-        String code = "kakaoOauthCode";
+        String kakaoOauthTestCode = "kakaoOauthTestCode";
         KakaoTokenDto kakaoTokenDto = getKakaoTokenDto();
         KakaoUserInfoDto kakaoUserInfoDto = getKakaoUserInfoDto();
 
@@ -54,49 +57,57 @@ class KakaoOAuthServiceTest {
                 .willReturn(new ResponseEntity<>(kakaoTokenDto, HttpStatus.OK));
         given(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(KakaoUserInfoDto.class)))
                 .willReturn(new ResponseEntity<>(kakaoUserInfoDto, HttpStatus.OK));
+        given(siteUserRepository.existsByEmail(any()))
+                .willReturn(false);
 
         // when
-        KakaoUserInfoDto userInfo = kakaoOAuthService.getUserInfo(code);
+        KakaoFirstSignInResponseDto actualKakaoUser = (KakaoFirstSignInResponseDto) kakaoOAuthService.processOauth(kakaoOauthTestCode);
 
         // then
-        KakaoUserInfoDto.KakaoAccount expectedKakaoAccount = kakaoUserInfoDto.getKakaoAccount();
-        KakaoUserInfoDto.KakaoAccount actualKakaoAccount = userInfo.getKakaoAccount();
-        assertEquals(expectedKakaoAccount.getEmail(), actualKakaoAccount.getEmail());
-        assertEquals(expectedKakaoAccount.getProfile().getNickname(), actualKakaoAccount.getProfile().getNickname());
-        assertEquals(expectedKakaoAccount.getProfile().getProfileImageUrl(), actualKakaoAccount.getProfile().getProfileImageUrl());
+        assertFalse(actualKakaoUser.getRegistered());
+        assertEquals(actualKakaoUser.getEmail(), kakaoUserInfoDto.getKakaoAccount().getEmail());
+        assertEquals(actualKakaoUser.getNickname(), kakaoUserInfoDto.getKakaoAccount().getProfile().getNickname());
+        assertEquals(actualKakaoUser.getProfileImageUrl(), kakaoUserInfoDto.getKakaoAccount().getProfile().getProfileImageUrl());
     }
 
     @Test
-    void kakaoSignInSuccess() {
+    void kakaoSignIn() {
         // given
-        String email = "email@naver.com";
-        String accessToken = "access_token";
-        String refreshToken = "refresh_token";
+        String kakaoOauthTestCode = "kakaoOauthTestCode";
+        String testEmail = "testEmail";
+        String testAccessToken = "testAccessToken";
+        String testRefreshToken = "testRefreshToken";
+        KakaoTokenDto kakaoTokenDto = getKakaoTokenDto();
+        KakaoUserInfoDto kakaoUserInfoDto = getKakaoUserInfoDto();
 
-        given(tokenProvider.generateAccessToken(email))
-                .willReturn(accessToken);
-        given(tokenProvider.generateAndSaveRefreshToken(email))
-                .willReturn(refreshToken);
+        given(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(), eq(KakaoTokenDto.class)))
+                .willReturn(new ResponseEntity<>(kakaoTokenDto, HttpStatus.OK));
+        given(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(KakaoUserInfoDto.class)))
+                .willReturn(new ResponseEntity<>(kakaoUserInfoDto, HttpStatus.OK));
+        given(siteUserRepository.existsByEmail(testEmail))
+                .willReturn(true);
+        given(tokenProvider.generateAccessToken(testEmail))
+                .willReturn(testAccessToken);
+        given(tokenProvider.generateAndSaveRefreshToken(testEmail))
+                .willReturn(testRefreshToken);
 
         // when
-        KakaoSignInResponseDto responseDto = kakaoOAuthService.kakaoSignIn(email);
+        KakaoSignInResponseDto actualKakaoUser = (KakaoSignInResponseDto) kakaoOAuthService.processOauth(kakaoOauthTestCode);
 
         // then
-        assertTrue(responseDto.getRegistered());
-        assertEquals(accessToken, responseDto.getAccessToken());
-        assertEquals(refreshToken, responseDto.getRefreshToken());
+        assertTrue(actualKakaoUser.getRegistered());
+        assertEquals(actualKakaoUser.getAccessToken(), testAccessToken);
+        assertEquals(actualKakaoUser.getRefreshToken(), testRefreshToken);
+        assertEquals(actualKakaoUser.getAuthType(), AuthType.KAKAO);
     }
 
     private KakaoTokenDto getKakaoTokenDto(){
-        return new KakaoTokenDto("access_token", "refresh_token");
+        return new KakaoTokenDto("accessToken", "refreshToken");
     }
 
     private KakaoUserInfoDto getKakaoUserInfoDto() {
-        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(null);
-        KakaoUserInfoDto.KakaoAccount kakaoAccount = kakaoUserInfoDto.new KakaoAccount(null, "test@example.com");
-        KakaoUserInfoDto.KakaoAccount.Profile profile = kakaoAccount.new Profile("nickname", "profileImageUrl");
-        kakaoAccount.setProfile(profile);
-        kakaoUserInfoDto.setKakaoAccount(kakaoAccount);
-        return kakaoUserInfoDto;
+        KakaoProfile kakaoProfile = new KakaoProfile("nickname", "profileImageUrl");
+        KakaoAccount kakaoAccount = new KakaoAccount(kakaoProfile, "testEmail");
+        return new KakaoUserInfoDto(kakaoAccount);
     }
 }

@@ -93,16 +93,15 @@ class AuthControllerTest {
     @Test
     void kakaoFirstSignIn() throws Exception {
         // given
-        KakaoUserInfoDto kakaoUserInfoDto = getKakaoUserInfoDto();
-        given(kakaoOAuthService.getUserInfo(anyString()))
-                .willReturn(kakaoUserInfoDto);
-        given(authService.isEmailExist(kakaoUserInfoDto.getKakaoAccount().getEmail()))
-                .willReturn(false);
+        KakaoFirstSignInResponseDto kakaoFirstSignInResponseDto = getKakaoFirstSignInResponseDto();
+        String kakaoOauthTestCode = "kakaoOauthTestCode";
+        given(kakaoOAuthService.processOauth(kakaoOauthTestCode))
+                .willReturn(kakaoFirstSignInResponseDto);
 
         // when
         // then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/kakao")
-                        .param("code", "kakaoOauthCode"))
+                        .param("code", kakaoOauthTestCode))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
@@ -110,19 +109,14 @@ class AuthControllerTest {
     @Test
     void kakaoSignIn() throws Exception {
         // given
-        KakaoUserInfoDto kakaoUserInfoDto = getKakaoUserInfoDto();
-        String email = kakaoUserInfoDto.getKakaoAccount().getEmail();
-        given(kakaoOAuthService.getUserInfo(anyString()))
-                .willReturn(kakaoUserInfoDto);
-        given(authService.isEmailExist(email))
-                .willReturn(true);
-        given(kakaoOAuthService.kakaoSignIn(email))
-                .willReturn(getKakaoSigninResponseDto());
-
+        KakaoSignInResponseDto kakaoSignInResponseDto = getKakaoSigninResponseDto();
+        String kakaoOauthTestCode = "kakaoOauthTestCode";
+        given(kakaoOAuthService.processOauth(kakaoOauthTestCode))
+                .willReturn(kakaoSignInResponseDto);
         // when
         // then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/kakao")
-                        .param("code", "kakaoOauthCode"))
+                        .param("code", kakaoOauthTestCode))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
@@ -208,6 +202,7 @@ class AuthControllerTest {
         return SignUpDto.builder()
                 .email("email@naver.com")
                 .nickname("닉네임")
+                .password("")
                 .phoneNumber("010-1234-5678")
                 .gender(GenderType.FEMALE)
                 .siteUserName("홍길동")
@@ -224,13 +219,13 @@ class AuthControllerTest {
         return new SignInDto("email@nave.com", "`1234");
     }
 
-    private KakaoUserInfoDto getKakaoUserInfoDto() {
-        KakaoUserInfoDto kakaoUserInfoDto = new KakaoUserInfoDto(null);
-        KakaoUserInfoDto.KakaoAccount kakaoAccount = kakaoUserInfoDto.new KakaoAccount(null, "test@example.com");
-        KakaoUserInfoDto.KakaoAccount.Profile profile = kakaoAccount.new Profile("nickname", "profileImageUrl");
-        kakaoAccount.setProfile(profile);
-        kakaoUserInfoDto.setKakaoAccount(kakaoAccount);
-        return kakaoUserInfoDto;
+    private KakaoFirstSignInResponseDto getKakaoFirstSignInResponseDto(){
+        return KakaoFirstSignInResponseDto.builder()
+                .registered(false)
+                .email("email@test.com")
+                .profileImageUrl("test.png")
+                .nickname("nickname")
+                .build();
     }
 
     private KakaoSignInResponseDto getKakaoSigninResponseDto(){
