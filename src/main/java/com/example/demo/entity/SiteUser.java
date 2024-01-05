@@ -28,6 +28,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.ObjectUtils;
 
 @Getter
 @Setter
@@ -141,13 +142,15 @@ public class SiteUser implements UserDetails {
                 .zipCode(signUpDto.getZipCode())
                 .ageGroup(signUpDto.getAgeGroup())
                 .profileImg(signUpDto.getProfileImg())
-                .siteUserName(signUpDto.getUserName())
+                .siteUserName(signUpDto.getSiteUserName())
                 .build();
     }
 
     public void updateSiteUser(UpdateSiteUserInfoDto updateSiteUserInfoDto) {
+        if(!ObjectUtils.isEmpty(updateSiteUserInfoDto.getPassword())) {
+            this.password = updateSiteUserInfoDto.getPassword();
+        }
         this.nickname = updateSiteUserInfoDto.getNickname();
-        this.password = updateSiteUserInfoDto.getPassword();
         this.phoneNumber = updateSiteUserInfoDto.getPhoneNumber();
         this.address = updateSiteUserInfoDto.getAddress();
         this.zipCode = updateSiteUserInfoDto.getZipCode();

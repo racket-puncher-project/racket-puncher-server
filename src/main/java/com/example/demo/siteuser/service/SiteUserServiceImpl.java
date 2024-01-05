@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +53,10 @@ public class SiteUserServiceImpl implements SiteUserService {
     public SiteUser updateSiteUserInfo(String email, UpdateSiteUserInfoDto updateSiteUserInfoDto) {
         SiteUser siteUser = siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+        if (ObjectUtils.isEmpty(updateSiteUserInfoDto.getPassword())) {
+            siteUser.updateSiteUser(updateSiteUserInfoDto);
+            return siteUser;
+        }
         validatePassword(updateSiteUserInfoDto);
         updateSiteUserInfoDto.setPassword(passwordEncoder.encode(updateSiteUserInfoDto.getPassword()));
         siteUser.updateSiteUser(updateSiteUserInfoDto);
