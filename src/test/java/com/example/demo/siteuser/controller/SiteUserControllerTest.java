@@ -7,6 +7,7 @@ import com.example.demo.auth.security.JwtAuthenticationFilter;
 import com.example.demo.auth.security.SecurityConfiguration;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.aws.S3Uploader;
+import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.service.SiteUserService;
 import com.example.demo.type.AgeGroup;
@@ -52,6 +53,19 @@ public class SiteUserControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void getMyInfo() throws Exception {
+        // given
+        given(siteUserService.getMyInfo("email@naver.com"))
+                .willReturn(getMyInfoDto());
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/my-page"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SiteUserInfoDto getSiteUserInfoDto() {
         return SiteUserInfoDto.builder()
                 .profileImg("img.png")
@@ -61,9 +75,25 @@ public class SiteUserControllerTest {
                 .zipCode("zipCode")
                 .ntrp(Ntrp.BEGINNER)
                 .gender(GenderType.FEMALE)
-                .mannerScore(3)
+                .mannerScore(3.0)
                 .ageGroup(AgeGroup.TWENTIES)
                 .build();
     }
 
+    private MyInfoDto getMyInfoDto() {
+        return MyInfoDto.builder()
+                .id(1L)
+                .profileImg("img.png")
+                .siteUserName("userName")
+                .nickname("nickName")
+                .email("email@naver.com")
+                .phoneNumber("010-1234-5678")
+                .address("address")
+                .zipCode("zipCode")
+                .ntrp(Ntrp.BEGINNER)
+                .gender(GenderType.FEMALE)
+                .mannerScore(3.0)
+                .ageGroup(AgeGroup.TWENTIES)
+                .build();
+    }
 }

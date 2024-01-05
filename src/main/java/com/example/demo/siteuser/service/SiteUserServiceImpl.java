@@ -1,16 +1,20 @@
 package com.example.demo.siteuser.service;
 
+import static com.example.demo.exception.type.ErrorCode.*;
+
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.Notification;
 import com.example.demo.entity.SiteUser;
+import com.example.demo.exception.RacketPuncherException;
+import com.example.demo.exception.type.ErrorCode;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.repository.NotificationRepository;
 import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
-import com.example.demo.siteuser.dto.SiteUserMyInfoDto;
+import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.SiteUserNotificationDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,10 +40,10 @@ public class SiteUserServiceImpl implements SiteUserService {
     }
 
     @Override
-    public SiteUserMyInfoDto getSiteUserMyInfoById(Long userId) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-        return SiteUserMyInfoDto.fromEntity(siteUser);
+    public MyInfoDto getMyInfo(String email) {
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+        return MyInfoDto.fromEntity(siteUser);
     }
 
     @Override
