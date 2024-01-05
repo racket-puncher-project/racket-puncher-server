@@ -5,7 +5,7 @@ import static com.example.demo.exception.type.ErrorCode.*;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.LoginResponseDto;
+import com.example.demo.auth.dto.GeneralSignInResponseDto;
 import com.example.demo.auth.dto.QuitDto;
 import com.example.demo.auth.dto.SignInDto;
 import com.example.demo.auth.dto.SignUpDto;
@@ -90,11 +90,12 @@ public class AuthService implements UserDetailsService {
         return new AccessTokenDto(newAccessToken);
     }
 
-    public LoginResponseDto signIn(SignInDto signInDto) {
+    public GeneralSignInResponseDto signIn(SignInDto signInDto) {
         authenticate(signInDto);
         var accessToken = tokenProvider.generateAccessToken(signInDto.getEmail());
         var refreshToken = tokenProvider.generateAndSaveRefreshToken(signInDto.getEmail());
-        return LoginResponseDto.builder()
+        return GeneralSignInResponseDto.builder()
+                .authType(AuthType.GENERAL)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -122,9 +123,5 @@ public class AuthService implements UserDetailsService {
             throw new RacketPuncherException(NICKNAME_ALREADY_EXISTED);
         }
         return new StringResponseDto(VALID_NICKNAME);
-    }
-
-    public boolean isEmailExist(String email) {
-        return this.siteUserRepository.existsByEmail(email);
     }
 }
