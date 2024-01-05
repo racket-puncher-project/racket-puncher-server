@@ -35,21 +35,14 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
-    public ResponseDto<LoginResponseDto> signIn(@RequestBody SignInDto signInDto) {
+    public ResponseDto<GeneralSignInResponseDto> signIn(@RequestBody SignInDto signInDto) {
         var result = authService.signIn(signInDto);
         return ResponseUtil.SUCCESS(result);
     }
 
     @GetMapping("/kakao")
     public ResponseDto<?> kakaoCallback(@RequestParam String code) {
-        KakaoUserInfoDto kakaoUserInfoDto = kakaoOAuthService.getUserInfo(code);
-        String email = kakaoUserInfoDto.getKakaoAccount().getEmail();
-        boolean isAlreadyRegistered = authService.isEmailExist(email);
-        if (isAlreadyRegistered) {
-            var result = kakaoOAuthService.kakaoSignIn(email);
-            return ResponseUtil.SUCCESS(result);
-        }
-        var result = KakaoFirstSignInResponseDto.fromKakaoUserInfo(kakaoUserInfoDto);
+        var result = kakaoOAuthService.processOauth(code);
         return ResponseUtil.SUCCESS(result);
     }
 

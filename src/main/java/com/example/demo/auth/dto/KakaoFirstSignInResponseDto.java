@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class KakaoFirstSignInResponseDto {
+public class KakaoFirstSignInResponseDto implements KakaoSignIn{
     private Boolean registered = false;
     private String email;
     private String profileImageUrl;

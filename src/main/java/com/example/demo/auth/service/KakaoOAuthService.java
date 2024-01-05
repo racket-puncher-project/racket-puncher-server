@@ -3,7 +3,10 @@ package com.example.demo.auth.service;
 import com.example.demo.auth.dto.*;
 
 import com.example.demo.auth.security.TokenProvider;
+import com.example.demo.common.ResponseUtil;
 import com.example.demo.exception.RacketPuncherException;
+import com.example.demo.siteuser.repository.SiteUserRepository;
+import com.example.demo.type.AuthType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +24,7 @@ import static com.example.demo.exception.type.ErrorCode.KAKAO_USER_INFO_FAIL;
 public class KakaoOAuthService {
     private final RestTemplate restTemplate;
     private final TokenProvider tokenProvider;
+    private final SiteUserRepository siteUserRepository;
 
     @Value("${kakao.client_id}")
     private String clientId;
@@ -31,9 +35,15 @@ public class KakaoOAuthService {
     @Value("${kakao.user_info_url}")
     private String userInfoUrl;
 
-    public KakaoUserInfoDto getUserInfo(String code) {
+    public KakaoSignIn processOauth(String code) {
         String kakaoAccessToken = getKakaoAccessToken(code);
-        return getKakaoUserInfo(kakaoAccessToken);
+        KakaoUserInfoDto kakaoUserInfoDto = getKakaoUserInfo(kakaoAccessToken);
+        String email = kakaoUserInfoDto.getKakaoAccount().getEmail();
+        boolean isAlreadyRegistered = siteUserRepository.existsByEmail(email);
+        if (isAlreadyRegistered) {
+            return kakaoSignIn(email);
+        }
+        return KakaoFirstSignInResponseDto.fromKakaoUserInfo(kakaoUserInfoDto);
     }
 
     private String getKakaoAccessToken(String code) {
@@ -85,13 +95,14 @@ public class KakaoOAuthService {
         }
     }
 
-    public KakaoSignInResponseDto kakaoSignIn(String email) {
+    private KakaoSignInResponseDto kakaoSignIn(String email) {
         var accessToken = tokenProvider.generateAccessToken(email);
         var refreshToken = tokenProvider.generateAndSaveRefreshToken(email);
         return KakaoSignInResponseDto.builder()
                 .registered(true)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .authType(AuthType.KAKAO)
                 .build();
     }
 }
