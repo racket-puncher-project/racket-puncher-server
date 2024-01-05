@@ -12,7 +12,8 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class KakaoUserInfoDto {
-    @JsonProperty("kakao_account")
-    private KakaoAccount kakaoAccount;
+public class KakaoAccount {
+    @JsonProperty("profile")
+    private KakaoProfile profile;
+    private String email;
 }
