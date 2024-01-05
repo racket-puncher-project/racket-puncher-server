@@ -83,5 +83,4 @@ public class SiteUserController {
 
         return  ResponseUtil.SUCCESS(result);
     }
-
 }
