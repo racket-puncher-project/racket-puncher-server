@@ -1,44 +1,73 @@
 package com.example.demo.siteuser.service;
 
+import static com.example.demo.exception.type.ErrorCode.*;
+
 import com.example.demo.apply.repository.ApplyRepository;
+import com.example.demo.common.FindEntity;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
-import com.example.demo.entity.Notification;
 import com.example.demo.entity.SiteUser;
+import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.repository.NotificationRepository;
 import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
-import com.example.demo.siteuser.dto.SiteUserMyInfoDto;
-import com.example.demo.siteuser.dto.SiteUserNotificationDto;
+import com.example.demo.siteuser.dto.MyInfoDto;
+import com.example.demo.siteuser.dto.NotificationDto;
+import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 @Service
 @RequiredArgsConstructor
-public class SiteUserInfoServiceImpl implements SiteUserInfoService {
+public class SiteUserServiceImpl implements SiteUserService {
     private final SiteUserRepository siteUserRepository;
     private final MatchingRepository matchingRepository;
     private final ApplyRepository applyRepository;
     private final NotificationRepository notificationRepository;
+    private final FindEntity findEntity;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    public SiteUserInfoDto getSiteUserInfoById(Long userId) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    public SiteUserInfoDto getSiteUserInfo(Long userId) {
+        SiteUser siteUser = findEntity.findUser(userId);
         return SiteUserInfoDto.fromEntity(siteUser);
     }
 
     @Override
-    public SiteUserMyInfoDto getSiteUserMyInfoById(Long userId) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-        return SiteUserMyInfoDto.fromEntity(siteUser);
+    public MyInfoDto getMyInfo(String email) {
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+        return MyInfoDto.fromEntity(siteUser);
+    }
+
+    @Override
+    @Transactional
+    public SiteUser updateSiteUserInfo(String email, UpdateSiteUserInfoDto updateSiteUserInfoDto) {
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+        if (ObjectUtils.isEmpty(updateSiteUserInfoDto.getPassword())) {
+            siteUser.updateSiteUser(updateSiteUserInfoDto);
+            return siteUser;
+        }
+        validatePassword(updateSiteUserInfoDto);
+        updateSiteUserInfoDto.setPassword(passwordEncoder.encode(updateSiteUserInfoDto.getPassword()));
+        siteUser.updateSiteUser(updateSiteUserInfoDto);
+
+        return siteUser;
+    }
+
+    private static void validatePassword(UpdateSiteUserInfoDto updateSiteUserInfoDto) {
+        if (!updateSiteUserInfoDto.getPassword().equals(updateSiteUserInfoDto.getCheckPassword())) {
+            throw new RacketPuncherException(WRONG_PASSWORD);
+        }
     }
 
     @Override
@@ -69,33 +98,13 @@ public class SiteUserInfoServiceImpl implements SiteUserInfoService {
         }
     }
 
-    @Transactional
     @Override
-    public void updateProfileImage(Long userId, String imageUrl) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+    public List<NotificationDto> getNotifications(String email) {
+        siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
 
-        siteUser.setProfileImg(imageUrl);
-        siteUserRepository.save(siteUser);
-    }
-
-    @Override
-    public String getProfileUrl(Long userId) {
-        SiteUser siteUser = siteUserRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
-        return siteUser.getProfileImg();
-    }
-
-    @Override
-    public List<SiteUserNotificationDto> getNotificationBySiteUser(Long userId) {
-        List<Notification> notificationList = notificationRepository.findBySiteUser_Id(userId);
-
-        if (notificationList != null && !notificationList.isEmpty()) {
-            return notificationList.stream()
-                    .map(SiteUserNotificationDto::fromEntity)
-                    .collect(Collectors.toList());
-        } else {
-            throw new EntityNotFoundException("No notification data found for user with ID: " + userId);
-        }
+        return notificationRepository.findAllBySiteUser_Email(email).get()
+                .stream().map(notification -> NotificationDto.fromEntity(notification))
+                .collect(Collectors.toList());
     }
 }

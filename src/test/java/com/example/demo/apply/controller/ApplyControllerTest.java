@@ -37,7 +37,7 @@ class ApplyControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    void successApply() throws Exception {
+    void apply() throws Exception {
         // given
         given(applyService.apply(anyString(), anyLong()))
                 .willReturn(Apply.builder()
@@ -51,7 +51,7 @@ class ApplyControllerTest {
     }
 
     @Test
-    void successCancelApply() throws Exception {
+    void cancelApply() throws Exception {
         // given
         given(applyService.cancel(anyLong()))
                 .willReturn(Apply.builder()
@@ -65,7 +65,7 @@ class ApplyControllerTest {
     }
 
     @Test
-    void successAcceptApply() throws Exception {
+    void acceptApply() throws Exception {
         // given
         String request = "{\n"
                 + "\"appliedList\": [1,2],\n"

@@ -36,7 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.annotation.Commit;
 
 @ExtendWith(MockitoExtension.class)
-class ApplyServiceImplTest {
+class ApplyServiceTest {
 
     @Mock
     private ApplyRepository applyRepository;

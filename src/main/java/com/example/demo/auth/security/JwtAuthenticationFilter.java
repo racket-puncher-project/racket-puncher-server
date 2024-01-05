@@ -75,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/api/auth/upload-profile-image");
         permitAllEndpoints.add("/api/matches/list");
         permitAllEndpoints.add("/api/matches/**");
-        permitAllEndpoints.add("/api/users/**");
+        permitAllEndpoints.add("/api/users/profile/**");
         permitAllEndpoints.add("/api/aws/**");
         permitAllEndpoints.add("/api/auth/check-nickname");
         permitAllEndpoints.add("/api/auth/check-email");

@@ -28,6 +28,7 @@ public class ApplyServiceImpl implements ApplyService {
     private final FindEntity findEntity;
 
     @Override
+    @Transactional
     public Apply apply(String email, long matchingId) {
         var user = siteUserRepository.findByEmail(email).orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
         var matching = findEntity.findMatching(matchingId);

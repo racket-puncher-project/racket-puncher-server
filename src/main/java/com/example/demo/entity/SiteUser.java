@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.example.demo.auth.dto.SignUpDto;
+import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
@@ -28,6 +29,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.ObjectUtils;
 
 @Getter
 @Setter
@@ -148,5 +150,19 @@ public class SiteUser implements UserDetails {
                 .siteUserName(signUpDto.getSiteUserName())
                 .authType(signUpDto.getAuthType())
                 .build();
+    }
+
+    public void updateSiteUser(UpdateSiteUserInfoDto updateSiteUserInfoDto) {
+        if(!ObjectUtils.isEmpty(updateSiteUserInfoDto.getPassword())) {
+            this.password = updateSiteUserInfoDto.getPassword();
+        }
+        this.nickname = updateSiteUserInfoDto.getNickname();
+        this.phoneNumber = updateSiteUserInfoDto.getPhoneNumber();
+        this.address = updateSiteUserInfoDto.getAddress();
+        this.zipCode = updateSiteUserInfoDto.getZipCode();
+        this.ntrp = updateSiteUserInfoDto.getNtrp();
+        this.gender = updateSiteUserInfoDto.getGender();
+        this.ageGroup = updateSiteUserInfoDto.getAgeGroup();
+        this.profileImg = updateSiteUserInfoDto.getProfileImg();
     }
 }
