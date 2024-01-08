@@ -5,13 +5,14 @@ import static com.example.demo.exception.type.ErrorCode.*;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.LoginResponseDto;
+import com.example.demo.auth.dto.GeneralSignInResponseDto;
 import com.example.demo.auth.dto.QuitDto;
 import com.example.demo.auth.dto.SignInDto;
 import com.example.demo.auth.dto.SignUpDto;
 import com.example.demo.auth.dto.StringResponseDto;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.siteuser.repository.SiteUserRepository;
+import com.example.demo.type.AuthType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -47,7 +48,9 @@ public class AuthService implements UserDetailsService {
         if (exists) {
             throw new RacketPuncherException(EMAIL_ALREADY_EXISTED);
         }
-        signUpDto.setPassword(this.passwordEncoder.encode(signUpDto.getPassword()));
+        if(AuthType.GENERAL.equals(signUpDto.getAuthType())){
+            signUpDto.setPassword(this.passwordEncoder.encode(signUpDto.getPassword()));
+        }
         return this.siteUserRepository.save(SiteUser.fromDto(signUpDto));
     }
 
@@ -63,7 +66,6 @@ public class AuthService implements UserDetailsService {
     }
 
     public SiteUser authenticate(SignInDto signInDto) {
-
         var user = siteUserRepository.findByEmail(signInDto.getEmail())
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
 
@@ -88,11 +90,12 @@ public class AuthService implements UserDetailsService {
         return new AccessTokenDto(newAccessToken);
     }
 
-    public LoginResponseDto signIn(SignInDto signInDto) {
+    public GeneralSignInResponseDto signIn(SignInDto signInDto) {
         authenticate(signInDto);
         var accessToken = tokenProvider.generateAccessToken(signInDto.getEmail());
         var refreshToken = tokenProvider.generateAndSaveRefreshToken(signInDto.getEmail());
-        return LoginResponseDto.builder()
+        return GeneralSignInResponseDto.builder()
+                .authType(AuthType.GENERAL)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

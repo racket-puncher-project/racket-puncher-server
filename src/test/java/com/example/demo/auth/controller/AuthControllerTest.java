@@ -1,21 +1,20 @@
 package com.example.demo.auth.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
+import com.example.demo.auth.dto.*;
+import com.example.demo.auth.service.KakaoOAuthService;
 import com.example.demo.entity.SiteUser;
-import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.EmailRequestDto;
-import com.example.demo.auth.dto.NicknameRequestDto;
-import com.example.demo.auth.dto.SignInDto;
-import com.example.demo.auth.dto.SignUpDto;
-import com.example.demo.auth.dto.StringResponseDto;
 import com.example.demo.auth.security.JwtAuthenticationFilter;
 import com.example.demo.auth.security.SecurityConfiguration;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.auth.service.AuthService;
 import com.example.demo.type.AgeGroup;
+import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +38,9 @@ class AuthControllerTest {
 
     @MockBean
     private AuthService authService;
+
+    @MockBean
+    private KakaoOAuthService kakaoOAuthService;
 
     @MockBean
     private TokenProvider tokenProvider;
@@ -71,6 +73,50 @@ class AuthControllerTest {
         // when
         // then
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/sign-in"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void kakaoSignUp() throws Exception {
+        // given
+        given(authService.register(getKakaoSignUpDto()))
+                .willReturn(SiteUser.fromDto(getKakaoSignUpDto()));
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/sign-up"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void kakaoFirstSignIn() throws Exception {
+        // given
+        KakaoFirstSignInResponseDto kakaoFirstSignInResponseDto = getKakaoFirstSignInResponseDto();
+        String kakaoOauthTestCode = "kakaoOauthTestCode";
+        given(kakaoOAuthService.processOauth(kakaoOauthTestCode))
+                .willReturn(kakaoFirstSignInResponseDto);
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/kakao")
+                        .param("code", kakaoOauthTestCode))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void kakaoSignIn() throws Exception {
+        // given
+        KakaoSignInResponseDto kakaoSignInResponseDto = getKakaoSigninResponseDto();
+        String kakaoOauthTestCode = "kakaoOauthTestCode";
+        given(kakaoOAuthService.processOauth(kakaoOauthTestCode))
+                .willReturn(kakaoSignInResponseDto);
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/kakao")
+                        .param("code", kakaoOauthTestCode))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
@@ -148,6 +194,24 @@ class AuthControllerTest {
                 .zipCode("12345")
                 .profileImg("test.url")
                 .ageGroup(AgeGroup.TWENTIES)
+                .authType(AuthType.GENERAL)
+                .build();
+    }
+
+    private SignUpDto getKakaoSignUpDto() {
+        return SignUpDto.builder()
+                .email("email@naver.com")
+                .nickname("닉네임")
+                .password("")
+                .phoneNumber("010-1234-5678")
+                .gender(GenderType.FEMALE)
+                .siteUserName("홍길동")
+                .ntrp(Ntrp.BEGINNER)
+                .address("삼성동")
+                .zipCode("12345")
+                .profileImg("test.url")
+                .ageGroup(AgeGroup.TWENTIES)
+                .authType(AuthType.KAKAO)
                 .build();
     }
 
@@ -155,9 +219,27 @@ class AuthControllerTest {
         return new SignInDto("email@nave.com", "`1234");
     }
 
+    private KakaoFirstSignInResponseDto getKakaoFirstSignInResponseDto(){
+        return KakaoFirstSignInResponseDto.builder()
+                .registered(false)
+                .email("email@test.com")
+                .profileImageUrl("test.png")
+                .nickname("nickname")
+                .build();
+    }
+
+    private KakaoSignInResponseDto getKakaoSigninResponseDto(){
+        return KakaoSignInResponseDto.builder()
+                .registered(true)
+                .accessToken("accessToken")
+                .refreshToken("refreshToken")
+                .build();
+    }
+
     private AccessTokenDto getAccessTokenDto() {
         return new AccessTokenDto("accessToken");
     }
+
     private EmailRequestDto getEmailRequestDto() {
         return new EmailRequestDto("email");
     }

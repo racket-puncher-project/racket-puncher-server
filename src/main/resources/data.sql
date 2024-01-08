@@ -3,15 +3,15 @@ INSERT INTO SITE_USER(PASSWORD, NAME, NICKNAME, EMAIL, PHONE_NUMBER, GENDER, NTR
 VALUES ('$2a$10$d99fg2QxEqgVwejJqhVAieCwpUicDffY4DOlHsT/vCrR0QKxnp472', '홍길동', 'nickname12', 'email1@naver.com', '010-1234-5678', 'MALE', 'BEGINNER', '서울특별시 강남구 가로수길5 (신사동)',
         '06035', 'TWENTIES', '2024-01-31 10:00:00', 1),
        ('111', 'User2', 'nickname34', 'email2@naver.com', '010-1234-5678', 'MALE', 'BEGINNER',
-        '서울특별시 광진구 강변북로2140 (자양동)', '05089', 'TWENTIES', '2024-01-31 10:00:00', 1),
+        '서울특별시 광진구 강변북로2140 (자양동)', '05089', 'TWENTIES', '2024-01-31 10:00:00', 1, 'GENERAL'),
        ('2222', 'User3', 'nickname56', 'email3@naver.com', '010-1234-5678', 'MALE', 'BEGINNER',
-        '서울특별시 동대문구 겸재로16 (휘경동)', '02512', 'TWENTIES', '2024-01-31 10:00:00', 1),
+        '서울특별시 동대문구 겸재로16 (휘경동)', '02512', 'TWENTIES', '2024-01-31 10:00:00', 1, 'GENERAL'),
        ('3333', 'User4', 'nickname78', 'email4@naver.com', '010-1234-5678', 'MALE', 'BEGINNER',
-        '서울특별시 성동구 난계로100 (하왕십리동, 왕십리자이)', '04711', 'TWENTIES', '2024-01-31 10:00:00', 1),
+        '서울특별시 성동구 난계로100 (하왕십리동, 왕십리자이)', '04711', 'TWENTIES', '2024-01-31 10:00:00', 1, 'GENERAL'),
        ('4444', 'User5', 'nickname91', 'email5@naver.com', '010-1234-5678', 'MALE', 'BEGINNER',
-        '서울특별시 성북구 동소문로177 (돈암동, 미아리고개예술극장)', '02829', 'TWENTIES', '2024-01-31 10:00:00', 1),
+        '서울특별시 성북구 동소문로177 (돈암동, 미아리고개예술극장)', '02829', 'TWENTIES', '2024-01-31 10:00:00', 1, 'GENERAL'),
        ('5555', 'User6', 'nickname96', 'email6@naver.com', '010-1234-5678', 'MALE', 'BEGINNER',
-        '서울특별시 성동구 청계천로500 (마장동, 서울시청운복지관)', '04704', 'TWENTIES', '2024-01-31 10:00:00', 1);
+        '서울특별시 성동구 청계천로500 (마장동, 서울시청운복지관)', '04704', 'TWENTIES', '2024-01-31 10:00:00', 1, 'GENERAL');
 
 INSERT INTO MATCHING (SITE_USER_ID, TITLE, CONTENT, LOCATION, LAT, LON, LOCATION_IMG, DATE, START_TIME, END_TIME,
                       RECRUIT_DUE_DATE_TIME, RECRUIT_NUM, COST, NTRP, AGE, RECRUIT_STATUS, MATCHING_TYPE, CREATE_TIME)
