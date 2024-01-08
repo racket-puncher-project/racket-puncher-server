@@ -3,6 +3,7 @@ package com.example.demo.siteuser.controller;
 import com.example.demo.aws.S3Uploader;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
+import com.example.demo.siteuser.dto.InputReviewDto;
 import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -91,5 +93,11 @@ public class SiteUserController {
         var result = siteUserService.getReviewPageInfo(email, matchingId);
 
         return  ResponseUtil.SUCCESS(result);
+    }
+
+    @PostMapping("/review/{matchingId}")
+    public void review(@RequestBody List<InputReviewDto> inputReviewDtos, Principal principal, @PathVariable Long matchingId) {
+        var email = principal.getName();
+        siteUserService.review(email, matchingId, inputReviewDtos);
     }
 }

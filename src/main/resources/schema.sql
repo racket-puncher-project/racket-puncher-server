@@ -1,5 +1,5 @@
 SET
-FOREIGN_KEY_CHECKS = 0;
+    FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS SITE_USER;
 DROP TABLE IF EXISTS MATCHING;
@@ -15,7 +15,7 @@ CREATE TABLE `SITE_USER`
     `NICKNAME`          varchar(50)   NOT NULL COMMENT '숫자와 문자로만',
     `EMAIL`             varchar(255)  NOT NULL,
     `PHONE_NUMBER`      varchar(50)   NOT NULL,
-    `MANNER_SCORE`      DOUBLE NULL DEFAULT 0,
+    `MANNER_SCORE`      BIGINT        NULL DEFAULT 0,
     `GENDER`            varchar(50)   NOT NULL COMMENT 'MALE, FEMALE',
     `NTRP`              VARCHAR(50)   NOT NULL,
     `ADDRESS`           varchar(255)  NOT NULL,
@@ -23,31 +23,31 @@ CREATE TABLE `SITE_USER`
     `AGE_GROUP`         varchar(50)   NOT NULL COMMENT 'TWENTIES, THIRTIES , FORTIES , SENIOR',
     `PROFILE_IMG`       varchar(1023) NULL,
     `CREATE_DATE`       TIMESTAMP     NOT NULL COMMENT 'YYYY-MM-DD HH:MM:SS',
-    `IS_PHONE_VERIFIED` BOOL NULL DEFAULT 0 COMMENT 'true = 1 / false = 0'
+    `IS_PHONE_VERIFIED` BOOL          NULL DEFAULT 0 COMMENT 'true = 1 / false = 0'
 );
 
 CREATE TABLE `MATCHING`
 (
-    `ID`                    BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    `SITE_USER_ID`          BIGINT       NOT NULL,
-    `TITLE`                 varchar(50)  NOT NULL,
+    `ID`                    BIGINT        NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `SITE_USER_ID`          BIGINT        NOT NULL,
+    `TITLE`                 varchar(50)   NOT NULL,
     `CONTENT`               varchar(1023) NULL,
-    `LOCATION`              varchar(255) NOT NULL,
-    `LAT`                   DOUBLE       NOT NULL COMMENT '위도',
-    `LON`                   DOUBLE       NOT NULL COMMENT '경도',
+    `LOCATION`              varchar(255)  NOT NULL,
+    `LAT`                   DOUBLE        NOT NULL COMMENT '위도',
+    `LON`                   DOUBLE        NOT NULL COMMENT '경도',
     `LOCATION_IMG`          varchar(1023) NULL,
-    `DATE`                  DATE         NOT NULL COMMENT 'YYYY-MM-DD',
-    `START_TIME`            TIME         NOT NULL COMMENT 'HH:MM:SS',
-    `END_TIME`              TIME         NOT NULL COMMENT 'HH:MM:SS',
-    `RECRUIT_DUE_DATE_TIME` TIMESTAMP    NOT NULL COMMENT 'YYYY-MM-DD HH:MM:SS',
-    `RECRUIT_NUM`           INT          NOT NULL,
-    `COST`                  INT          NOT NULL,
+    `DATE`                  DATE          NOT NULL COMMENT 'YYYY-MM-DD',
+    `START_TIME`            TIME          NOT NULL COMMENT 'HH:MM:SS',
+    `END_TIME`              TIME          NOT NULL COMMENT 'HH:MM:SS',
+    `RECRUIT_DUE_DATE_TIME` TIMESTAMP     NOT NULL COMMENT 'YYYY-MM-DD HH:MM:SS',
+    `RECRUIT_NUM`           INT           NOT NULL,
+    `COST`                  INT           NOT NULL,
     `IS_RESERVED`           BOOL        DEFAULT 0 COMMENT 'true = 1 / false = 0',
-    `NTRP`                  VARCHAR(50)  NOT NULL,
-    `AGE`                   VARCHAR(50)  NOT NULL,
+    `NTRP`                  VARCHAR(50)   NOT NULL,
+    `AGE`                   VARCHAR(50)   NOT NULL,
     `RECRUIT_STATUS`        VARCHAR(50) DEFAULT 'OPEN',
     `CREATE_TIME`           TIMESTAMP COMMENT 'YYYY-MM-DD HH:MM:SS',
-    `MATCHING_TYPE`         VARCHAR(50)  NOT NULL COMMENT 'SINGLE, DOUBLE, MIXED_DOUBLE, OTHER',
+    `MATCHING_TYPE`         VARCHAR(50)   NOT NULL COMMENT 'SINGLE, DOUBLE, MIXED_DOUBLE, OTHER',
     `CONFIRMED_NUM`         INT         DEFAULT 1
 );
 
@@ -64,7 +64,7 @@ CREATE TABLE `NOTIFICATION`
 (
     `ID`                BIGINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
     `SITE_USER_ID`      VARCHAR(255) NOT NULL,
-    `MATCHING_ID`       BIGINT NULL COMMENT '*특정 매칭과 관련없는 알림의 경우 null',
+    `MATCHING_ID`       BIGINT       NULL COMMENT '*특정 매칭과 관련없는 알림의 경우 null',
     `NOTIFICATION_TYPE` VARCHAR(50)  NOT NULL,
     `CONTENT`           VARCHAR(255) NOT NULL,
     `CREATE_TIME`       TIMESTAMP    NOT NULL
@@ -72,12 +72,12 @@ CREATE TABLE `NOTIFICATION`
 
 CREATE TABLE `REVIEW`
 (
-        `ID`              BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-        `OBJECT_USER_ID`  BIGINT NOT NULL,
-        `MATCHING_ID`     BIGINT NOT NULL,
-        `SUBJECT_USER_ID` BIGINT NOT NULL,
-        `SCORE`           INT NOT NULL,
-        `POSITIVE_SCORE`  INT NOT NULL,
-        `NEGATIVE_SCORE`  INT NOT NULL,
-        `CREATE_TIME`     TIMESTAMP NOT NULL COMMENT 'YYYY-MM-DD HH:MM:SS'
+    `ID`               BIGINT    NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `OBJECT_USER_ID`   BIGINT    NOT NULL,
+    `MATCHING_ID`      BIGINT    NOT NULL,
+    `SUBJECT_USER_ID`  BIGINT    NOT NULL,
+    `SCORE`            BIGINT       NOT NULL,
+    `POSITIVE_REVIEWS` JSON      NOT NULL,
+    `NEGATIVE_REVIEWS` JSON      NOT NULL,
+    `CREATE_TIME`      TIMESTAMP NOT NULL COMMENT 'YYYY-MM-DD HH:MM:SS'
 );

@@ -58,7 +58,7 @@ public class SiteUser implements UserDetails {
     private String phoneNumber;
 
     @Column(name = "MANNER_SCORE")
-    private Double mannerScore;
+    private Integer mannerScore;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "GENDER", length = 50, nullable = false)
@@ -158,5 +158,9 @@ public class SiteUser implements UserDetails {
         this.gender = updateSiteUserInfoDto.getGender();
         this.ageGroup = updateSiteUserInfoDto.getAgeGroup();
         this.profileImg = updateSiteUserInfoDto.getProfileImg();
+    }
+
+    public void sumMannerScore(int score) {
+        this.mannerScore = score;
     }
 }
