@@ -3,29 +3,39 @@ package com.example.demo.siteuser.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.Notification;
+import com.example.demo.entity.Review;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.repository.NotificationRepository;
+import com.example.demo.siteuser.dto.InputReviewDto;
 import com.example.demo.siteuser.dto.NotificationDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
+import com.example.demo.siteuser.repository.ReviewRepository;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.GenderType;
+import com.example.demo.type.MatchingType;
+import com.example.demo.type.NegativeReviewType;
 import com.example.demo.type.Ntrp;
+import com.example.demo.type.PositiveReviewType;
+import com.example.demo.type.RecruitStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -42,6 +52,9 @@ public class SiteUserServiceTest {
 
     @Mock
     private ApplyRepository applyRepository;
+
+    @Mock
+    private ReviewRepository reviewRepository;
 
     @Mock
     private NotificationRepository notificationRepository;
@@ -209,6 +222,39 @@ public class SiteUserServiceTest {
         assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
     }
 
+    @Test
+    void reviewSuccess() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(getSiteUser()));
+        given(findEntity.findMatching(1L))
+                .willReturn(getMatching());
+        given(findEntity.findUser(2L))
+                .willReturn(getObjectUser1());
+        given(findEntity.findUser(3L))
+                .willReturn(getObjectUser2());
+
+        // when
+        ArgumentCaptor<Review> captor = ArgumentCaptor.forClass(Review.class);
+        siteUserService.review("email@naver.com", 1L, getInputReviewDtoList());
+        // then
+        verify(reviewRepository, times(2)).save(captor.capture());
+    }
+
+    @Test
+    void reviewFailedByEmailNotFound() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(null));
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> siteUserService.review("email@naver.com", 1L, getInputReviewDtoList()));
+
+        // then
+        assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
+    }
+
     private SiteUserInfoDto getSiteUserInfoDto() {
         return SiteUserInfoDto.builder()
                 .profileImg("img.png")
@@ -218,8 +264,22 @@ public class SiteUserServiceTest {
                 .zipCode("zipCode")
                 .ntrp(Ntrp.BEGINNER)
                 .gender(GenderType.FEMALE)
-                .mannerScore(3.0)
+                .mannerScore(3)
                 .ageGroup(AgeGroup.TWENTIES)
+                .build();
+    }
+
+    private Matching getMatching() {
+        return Matching.builder()
+                .id(1L)
+                .title("title")
+                .confirmedNum(4)
+                .recruitDueDateTime(LocalDateTime.now())
+                .matchingType(MatchingType.DOUBLE)
+                .siteUser(getSiteUser())
+                .recruitStatus(RecruitStatus.CLOSED)
+                .content("content")
+                .cost(40000)
                 .build();
     }
 
@@ -231,7 +291,47 @@ public class SiteUserServiceTest {
                 .nickname("nickName")
                 .siteUserName("userName")
                 .phoneNumber("010-1234-5678")
-                .mannerScore(3.0)
+                .mannerScore(3)
+                .gender(GenderType.FEMALE)
+                .ntrp(Ntrp.BEGINNER)
+                .address("address")
+                .zipCode("zipCode")
+                .ageGroup(AgeGroup.TWENTIES)
+                .profileImg("img.png")
+                .isPhoneVerified(true)
+                .createDate(LocalDateTime.now())
+                .build();
+    }
+
+    private SiteUser getObjectUser1() {
+        return SiteUser.builder()
+                .id(2L)
+                .email("email2@naver.com")
+                .password("password")
+                .nickname("nickName2")
+                .siteUserName("userName3")
+                .phoneNumber("010-1234-5678")
+                .mannerScore(3)
+                .gender(GenderType.FEMALE)
+                .ntrp(Ntrp.BEGINNER)
+                .address("address")
+                .zipCode("zipCode")
+                .ageGroup(AgeGroup.TWENTIES)
+                .profileImg("img.png")
+                .isPhoneVerified(true)
+                .createDate(LocalDateTime.now())
+                .build();
+    }
+
+    private SiteUser getObjectUser2() {
+        return SiteUser.builder()
+                .id(1L)
+                .email("email3@naver.com")
+                .password("password")
+                .nickname("nickName3")
+                .siteUserName("userName3")
+                .phoneNumber("010-1234-5678")
+                .mannerScore(3)
                 .gender(GenderType.FEMALE)
                 .ntrp(Ntrp.BEGINNER)
                 .address("address")
@@ -333,7 +433,7 @@ public class SiteUserServiceTest {
                         .zipCode("zipCode1")
                         .ntrp(Ntrp.BEGINNER)
                         .gender(GenderType.FEMALE)
-                        .mannerScore(3.0)
+                        .mannerScore(3)
                         .ageGroup(AgeGroup.TWENTIES)
                         .build())
                 .applyStatus(ApplyStatus.ACCEPTED)
@@ -355,7 +455,7 @@ public class SiteUserServiceTest {
                         .zipCode("zipCode2")
                         .ntrp(Ntrp.BEGINNER)
                         .gender(GenderType.FEMALE)
-                        .mannerScore(3.0)
+                        .mannerScore(3)
                         .ageGroup(AgeGroup.TWENTIES)
                         .build())
                 .applyStatus(ApplyStatus.ACCEPTED)
@@ -366,5 +466,28 @@ public class SiteUserServiceTest {
         applies.add(apply2);
 
         return applies;
+    }
+
+    private List<InputReviewDto> getInputReviewDtoList() {
+        List<InputReviewDto> inputReviewDtoList = new ArrayList<>();
+
+        InputReviewDto inputReviewDto1 = InputReviewDto
+                .builder()
+                .objectUserId(2L)
+                .positiveReviewTypes(List.of(PositiveReviewType.PROACTIVE))
+                .negativeReviewTypes(List.of(NegativeReviewType.AGGRESSIVE))
+                .build();
+
+        InputReviewDto inputReviewDto2 = InputReviewDto
+                .builder()
+                .objectUserId(3L)
+                .positiveReviewTypes(List.of(PositiveReviewType.PROACTIVE))
+                .negativeReviewTypes(List.of(NegativeReviewType.AGGRESSIVE))
+                .build();
+
+        inputReviewDtoList.add(inputReviewDto1);
+        inputReviewDtoList.add(inputReviewDto2);
+
+        return inputReviewDtoList;
     }
 }

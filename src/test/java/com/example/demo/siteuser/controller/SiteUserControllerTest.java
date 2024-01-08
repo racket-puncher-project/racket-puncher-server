@@ -8,6 +8,7 @@ import com.example.demo.auth.security.SecurityConfiguration;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.aws.S3Uploader;
 import com.example.demo.entity.SiteUser;
+import com.example.demo.siteuser.dto.InputReviewDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.NotificationDto;
@@ -16,7 +17,9 @@ import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.service.SiteUserService;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.GenderType;
+import com.example.demo.type.NegativeReviewType;
 import com.example.demo.type.Ntrp;
+import com.example.demo.type.PositiveReviewType;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -112,6 +115,16 @@ public class SiteUserControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void review() throws Exception {
+        // given
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/users/review/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SiteUserInfoDto getSiteUserInfoDto() {
         return SiteUserInfoDto.builder()
                 .profileImg("img.png")
@@ -121,7 +134,7 @@ public class SiteUserControllerTest {
                 .zipCode("zipCode")
                 .ntrp(Ntrp.BEGINNER)
                 .gender(GenderType.FEMALE)
-                .mannerScore(3.0)
+                .mannerScore(3)
                 .ageGroup(AgeGroup.TWENTIES)
                 .build();
     }
@@ -138,7 +151,7 @@ public class SiteUserControllerTest {
                 .zipCode("zipCode")
                 .ntrp(Ntrp.BEGINNER)
                 .gender(GenderType.FEMALE)
-                .mannerScore(3.0)
+                .mannerScore(3)
                 .ageGroup(AgeGroup.TWENTIES)
                 .build();
     }
@@ -166,7 +179,7 @@ public class SiteUserControllerTest {
                 .nickname("nickName")
                 .siteUserName("userName")
                 .phoneNumber("010-1234-5678")
-                .mannerScore(3.0)
+                .mannerScore(3)
                 .gender(GenderType.FEMALE)
                 .ntrp(Ntrp.BEGINNER)
                 .address("address")
@@ -216,7 +229,7 @@ public class SiteUserControllerTest {
                 .zipCode("zipCode")
                 .ntrp(Ntrp.BEGINNER)
                 .gender(GenderType.FEMALE)
-                .mannerScore(3.0)
+                .mannerScore(3)
                 .ageGroup(AgeGroup.TWENTIES)
                 .build();
 
@@ -230,7 +243,7 @@ public class SiteUserControllerTest {
                 .zipCode("zipCode2")
                 .ntrp(Ntrp.BEGINNER)
                 .gender(GenderType.FEMALE)
-                .mannerScore(3.0)
+                .mannerScore(3)
                 .ageGroup(AgeGroup.TWENTIES)
                 .build();
 
