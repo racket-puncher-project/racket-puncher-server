@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
+import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.Notification;
 import com.example.demo.entity.SiteUser;
@@ -16,6 +17,7 @@ import com.example.demo.siteuser.dto.NotificationDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.type.AgeGroup;
+import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import java.time.LocalDateTime;
@@ -178,6 +180,35 @@ public class SiteUserServiceTest {
         assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
     }
 
+    @Test
+    void getReviewPageInfoSuccess() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(getSiteUser()));
+        given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.ACCEPTED))
+                .willReturn(Optional.ofNullable(getApplies()));
+
+        // when
+        var result = siteUserService.getReviewPageInfo("email@naver.com", 1L);
+
+        // then
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void getReviewPageInfoFailedByEmailNotFound() {
+        // given
+        given(siteUserRepository.findByEmail("email@naver.com"))
+                .willReturn(Optional.ofNullable(null));
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> siteUserService.getReviewPageInfo("email@naver.com", 1L));
+
+        // then
+        assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
+    }
+
     private SiteUserInfoDto getSiteUserInfoDto() {
         return SiteUserInfoDto.builder()
                 .profileImg("img.png")
@@ -282,5 +313,58 @@ public class SiteUserServiceTest {
         notifications.add(notification2);
 
         return notifications;
+    }
+
+    private List<Apply> getApplies() {
+        List<Apply> applies = new ArrayList<>();
+
+        Apply apply1 = Apply
+                .builder()
+                .matching(Matching.builder()
+                        .id(1L)
+                        .title("title1")
+                        .build())
+                .siteUser(SiteUser.builder()
+                        .id(1L)
+                        .siteUserName("주최자")
+                        .profileImg("img.png")
+                        .nickname("nickName1")
+                        .address("address1")
+                        .zipCode("zipCode1")
+                        .ntrp(Ntrp.BEGINNER)
+                        .gender(GenderType.FEMALE)
+                        .mannerScore(3.0)
+                        .ageGroup(AgeGroup.TWENTIES)
+                        .build())
+                .applyStatus(ApplyStatus.ACCEPTED)
+                .createTime(LocalDateTime.now())
+                .build();
+
+        Apply apply2 = Apply
+                .builder()
+                .matching(Matching.builder()
+                        .id(1L)
+                        .title("title1")
+                        .build())
+                .siteUser(SiteUser.builder()
+                        .id(2L)
+                        .siteUserName("참여자")
+                        .profileImg("img.png")
+                        .nickname("nickName2")
+                        .address("address2")
+                        .zipCode("zipCode2")
+                        .ntrp(Ntrp.BEGINNER)
+                        .gender(GenderType.FEMALE)
+                        .mannerScore(3.0)
+                        .ageGroup(AgeGroup.TWENTIES)
+                        .build())
+                .applyStatus(ApplyStatus.ACCEPTED)
+                .createTime(LocalDateTime.now())
+                .build();
+
+        applies.add(apply1);
+        applies.add(apply2);
+
+        return applies;
     }
 }
