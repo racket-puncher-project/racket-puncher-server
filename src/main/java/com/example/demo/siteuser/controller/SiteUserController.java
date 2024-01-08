@@ -7,6 +7,7 @@ import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.NotificationDto;
+import com.example.demo.siteuser.dto.ReviewPageInfoDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.service.SiteUserService;
 import java.security.Principal;
@@ -80,6 +81,14 @@ public class SiteUserController {
     public ResponseDto<List<NotificationDto>> getNotifications(Principal principal) {
         var email = principal.getName();
         var result = siteUserService.getNotifications(email);
+
+        return  ResponseUtil.SUCCESS(result);
+    }
+
+    @GetMapping("/review/{matchingId}")
+    public ResponseDto<List<ReviewPageInfoDto>> getReviewPageInfo(Principal principal, @PathVariable Long matchingId) {
+        var email = principal.getName();
+        var result = siteUserService.getReviewPageInfo(email, matchingId);
 
         return  ResponseUtil.SUCCESS(result);
     }

@@ -1,6 +1,6 @@
 INSERT INTO SITE_USER(PASSWORD, NAME, NICKNAME, EMAIL, PHONE_NUMBER, GENDER, NTRP, ADDRESS, ZIP_CODE, AGE_GROUP,
                       CREATE_DATE, IS_PHONE_VERIFIED)
-VALUES ('1234', 'User1', 'nickname12', 'email1@naver.com', '010-1234-5678', 'MALE', 'BEGINNER', '서울특별시 강남구 가로수길5 (신사동)',
+VALUES ('$2a$10$d99fg2QxEqgVwejJqhVAieCwpUicDffY4DOlHsT/vCrR0QKxnp472', '홍길동', 'nickname12', 'email1@naver.com', '010-1234-5678', 'MALE', 'BEGINNER', '서울특별시 강남구 가로수길5 (신사동)',
         '06035', 'TWENTIES', '2024-01-31 10:00:00', 1),
        ('111', 'User2', 'nickname34', 'email2@naver.com', '010-1234-5678', 'MALE', 'BEGINNER',
         '서울특별시 광진구 강변북로2140 (자양동)', '05089', 'TWENTIES', '2024-01-31 10:00:00', 1),
@@ -19,8 +19,8 @@ VALUES (2, '퇴근 후 같이 테니스 치실분!', '초보자 환영합니다.
         '2024-02-10', '20:00:00', '22:00:00', '2024-02-09 17:00:00', 2, 50000, 'BEGINNER', 'TWENTIES', 'OPEN', 'SINGLE',
         '2024-02-08 07:18:44'),
        (1, '테니스 같이 연습해요', '테니스의 왕자가 되고 싶은 분 구합니다!', '서울 강남구 삼성로108길5 B01 더테니스존 삼성점', 37.512024002145, 127.05452608227,
-        '', '2024-02-11', '14:00:00', '16:00:00', '2024-02-10 12:00:00', 4, 50000, 'DEVELOPMENT', 'THIRTIES', 'OPEN',
-        'DOUBLE', '2024-02-09 07:18:44'),
+        '', '2024-01-03', '14:00:00', '16:00:00', '2024-01-02 12:00:00', 4, 50000, 'DEVELOPMENT', 'THIRTIES', 'FINISHED',
+        'DOUBLE', '2024-01-01 07:18:44'),
        (3, '전문가의 무료 레슨', '중상급자 신청해주세요', '서울 강남구 선릉로112길85 테니스비트 삼성청담점', 37.5131740089799, 127.050342094205, '',
         '2024-02-12', '10:00:00', '11:00:00', '2024-02-11 00:00:00', 6, 50000, 'DEVELOPMENT', 'THIRTIES', 'OPEN',
         'OTHER', '2024-02-10 07:18:44'),
@@ -225,7 +225,10 @@ VALUES (2, '퇴근 후 같이 테니스 치실분!', '초보자 환영합니다.
 
 insert into APPLY (MATCHING_ID, SITE_USER_ID, CREATE_TIME, APPLY_STATUS)
 values (1, 1, '2024-02-10 10:00:00', 'ACCEPTED'),
-       (2, 2, '2024-02-10 10:00:00', 'ACCEPTED');
+       (2, 1, '2024-01-01 10:00:00', 'ACCEPTED'),
+       (2, 2, '2024-01-01 10:00:00', 'ACCEPTED'),
+       (2, 3, '2024-01-01 10:00:00', 'ACCEPTED'),
+       (2, 4, '2024-01-01 10:00:00', 'ACCEPTED');
 
 insert into APPLY (MATCHING_ID, SITE_USER_ID, CREATE_TIME)
 values (1, 3, '2024-02-10 10:00:00'),
