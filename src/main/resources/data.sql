@@ -1,7 +1,7 @@
 INSERT INTO SITE_USER(PASSWORD, NAME, NICKNAME, EMAIL, PHONE_NUMBER, GENDER, NTRP, ADDRESS, ZIP_CODE, AGE_GROUP,
-                      CREATE_DATE, IS_PHONE_VERIFIED)
+                      CREATE_DATE, IS_PHONE_VERIFIED, AUTH_TYPE)
 VALUES ('$2a$10$d99fg2QxEqgVwejJqhVAieCwpUicDffY4DOlHsT/vCrR0QKxnp472', '홍길동', 'nickname12', 'email1@naver.com', '010-1234-5678', 'MALE', 'BEGINNER', '서울특별시 강남구 가로수길5 (신사동)',
-        '06035', 'TWENTIES', '2024-01-31 10:00:00', 1),
+        '06035', 'TWENTIES', '2024-01-31 10:00:00', 1, 'GENERAL'),
        ('111', 'User2', 'nickname34', 'email2@naver.com', '010-1234-5678', 'MALE', 'BEGINNER',
         '서울특별시 광진구 강변북로2140 (자양동)', '05089', 'TWENTIES', '2024-01-31 10:00:00', 1, 'GENERAL'),
        ('2222', 'User3', 'nickname56', 'email3@naver.com', '010-1234-5678', 'MALE', 'BEGINNER',
