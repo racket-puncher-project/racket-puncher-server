@@ -1,12 +1,25 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)
+@DynamicInsert
+@DynamicUpdate
 @Entity
 @Table(name = "REVIEW")
 public class Review {
@@ -37,70 +50,7 @@ public class Review {
     @Column(name = "POSITIVE_SCORE", nullable = false)
     private Integer positiveScore;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setMatching(Matching matching) {
-        this.matching = matching;
-    }
-
-    public void setObjectUser(SiteUser objectUser) {
-        this.objectUser = objectUser;
-    }
-
-    public void setSubjectUser(SiteUser subjectUser) {
-        this.subjectUser = subjectUser;
-    }
-
-    public void setScore(Integer score) {
-        this.score = score;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public void setPositiveScore(Integer positiveScore) {
-        this.positiveScore = positiveScore;
-    }
-
-    public void setNegativeScore(Integer negativeScore) {
-        this.negativeScore = negativeScore;
-    }
-
     @Column(name = "NEGATIVE_SCORE", nullable = false)
     private Integer negativeScore;
 
-    public Long getId() {
-        return id;
-    }
-
-    public Matching getMatching() {
-        return matching;
-    }
-
-    public SiteUser getObjectUser() {
-        return objectUser;
-    }
-
-    public SiteUser getSubjectUser() {
-        return subjectUser;
-    }
-
-    public Integer getScore() {
-        return score;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public Integer getPositiveScore() {
-        return positiveScore;
-    }
-
-    public Integer getNegativeScore() {
-        return negativeScore;
-    }
 }

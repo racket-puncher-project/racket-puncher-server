@@ -11,6 +11,7 @@ import com.example.demo.entity.SiteUser;
 import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.NotificationDto;
+import com.example.demo.siteuser.dto.ReviewPageInfoDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.service.SiteUserService;
 import com.example.demo.type.AgeGroup;
@@ -93,7 +94,20 @@ public class SiteUserControllerTest {
 
         // when
         // then
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/my-page/notifications"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/notifications"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void getReviewPageInfo() throws Exception {
+        // given
+        given(siteUserService.getReviewPageInfo("email@naver.com", 1L))
+                .willReturn(getReviewPageInfoDtoList());
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/review/1"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
@@ -187,5 +201,42 @@ public class SiteUserControllerTest {
         notificationList.add(notification2);
 
         return notificationList;
+    }
+
+    private List<ReviewPageInfoDto> getReviewPageInfoDtoList() {
+        List<ReviewPageInfoDto> reviewPageInfoDtoList = new ArrayList<>();
+
+        ReviewPageInfoDto reviewPageInfoDto1 = ReviewPageInfoDto
+                .builder()
+                .siteUserId(1L)
+                .profileImg("img.png")
+                .siteUserName("userName")
+                .nickname("nickName")
+                .address("address")
+                .zipCode("zipCode")
+                .ntrp(Ntrp.BEGINNER)
+                .gender(GenderType.FEMALE)
+                .mannerScore(3.0)
+                .ageGroup(AgeGroup.TWENTIES)
+                .build();
+
+        ReviewPageInfoDto reviewPageInfoDto2 = ReviewPageInfoDto
+                .builder()
+                .siteUserId(2L)
+                .profileImg("img2.png")
+                .siteUserName("userName2")
+                .nickname("nickName2")
+                .address("address2")
+                .zipCode("zipCode2")
+                .ntrp(Ntrp.BEGINNER)
+                .gender(GenderType.FEMALE)
+                .mannerScore(3.0)
+                .ageGroup(AgeGroup.TWENTIES)
+                .build();
+
+        reviewPageInfoDtoList.add(reviewPageInfoDto1);
+        reviewPageInfoDtoList.add(reviewPageInfoDto2);
+
+        return reviewPageInfoDtoList;
     }
 }

@@ -14,8 +14,10 @@ import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.NotificationDto;
+import com.example.demo.siteuser.dto.ReviewPageInfoDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.repository.SiteUserRepository;
+import com.example.demo.type.ApplyStatus;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -105,6 +107,19 @@ public class SiteUserServiceImpl implements SiteUserService {
 
         return notificationRepository.findAllBySiteUser_Email(email).get()
                 .stream().map(notification -> NotificationDto.fromEntity(notification))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ReviewPageInfoDto> getReviewPageInfo(String email, Long matchingId) {
+        var subjectUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+
+        return applyRepository
+                .findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED).get()
+                .stream().map(apply -> apply.getSiteUser())
+                .filter(siteUser -> siteUser != subjectUser)
+                .map(siteUser -> ReviewPageInfoDto.fromEntity(siteUser))
                 .collect(Collectors.toList());
     }
 }

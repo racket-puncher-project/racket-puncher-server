@@ -5,6 +5,7 @@ import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.siteuser.dto.NotificationDto;
+import com.example.demo.siteuser.dto.ReviewPageInfoDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import java.util.List;
 
@@ -17,4 +18,6 @@ public interface SiteUserService {
     SiteUser updateSiteUserInfo(String email, UpdateSiteUserInfoDto updateSiteUserInfoDto);
 
     List<NotificationDto> getNotifications(String email);
+
+    List<ReviewPageInfoDto> getReviewPageInfo(String email, Long matchingId);
 }
