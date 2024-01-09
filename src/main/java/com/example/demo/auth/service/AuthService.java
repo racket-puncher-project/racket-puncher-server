@@ -30,8 +30,10 @@ import org.springframework.util.ObjectUtils;
 public class AuthService implements UserDetailsService {
 
     public static final String VALID_EMAIL = "사용 가능한 이메일입니다.";
-    public static final String SUCCESS_LOGOUT = "로그아웃 성공";
     public static final String VALID_NICKNAME = "사용 가능한 닉네임입니다.";
+    public static final String SUCCESS_LOGOUT = "로그아웃 성공";
+    public static final String SUCCESS_WITHDRAWAL = "탈퇴 성공";
+
     private final PasswordEncoder passwordEncoder;
     private final SiteUserRepository siteUserRepository;
     private final TokenProvider tokenProvider;
@@ -48,21 +50,24 @@ public class AuthService implements UserDetailsService {
         if (exists) {
             throw new RacketPuncherException(EMAIL_ALREADY_EXISTED);
         }
-        if(AuthType.GENERAL.equals(signUpDto.getAuthType())){
+        if (AuthType.GENERAL.equals(signUpDto.getAuthType())) {
             signUpDto.setPassword(this.passwordEncoder.encode(signUpDto.getPassword()));
         }
         return this.siteUserRepository.save(SiteUser.fromDto(signUpDto));
     }
 
-    public SiteUser withdraw(QuitDto member) {
-        var user = this.siteUserRepository.findByEmail(member.getEmail())
+    public void withdraw(String email, String password) {
+        var user = siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
 
-        if (!this.passwordEncoder.matches(member.getPassword(), user.getPassword())) {
+        if (user.getAuthType().equals(AuthType.GENERAL) && !passwordEncoder.matches(password, user.getPassword())) {
             throw new RacketPuncherException(WRONG_PASSWORD);
         }
-        this.siteUserRepository.delete(user);
-        return user;
+        if (redisTemplate.opsForValue().get(email) == null) {
+            throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
+        }
+        redisTemplate.delete(email);
+        siteUserRepository.delete(user);
     }
 
     public SiteUser authenticate(SignInDto signInDto) {
