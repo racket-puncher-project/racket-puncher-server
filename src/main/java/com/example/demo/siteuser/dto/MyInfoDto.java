@@ -17,7 +17,7 @@ public class MyInfoDto {
     private String nickname;
     private String email;
     private String phoneNumber;
-    private double mannerScore;
+    private int mannerScore;
     private GenderType gender;
     private Ntrp ntrp;
     private String address;

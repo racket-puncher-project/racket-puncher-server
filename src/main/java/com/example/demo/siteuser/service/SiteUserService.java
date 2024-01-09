@@ -1,6 +1,8 @@
 package com.example.demo.siteuser.service;
 
+import com.example.demo.entity.Review;
 import com.example.demo.entity.SiteUser;
+import com.example.demo.siteuser.dto.InputReviewDto;
 import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.MyInfoDto;
@@ -20,4 +22,6 @@ public interface SiteUserService {
     List<NotificationDto> getNotifications(String email);
 
     List<ReviewPageInfoDto> getReviewPageInfo(String email, Long matchingId);
+
+    void review(String email, Long matchingId, List<InputReviewDto> inputReviewDtos);
 }

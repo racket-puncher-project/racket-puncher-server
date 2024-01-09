@@ -19,7 +19,7 @@ public class SiteUserInfoDto{
     private String zipCode;
     private Ntrp ntrp;
     private GenderType gender;
-    private double mannerScore;
+    private int mannerScore;
     private AgeGroup ageGroup;
 
 

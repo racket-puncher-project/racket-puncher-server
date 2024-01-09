@@ -24,7 +24,7 @@ public class ReviewPageInfoDto {
     private String zipCode;
     private Ntrp ntrp;
     private GenderType gender;
-    private double mannerScore;
+    private int mannerScore;
     private AgeGroup ageGroup;
 
 

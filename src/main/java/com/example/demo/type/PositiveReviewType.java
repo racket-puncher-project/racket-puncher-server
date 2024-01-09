@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum PositiveReview {
+public enum PositiveReviewType {
     KIND(2),
-    PUNCTUAl(2),
+    PUNCTUAL(2),
     GOOD_MANNER(2),
     HELPFUL(2),
     PROACTIVE(2);

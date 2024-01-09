@@ -5,10 +5,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public enum NegativeReview {
+public enum NegativeReviewType {
     NO_SHOW(-10),
     FALSE_MATCHING(-15),
-    CYBERBULLYING(-3),
+    CYBER_BULLYING(-3),
     SPORTS_MISCONDUCT(-3),
     LATE(-2),
     AGGRESSIVE(-3),
