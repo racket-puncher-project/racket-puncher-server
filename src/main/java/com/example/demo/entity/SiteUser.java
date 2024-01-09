@@ -160,7 +160,7 @@ public class SiteUser implements UserDetails {
         this.profileImg = updateSiteUserInfoDto.getProfileImg();
     }
 
-    public void sumMannerScore(int score) {
-        this.mannerScore = score;
+    public void sumMannerScore(int positiveScore, int negativeScore) {
+        this.mannerScore = positiveScore + negativeScore;
     }
 }

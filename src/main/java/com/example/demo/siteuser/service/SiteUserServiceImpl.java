@@ -145,9 +145,8 @@ public class SiteUserServiceImpl implements SiteUserService {
                     .stream().mapToInt(PositiveReviewType::getScore).sum();
             int negativeScore = inputReviewDto.getNegativeReviewTypes()
                     .stream().mapToInt(NegativeReviewType::getScore).sum();
-            int score = positiveScore + negativeScore;
 
-            objectUser.sumMannerScore(positiveScore + negativeScore);
+            objectUser.sumMannerScore(positiveScore, negativeScore);
 
             var processedReviewDto = ProcessedReviewDto.builder()
                     .matching(matching)
@@ -155,7 +154,7 @@ public class SiteUserServiceImpl implements SiteUserService {
                     .subjectUser(subjectUser)
                     .positiveReviewTypes(inputReviewDto.getPositiveReviewTypes())
                     .negativeReviewTypes(inputReviewDto.getNegativeReviewTypes())
-                    .score(score)
+                    .score(positiveScore + negativeScore)
                     .build();
 
             reviewRepository.save(Review.fromDto(processedReviewDto));
