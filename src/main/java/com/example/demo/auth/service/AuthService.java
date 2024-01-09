@@ -56,20 +56,6 @@ public class AuthService implements UserDetailsService {
         return this.siteUserRepository.save(SiteUser.fromDto(signUpDto));
     }
 
-    public void withdraw(String email, String password) {
-        var user = siteUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
-
-        if (user.getAuthType().equals(AuthType.GENERAL) && !passwordEncoder.matches(password, user.getPassword())) {
-            throw new RacketPuncherException(WRONG_PASSWORD);
-        }
-        if (redisTemplate.opsForValue().get(email) == null) {
-            throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
-        }
-        redisTemplate.delete(email);
-        siteUserRepository.delete(user);
-    }
-
     public SiteUser authenticate(SignInDto signInDto) {
         var user = siteUserRepository.findByEmail(signInDto.getEmail())
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
@@ -128,5 +114,20 @@ public class AuthService implements UserDetailsService {
             throw new RacketPuncherException(NICKNAME_ALREADY_EXISTED);
         }
         return new StringResponseDto(VALID_NICKNAME);
+    }
+
+    public String withdraw(String email, String password) {
+        var user = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+
+        if (user.getAuthType().equals(AuthType.GENERAL) && !passwordEncoder.matches(password, user.getPassword())) {
+            throw new RacketPuncherException(WRONG_PASSWORD);
+        }
+        if (redisTemplate.opsForValue().get(email) == null) {
+            throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
+        }
+        redisTemplate.delete(email);
+        siteUserRepository.delete(user);
+        return SUCCESS_WITHDRAWAL;
     }
 }
