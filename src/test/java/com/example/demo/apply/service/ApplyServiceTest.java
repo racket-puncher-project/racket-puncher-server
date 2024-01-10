@@ -219,9 +219,10 @@ class ApplyServiceTest {
     @Test
     void applyAcceptSuccess() {
         //given
-        given(findEntity.findMatching(anyLong()))
+        given(findEntity.findMatching(1L))
                 .willReturn(Matching.builder()
                         .id(1L)
+                        .siteUser(getSiteUser())
                         .recruitStatus(RecruitStatus.OPEN)
                         .recruitNum(4)
                         .date(LocalDate.now())
@@ -244,7 +245,7 @@ class ApplyServiceTest {
                         .build());
 
         // when
-        applyService.accept(appliedList, confirmedList, 1L);
+        applyService.accept(getSiteUser().getEmail(), appliedList, confirmedList, 1L);
 
         // then
         verify(findEntity, times(3)).findApply(anyLong());
@@ -253,9 +254,10 @@ class ApplyServiceTest {
     @Test
     void applyAcceptFailedByOverRecruitNumber() {
         //given
-        given(findEntity.findMatching(anyLong()))
+        given(findEntity.findMatching(1L))
                 .willReturn(Matching.builder()
                         .id(1L)
+                        .siteUser(getSiteUser())
                         .recruitStatus(RecruitStatus.OPEN)
                         .recruitNum(2)
                         .date(LocalDate.now())
@@ -272,10 +274,39 @@ class ApplyServiceTest {
 
         // when
         RacketPuncherException exception = assertThrows(RacketPuncherException.class,
-                () -> applyService.accept(appliedList, confirmedList, 1L));
+                () -> applyService.accept(getSiteUser().getEmail(), appliedList, confirmedList, 1L));
 
         // then
         assertEquals("모집 인원보다 많은 인원을 수락할 수 없습니다.", exception.getMessage());
+    }
+
+    @Test
+    void applyAcceptFailedByPermissionDenied() {
+        //given
+        given(findEntity.findMatching(1L))
+                .willReturn(Matching.builder()
+                        .id(1L)
+                        .siteUser(getSiteUser())
+                        .recruitStatus(RecruitStatus.OPEN)
+                        .recruitNum(4)
+                        .date(LocalDate.now())
+                        .build());
+
+        List<Long> appliedList = new ArrayList<>();
+        appliedList.add(1L);
+
+        List<Long> confirmedList = new ArrayList<>();
+        confirmedList.add(1L);
+        confirmedList.add(3L);
+        confirmedList.add(4L);
+        confirmedList.add(5L);
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> applyService.accept("email@email.com", appliedList, confirmedList, 1L));
+
+        // then
+        assertEquals("참가 신청을 수락할 권한이 없습니다.", exception.getMessage());
     }
 
     private static Apply getApply(Matching matching, SiteUser siteUser) {
@@ -348,7 +379,7 @@ class ApplyServiceTest {
                 .recruitStatus(RecruitStatus.OPEN)
                 .createTime(LocalDateTime.now())
                 .matchingType(MatchingType.DOUBLE)
-                .confirmedNum(2)
+                .acceptedNum(2)
                 .build();
     }
 
@@ -367,7 +398,7 @@ class ApplyServiceTest {
                 .isReserved(true)
                 .ntrp(Ntrp.ADVANCE)
                 .age(AgeGroup.FORTIES)
-                .recruitStatus(RecruitStatus.CLOSED)
+                .recruitStatus(RecruitStatus.CONFIRMED)
                 .createTime(LocalDateTime.now())
                 .matchingType(MatchingType.DOUBLE)
                 .build();

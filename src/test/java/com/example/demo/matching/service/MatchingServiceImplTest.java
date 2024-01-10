@@ -294,7 +294,7 @@ class MatchingServiceImplTest {
                 .isReserved(true)
                 .recruitDueDateTime(LocalDateTime.now().plusDays(3))
                 .recruitNum(4)
-                .confirmedNum(2)
+                .acceptedNum(2)
                 .cost(5000)
                 .location("서울특별시 중구 을지로 66")
                 .lat(37.56556383681641)

@@ -18,7 +18,7 @@ import lombok.Setter;
 public class ApplyContents {
     private int applyNum;
     private int recruitNum;
-    private int confirmedNum;
+    private int acceptedNum;
     private List<ApplyMember> appliedMembers;
-    private List<ApplyMember> confirmedMembers;
+    private List<ApplyMember> acceptedMembers;
 }

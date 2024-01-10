@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "주소가 존재하지 않습니다."),
     APPLY_ALREADY_CANCELED(HttpStatus.BAD_REQUEST.value(), "해당 매칭에 대한 참가 신청은 이미 취소되었습니다."),
-    MATCHING_ALREADY_CLOSED(HttpStatus.BAD_REQUEST.value(), "이미 매칭이 확정된 경기입니다."),
+    MATCHING_ALREADY_FINISHED(HttpStatus.BAD_REQUEST.value(), "이미 매칭이 종료된 경기입니다."),
+    MATCHING_ALREADY_CONFIRMED(HttpStatus.BAD_REQUEST.value(), "이미 매칭이 확정된 경기입니다."),
     APPLY_ALREADY_EXISTED(HttpStatus.BAD_REQUEST.value(), "이미 참가 신청한 경기입니다."),
     APPLY_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "참가 신청 내역이 없습니다."),
     EMAIL_ALREADY_EXISTED(HttpStatus.BAD_REQUEST.value(), "이미 사용 중인 이메일입니다."),
@@ -22,6 +23,7 @@ public enum ErrorCode {
     MATCHING_NOT_FOUND(HttpStatus.NOT_FOUND.value(),"해당 매칭을 찾을 수 없습니다."),
     LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED.value(), "로그인이 필요한 서비스입니다."),
     PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING(HttpStatus.BAD_REQUEST.value(), "매칭을 수정 및 삭제할 권한이 없습니다."),
+    PERMISSION_DENIED_TO_ACCEPTED_APPLIES(HttpStatus.BAD_REQUEST.value(), "참가 신청을 수락할 권한이 없습니다."),
     NOTIFICATION_CONNECTION_FAILED(HttpStatus.BAD_REQUEST.value(), "알림 연결에 실패하였습니다."),
     RECRUIT_NUMBER_OVERED(HttpStatus.BAD_REQUEST.value(), "모집 인원보다 많은 인원을 수락할 수 없습니다."),
     S3_UPLOAD_FAILED(HttpStatus.BAD_REQUEST.value(), "파일 업로드가 실패했습니다."),

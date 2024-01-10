@@ -44,7 +44,6 @@ public class NotificationServiceImpl implements NotificationService {
         return sseEmitter;
     }
 
-    // TODO: 데이터 내용을 enum으로 설정해보자!
     @Override
     public void send(Long userId, Notification notification) {
         emitterRepository.get(userId).ifPresentOrElse(sseEmitter -> {

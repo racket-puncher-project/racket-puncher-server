@@ -50,7 +50,7 @@ public class MatchingDetailResponseDto {
                 .endTime(matching.getEndTime().toString())
                 .recruitDueDateTime(matching.getRecruitDueDateTime().toString())
                 .recruitNum(matching.getRecruitNum())
-                .confirmedNum(matching.getConfirmedNum())
+                .confirmedNum(matching.getAcceptedNum())
                 .cost(matching.getCost())
                 .isReserved(matching.getIsReserved())
                 .ntrp(matching.getNtrp())

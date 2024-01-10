@@ -10,5 +10,5 @@ public interface ApplyService {
 
     Apply cancel(long applyId);
 
-    Matching accept(List<Long> appliedList, List<Long> confirmedList, long matchingId);
+    Matching accept(String email, List<Long> pendingApplies, List<Long> acceptedApplies, long matchingId);
 }

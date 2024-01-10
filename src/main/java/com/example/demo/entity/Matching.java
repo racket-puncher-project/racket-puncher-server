@@ -105,12 +105,8 @@ public class Matching {
     @Column(name = "MATCHING_TYPE")
     private MatchingType matchingType;
 
-    public Integer getConfirmedNum() {
-        return confirmedNum;
-    }
-
-    @Column(name = "CONFIRMED_NUM")
-    private Integer confirmedNum;
+    @Column(name = "ACCEPTED_NUM")
+    private Integer acceptedNum;
 
     @CreatedDate
     @Column(name = "CREATE_TIME") // yyyy-MM-dd HH:mm
@@ -149,7 +145,7 @@ public class Matching {
                 .age(matchingDetailRequestDto.getAgeGroup())
                 .recruitStatus(RecruitStatus.OPEN)
                 .matchingType(matchingDetailRequestDto.getMatchingType())
-                .confirmedNum(1)
+                .acceptedNum(1)
                 .build();
     }
 
@@ -172,18 +168,15 @@ public class Matching {
         this.age = matching.getAge();
         this.matchingType = matching.getMatchingType();
         this.recruitStatus = matching.getRecruitStatus();
-        this.confirmedNum = matching.getConfirmedNum();
+        this.acceptedNum = matching.getAcceptedNum();
     }
 
-    public void updateConfirmedNum(int confirmedNum) {
-        this.confirmedNum = confirmedNum;
+    public void updateAcceptedNum(int acceptedNum) {
+        this.acceptedNum = acceptedNum;
     }
 
     public void changeRecruitStatus(RecruitStatus recruitStatus) {
         this.recruitStatus = recruitStatus;
     }
 
-    public void changeConfirmedNum(int confirmedNum) {
-        this.confirmedNum = confirmedNum;
-    }
 }

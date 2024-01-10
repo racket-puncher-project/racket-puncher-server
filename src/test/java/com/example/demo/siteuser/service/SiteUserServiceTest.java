@@ -17,7 +17,6 @@ import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.repository.NotificationRepository;
 import com.example.demo.siteuser.dto.InputReviewDto;
-import com.example.demo.siteuser.dto.NotificationDto;
 import com.example.demo.siteuser.dto.SiteUserInfoDto;
 import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.repository.ReviewRepository;
@@ -273,11 +272,11 @@ public class SiteUserServiceTest {
         return Matching.builder()
                 .id(1L)
                 .title("title")
-                .confirmedNum(4)
+                .acceptedNum(4)
                 .recruitDueDateTime(LocalDateTime.now())
                 .matchingType(MatchingType.DOUBLE)
                 .siteUser(getSiteUser())
-                .recruitStatus(RecruitStatus.CLOSED)
+                .recruitStatus(RecruitStatus.CONFIRMED)
                 .content("content")
                 .cost(40000)
                 .build();

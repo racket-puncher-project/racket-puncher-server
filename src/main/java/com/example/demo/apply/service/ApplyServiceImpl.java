@@ -12,6 +12,7 @@ import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
+import com.example.demo.type.PenaltyType;
 import com.example.demo.type.RecruitStatus;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +31,14 @@ public class ApplyServiceImpl implements ApplyService {
     @Override
     @Transactional
     public Apply apply(String email, long matchingId) {
-        var user = siteUserRepository.findByEmail(email).orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
+        var user = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
         var matching = findEntity.findMatching(matchingId);
         var organizer = matching.getSiteUser();
 
-        validateRecruitStatus(matching); // 매칭 상태 검사
+        validateRecruitNotConfirmed(matching);
 
-        if (isAlreadyExisted(user.getId(), matchingId)) { // 신청 중복 검사
+        if (isAlreadyExisted(user.getId(), matchingId)) {
             var existApply = applyRepository.findBySiteUser_IdAndMatching_Id(user.getId(), matchingId).get();
             validateApplyDuplication(existApply);
             existApply.changeApplyStatus(ApplyStatus.PENDING); // 취소 신청 내역 있을 경우 상태만 변경
@@ -59,14 +61,14 @@ public class ApplyServiceImpl implements ApplyService {
 
     private static void validateApplyDuplication(Apply existApply) {
 
-        if (!existApply.getApplyStatus().equals(ApplyStatus.CANCELED)) {
+        if (!ApplyStatus.CANCELED.equals(existApply.getApplyStatus())) {
             throw new RacketPuncherException(APPLY_ALREADY_EXISTED);
         }
     }
 
-    private static void validateRecruitStatus(Matching matching) {
-        if (matching.getRecruitStatus().equals(RecruitStatus.CLOSED)) {
-            throw new RacketPuncherException(MATCHING_ALREADY_CLOSED);
+    private static void validateRecruitNotConfirmed(Matching matching) {
+        if (RecruitStatus.CONFIRMED.equals(matching.getRecruitStatus())) {
+            throw new RacketPuncherException(MATCHING_ALREADY_CONFIRMED);
         }
     }
 
@@ -75,93 +77,95 @@ public class ApplyServiceImpl implements ApplyService {
     public Apply cancel(long applyId) {
         var apply = findEntity.findApply(applyId);
 
-        validateCancelDuplication(apply); // 취소 중복 검사
+        validateCancelDuplication(apply);
 
         var matching = apply.getMatching();
 
         validateNotYourOwnPosting(matching, apply);
-        validateMatchingClosed(matching);
+        validateRecruitNotFinished(matching);
+        validateRecruitNotConfirmed(matching);
 
-        if (matching.getRecruitStatus().equals(RecruitStatus.WEATHER_ISSUE)) {
-            apply.changeApplyStatus(ApplyStatus.CANCELED);
-            matching.changeConfirmedNum(matching.getConfirmedNum() - 1);
-            notificationService.createAndSendNotification(matching.getSiteUser(),
-                    matching, NotificationType.CANCEL_APPLY);
-            return apply;
+        if (ApplyStatus.ACCEPTED.equals(apply.getApplyStatus())) {
+            matching.updateAcceptedNum(matching.getAcceptedNum() - 1);
         }
 
-        if (RecruitStatus.FULL.equals(matching.getRecruitStatus())) {
-            if (ApplyStatus.ACCEPTED.equals(apply.getApplyStatus())) {
-                //TODO: 패널티 부여
-                apply.changeApplyStatus(ApplyStatus.CANCELED);
+        if (isRecruitFullAndIsApplyAccepted(matching, apply)) {
                 matching.changeRecruitStatus(RecruitStatus.OPEN);
-                matching.changeConfirmedNum(matching.getConfirmedNum() - 1);
-                notificationService.createAndSendNotification(matching.getSiteUser(),
-                        matching, NotificationType.CANCEL_APPLY);
-                return apply;
-            }
+                apply.getSiteUser().penalize(PenaltyType.CANCEL_APPLY);
         }
+
         apply.changeApplyStatus(ApplyStatus.CANCELED);
-        matching.changeConfirmedNum(matching.getConfirmedNum() - 1);
         notificationService.createAndSendNotification(matching.getSiteUser(),
                 matching, NotificationType.CANCEL_APPLY);
         return apply;
     }
 
-    private static void validateMatchingClosed(Matching matching) {
-        if (matching.getRecruitStatus().equals(RecruitStatus.CLOSED)) {
-            throw new RacketPuncherException(MATCHING_ALREADY_CLOSED);
+    private static boolean isRecruitFullAndIsApplyAccepted(Matching matching, Apply apply) {
+        return RecruitStatus.FULL.equals(matching.getRecruitStatus())
+                && ApplyStatus.ACCEPTED.equals(apply.getApplyStatus());
+    }
+
+    private static void validateRecruitNotFinished(Matching matching) {
+        if (RecruitStatus.FINISHED.equals(matching.getRecruitStatus())) {
+            throw new RacketPuncherException(MATCHING_ALREADY_FINISHED);
         }
     }
 
     private static void validateNotYourOwnPosting(Matching matching, Apply apply) {
-        if (matching.getSiteUser().getId() == apply.getSiteUser().getId()) {
+        if (matching.getSiteUser().equals(apply.getSiteUser())) {
             throw new RacketPuncherException(SELF_APPLY_CANCEL_DENIED);
         }
     }
 
     private static void validateCancelDuplication(Apply apply) {
-        if (apply.getApplyStatus().equals(ApplyStatus.CANCELED)) {
+        if (ApplyStatus.CANCELED.equals(apply.getApplyStatus())) {
             throw new RacketPuncherException(APPLY_ALREADY_CANCELED);
         }
     }
 
     @Override
     @Transactional
-    public Matching accept(List<Long> appliedList, List<Long> confirmedList, long matchingId) {
+    public Matching accept(String email, List<Long> pendingApplies, List<Long> acceptedApplies, long matchingId) {
         var matching = findEntity.findMatching(matchingId);
+        validateOrganizer(email, matching);
+
         var recruitNum = matching.getRecruitNum();
-        var confirmedNum = confirmedList.size();
+        var acceptedNum = acceptedApplies.size();
 
-        validateOverRecruitNumber(recruitNum, confirmedNum);
+        validateOverRecruitNumber(recruitNum, acceptedNum);
 
-        appliedList
-                .forEach(applyId
-                        -> findEntity.findApply(applyId).changeApplyStatus(ApplyStatus.PENDING));
+        pendingApplies
+                .forEach(pendingId
+                        -> findEntity.findApply(pendingId).changeApplyStatus(ApplyStatus.PENDING));
 
-        confirmedList
-                .forEach(confirmedId
+        acceptedApplies
+                .forEach(acceptedId
                         -> {
-                    findEntity.findApply(confirmedId).changeApplyStatus(ApplyStatus.ACCEPTED);
+                    findEntity.findApply(acceptedId).changeApplyStatus(ApplyStatus.ACCEPTED);
                     notificationService
-                            .createAndSendNotification(
-                                    findEntity.findApply(confirmedId).getSiteUser(),
+                            .createAndSendNotification(findEntity.findApply(acceptedId).getSiteUser(),
                                     matching, NotificationType.ACCEPT_APPLY);
-
                 });
-        matching.updateConfirmedNum(confirmedNum);
-        checkForRecruitStatusChanging(recruitNum, confirmedNum, matching);
+
+        matching.updateAcceptedNum(acceptedNum);
+        checkForRecruitStatusChanging(recruitNum, acceptedNum, matching);
         return matching;
     }
 
-    private static void checkForRecruitStatusChanging(Integer recruitNum, int confirmedNum, Matching matching) {
-        if (recruitNum == confirmedNum) {
+    private static void validateOrganizer(String email, Matching matching) {
+        if (!matching.getSiteUser().getEmail().equals(email)) {
+            throw new RacketPuncherException(PERMISSION_DENIED_TO_ACCEPTED_APPLIES);
+        }
+    }
+
+    private static void checkForRecruitStatusChanging(Integer recruitNum, int acceptedNum, Matching matching) {
+        if (recruitNum == acceptedNum) {
             matching.changeRecruitStatus(RecruitStatus.FULL);
         }
     }
 
-    private static void validateOverRecruitNumber(int recruitNum, int confirmedNum) {
-        if (confirmedNum > recruitNum) {
+    private static void validateOverRecruitNumber(int recruitNum, int acceptedNum) {
+        if (acceptedNum > recruitNum) {
             throw new RacketPuncherException(RECRUIT_NUMBER_OVERED);
         }
     }

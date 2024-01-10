@@ -58,7 +58,7 @@ public class Scheduler {
                             .findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED);
 
                     if (RecruitStatus.FULL.equals(matching.getRecruitStatus())) {
-                        matching.changeRecruitStatus(RecruitStatus.CLOSED);
+                        matching.changeRecruitStatus(RecruitStatus.CONFIRMED);
                         log.info("matching succeed -> " + matching.getId());
 
                         for (Apply apply : applies.get()) {
