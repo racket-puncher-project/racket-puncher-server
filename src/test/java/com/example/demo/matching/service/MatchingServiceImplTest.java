@@ -3,8 +3,7 @@ package com.example.demo.matching.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 
 import com.example.demo.apply.dto.ApplyDto;
@@ -18,6 +17,7 @@ import com.example.demo.matching.dto.MatchingDetailRequestDto;
 import com.example.demo.matching.dto.MatchingPreviewDto;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.service.NotificationService;
+import com.example.demo.openfeign.feignclient.LatAndLonApiFeignClient;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.ApplyStatus;
@@ -27,8 +27,12 @@ import com.example.demo.type.Ntrp;
 import com.example.demo.type.RecruitStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import org.bouncycastle.asn1.est.AttrOrOID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +40,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class MatchingServiceImplTest {
@@ -54,85 +59,92 @@ class MatchingServiceImplTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private LatAndLonApiFeignClient latAndLonApiFeignClient;
+
     @InjectMocks
     private MatchingServiceImpl matchingService;
 
-    // 카카오에서 lat,lon을 가져오는 부분에서 에러가 나는 듯 합니다. 확인 부탁드립니다.
-//    @Test
-//    @DisplayName("유저 아이디에 해당하는 유저와 함께 매칭이 저장됨")
-//    void create() {
-//        //given
-//        SiteUser siteUser = makeSiteUser();
-//        MatchingDetailRequestDto matchingDetailRequestDto = makeMatchingDetailDto();
-//        ApplyDto applyDto = makeApplyDto(siteUser, Matching.fromDto(matchingDetailRequestDto, siteUser));
-//        given(siteUserRepository.findByEmail(("example@example.com")))
-//                .willReturn(Optional.of(siteUser));
-//        given(matchingRepository.save(any(Matching.class)))
-//                .willReturn(Matching.fromDto(matchingDetailRequestDto, siteUser));
-//        given(applyRepository.save(any(Apply.class)))
-//                .willReturn(Apply.fromDto(applyDto));
-//
-//        //when
-//        Matching savedMatching = matchingService.create(siteUser.getEmail(), matchingDetailRequestDto);
-//
-//        //then
-//        assertThat(savedMatching.getSiteUser().getId()).isEqualTo(siteUser.getId());
-//        assertThat(savedMatching.getTitle()).isEqualTo(matchingDetailRequestDto.getTitle());
-//        assertThat(savedMatching.getContent()).isEqualTo(matchingDetailRequestDto.getContent());
-//        assertThat(savedMatching.getLocation()).isEqualTo(matchingDetailRequestDto.getLocation());
-//        assertThat(savedMatching.getLat()).isEqualTo(matchingDetailRequestDto.getLat());
-//        assertThat(savedMatching.getLon()).isEqualTo(matchingDetailRequestDto.getLon());
-//        assertThat(savedMatching.getLocationImg()).isEqualTo(matchingDetailRequestDto.getLocationImg());
-//        assertThat(savedMatching.getDate()).isEqualTo(matchingDetailRequestDto.getDate());
-//        assertThat(savedMatching.getStartTime()).isEqualTo(matchingDetailRequestDto.getStartTime());
-//        assertThat(savedMatching.getEndTime()).isEqualTo(matchingDetailRequestDto.getEndTime());
-//        assertThat(savedMatching.getRecruitNum()).isEqualTo(matchingDetailRequestDto.getRecruitNum());
-//        assertThat(savedMatching.getCost()).isEqualTo(matchingDetailRequestDto.getCost());
-//        assertThat(savedMatching.getIsReserved()).isEqualTo(matchingDetailRequestDto.getIsReserved());
-//        assertThat(savedMatching.getNtrp()).isEqualTo(matchingDetailRequestDto.getNtrp());
-//        assertThat(savedMatching.getAge()).isEqualTo(matchingDetailRequestDto.getAgeGroup());
-//        assertThat(savedMatching.getMatchingType()).isEqualTo(matchingDetailRequestDto.getMatchingType());
-//    }
-//
-//    @Test
-//    @DisplayName("수정한 값이 제대로 저장됨")
-//    void update() {
-//        // given
-//        SiteUser siteUser = makeSiteUser();
-//        Matching matching = makeMatching(siteUser);
-//        MatchingDetailRequestDto matchingDetailRequestDto = makeMatchingDetailDto();
-//        given(siteUserRepository.findById(anyLong()))
-//                .willReturn(Optional.of(siteUser));
-//        given(matchingRepository.findById(anyLong()))
-//                .willReturn(Optional.of(matching));
-//        given(matchingRepository.existsByIdAndSiteUser(anyLong(), any(SiteUser.class)))
-//                .willReturn(true);
-//        given(matchingRepository.save(any(Matching.class)))
-//                .willReturn(Matching.fromDto(matchingDetailRequestDto, siteUser));
-//
-//        //when
-//        Matching savedMatching = matchingService.update(siteUser.getEmail(), 1L, matchingDetailRequestDto);
-//
-//        //then
-//        assertThat(savedMatching.getSiteUser().getId()).isEqualTo(siteUser.getId());
-//        assertThat(savedMatching.getTitle()).isEqualTo(matchingDetailRequestDto.getTitle());
-//        assertThat(savedMatching.getContent()).isEqualTo(matchingDetailRequestDto.getContent());
-//        assertThat(savedMatching.getLocation()).isEqualTo(matchingDetailRequestDto.getLocation());
-//        assertThat(savedMatching.getLat()).isEqualTo(matchingDetailRequestDto.getLat());
-//        assertThat(savedMatching.getLon()).isEqualTo(matchingDetailRequestDto.getLon());
-//        assertThat(savedMatching.getLocationImg()).isEqualTo(matchingDetailRequestDto.getLocationImg());
-//        assertThat(savedMatching.getDate()).isEqualTo(matchingDetailRequestDto.getDate());
-//        assertThat(savedMatching.getStartTime()).isEqualTo(matchingDetailRequestDto.getStartTime());
-//        assertThat(savedMatching.getEndTime()).isEqualTo(matchingDetailRequestDto.getEndTime());
-//        assertThat(savedMatching.getRecruitNum()).isEqualTo(matchingDetailRequestDto.getRecruitNum());
-//        assertThat(savedMatching.getCost()).isEqualTo(matchingDetailRequestDto.getCost());
-//        assertThat(savedMatching.getIsReserved()).isEqualTo(matchingDetailRequestDto.getIsReserved());
-//        assertThat(savedMatching.getNtrp()).isEqualTo(matchingDetailRequestDto.getNtrp());
-//        assertThat(savedMatching.getAge()).isEqualTo(matchingDetailRequestDto.getAgeGroup());
-//        assertThat(savedMatching.getMatchingType()).isEqualTo(matchingDetailRequestDto.getMatchingType());
-//    }
+    @BeforeEach
+    public void setup() {
+        ReflectionTestUtils.setField(matchingService, "apiKey", "kakaoClientId");
+    }
 
-    // 이 이후는 jpa에서 기본으로 제공하는 method로만 이루어져서 테스트 안해도 될 듯
+    @Test
+    void createSuccess() {
+        //given
+        SiteUser siteUser = getSiteUser();
+        MatchingDetailRequestDto matchingDetailRequestDto = getMatchingDetailDto();
+        ApplyDto applyDto = getApplyDto(siteUser, Matching.fromDto(matchingDetailRequestDto, siteUser));
+        String latAndLonResponse = "{ \"documents\": [ { \"x\": \"127.0\", \"y\": \"37.0\" } ] }";
+
+        given(siteUserRepository.findByEmail(siteUser.getEmail()))
+                .willReturn(Optional.of(siteUser));
+        given(latAndLonApiFeignClient.getLatAndLon(matchingDetailRequestDto.getLocation(), "KakaoAK kakaoClientId"))
+                .willReturn(latAndLonResponse);
+        given(matchingRepository.save(any(Matching.class)))
+                .willReturn(Matching.fromDto(matchingDetailRequestDto, siteUser));
+        given(applyRepository.save(any(Apply.class)))
+                .willReturn(Apply.fromDto(applyDto));
+
+        //when
+        Matching savedMatching = matchingService.create(siteUser.getEmail(), matchingDetailRequestDto);
+
+        //then
+        assertThat(savedMatching.getSiteUser().getId()).isEqualTo(siteUser.getId());
+        assertThat(savedMatching.getTitle()).isEqualTo(matchingDetailRequestDto.getTitle());
+        assertThat(savedMatching.getLocation()).isEqualTo(matchingDetailRequestDto.getLocation());
+    }
+
+    @Test
+    void createFailByWrongAddress() {
+        //given
+        SiteUser siteUser = getSiteUser();
+        MatchingDetailRequestDto matchingDetailRequestDto = getMatchingDetailDto();
+        ApplyDto applyDto = getApplyDto(siteUser, Matching.fromDto(matchingDetailRequestDto, siteUser));
+        String latAndLonResponse = "{}";
+
+        given(siteUserRepository.findByEmail(siteUser.getEmail()))
+                .willReturn(Optional.of(siteUser));
+        given(latAndLonApiFeignClient.getLatAndLon(matchingDetailRequestDto.getLocation(), "KakaoAK kakaoClientId"))
+                .willReturn(latAndLonResponse);
+
+        //when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> matchingService.create(siteUser.getEmail(), matchingDetailRequestDto));
+
+        //then
+        assertThat(exception.getMessage()).isEqualTo("위경도를 찾을 수 없는 주소입니다.");
+    }
+
+    @Test
+    void update() {
+        // given
+        SiteUser siteUser = getSiteUser();
+        Matching matching = getMatchingEntity(siteUser);
+        MatchingDetailRequestDto matchingDetailRequestDto = getMatchingDetailDto();
+
+        given(siteUserRepository.findByEmail(siteUser.getEmail()))
+                .willReturn(Optional.of(siteUser));
+        given(findEntity.findMatching(matching.getId()))
+                .willReturn(matching);
+        given(applyRepository.findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED))
+                .willReturn(Optional.of(getApplyMember()));
+        given(applyRepository.findAllByMatching_Id(matching.getId()))
+                .willReturn(Optional.of(new ArrayList<>()));
+        given(matchingRepository.existsByIdAndSiteUser(anyLong(), any(SiteUser.class)))
+                .willReturn(true);
+
+        //when
+        Matching savedMatching = matchingService.update(siteUser.getEmail(), 1L, matchingDetailRequestDto);
+
+        //then
+        assertThat(savedMatching.getSiteUser().getId()).isEqualTo(siteUser.getId());
+        assertThat(savedMatching.getTitle()).isEqualTo(matchingDetailRequestDto.getTitle());
+        assertThat(savedMatching.getContent()).isEqualTo(matchingDetailRequestDto.getContent());
+        assertThat(savedMatching.getLocation()).isEqualTo(matchingDetailRequestDto.getLocation());
+    }
+
     @Test
     void delete() {
     }
@@ -149,8 +161,8 @@ class MatchingServiceImplTest {
     void getApplyContentsByOrganizerSuccess() {
         // given
         given(siteUserRepository.findByEmail("example@example.com"))
-                .willReturn(Optional.ofNullable(makeSiteUser()));
-        given(findEntity.findMatching(1L)).willReturn(makeMatching(makeSiteUser()));
+                .willReturn(Optional.ofNullable(getSiteUser()));
+        given(findEntity.findMatching(1L)).willReturn(getMatchingEntity(getSiteUser()));
         given(applyRepository.countByMatching_IdAndApplyStatus(1L, ApplyStatus.PENDING))
                 .willReturn(Optional.of(2));
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.PENDING))
@@ -170,8 +182,8 @@ class MatchingServiceImplTest {
     void getApplyContentsByUserSuccess() {
         // given
         given(siteUserRepository.findByEmail("example@example.com"))
-                .willReturn(Optional.ofNullable(makeSiteUser2()));
-        given(findEntity.findMatching(1L)).willReturn(makeMatching(makeSiteUser()));
+                .willReturn(Optional.ofNullable(getSiteUser2()));
+        given(findEntity.findMatching(1L)).willReturn(getMatchingEntity(getSiteUser()));
         given(applyRepository.countByMatching_IdAndApplyStatus(1L, ApplyStatus.PENDING))
                 .willReturn(Optional.of(2));
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.PENDING))
@@ -201,7 +213,7 @@ class MatchingServiceImplTest {
         assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
     }
 
-    private SiteUser makeSiteUser() {
+    private SiteUser getSiteUser() {
         return SiteUser.builder()
                 .id(1L)
                 .password("password123")
@@ -223,7 +235,7 @@ class MatchingServiceImplTest {
                 .build();
     }
 
-    private SiteUser makeSiteUser2() {
+    private SiteUser getSiteUser2() {
         return SiteUser.builder()
                 .id(2L)
                 .password("password123")
@@ -245,18 +257,18 @@ class MatchingServiceImplTest {
                 .build();
     }
 
-    private ApplyDto makeApplyDto(SiteUser siteUser, Matching matching) {
+    private ApplyDto getApplyDto(SiteUser siteUser, Matching matching) {
         return ApplyDto.builder()
                 .matching(matching)
                 .siteUser(siteUser)
                 .build();
     }
 
-    private MatchingDetailRequestDto makeMatchingDetailDto() {
+    private MatchingDetailRequestDto getMatchingDetailDto() {
         return MatchingDetailRequestDto.builder()
                 .title("제목")
                 .content("본문")
-                .location("장소")
+                .location("주소")
                 .locationImg("구장 이미지 주소")
                 .date("2023-11-11")
                 .startTime("10:00")
@@ -272,7 +284,7 @@ class MatchingServiceImplTest {
                 .build();
     }
 
-    private MatchingPreviewDto makeMatchingPreviewDto() {
+    private MatchingPreviewDto getMatchingPreviewDto() {
         return MatchingPreviewDto.builder()
                 .isReserved(true)
                 .matchingType(MatchingType.SINGLE)
@@ -282,7 +294,7 @@ class MatchingServiceImplTest {
                 .build();
     }
 
-    private Matching makeMatching(SiteUser siteUser) {
+    private Matching getMatchingEntity(SiteUser siteUser) {
         return Matching.builder()
                 .id(1L)
                 .siteUser(siteUser)
@@ -296,7 +308,7 @@ class MatchingServiceImplTest {
                 .recruitNum(4)
                 .acceptedNum(2)
                 .cost(5000)
-                .location("서울특별시 중구 을지로 66")
+                .location("주소")
                 .lat(37.56556383681641)
                 .lon(126.98540998152264)
                 .recruitStatus(RecruitStatus.OPEN)
