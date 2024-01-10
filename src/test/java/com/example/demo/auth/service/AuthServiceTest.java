@@ -6,7 +6,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
@@ -28,6 +27,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
@@ -199,7 +201,105 @@ class AuthServiceTest {
         assertEquals(exception.getMessage(), "이미 사용 중인 닉네임입니다.");
     }
 
+    @Test
+    public void withdrawGeneralUserSuccess() {
+        // given
+        SiteUser generalSiteUser = getGeneralSiteUser();
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+
+        given(siteUserRepository.findByEmail(generalSiteUser.getEmail()))
+                .willReturn(Optional.of(generalSiteUser));
+        given(passwordEncoder.matches("password", generalSiteUser.getPassword()))
+                .willReturn(true);
+        given(redisTemplate.delete(generalSiteUser.getEmail()))
+                .willReturn(null);
+
+        // when
+        String result = authService.withdraw(generalSiteUser.getEmail(), "password");
+
+        // then
+        assertEquals(result, "탈퇴 성공");
+    }
+
+    @Test
+    public void withdrawKakaoUserSuccess() {
+        // given
+        SiteUser kakaoSiteUser = getKakaoSiteUser();
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+
+        given(siteUserRepository.findByEmail(kakaoSiteUser.getEmail()))
+                .willReturn(Optional.of(kakaoSiteUser));
+        given(redisTemplate.delete(kakaoSiteUser.getEmail()))
+                .willReturn(null);
+
+        // when
+        String result = authService.withdraw(kakaoSiteUser.getEmail(), "");
+
+        // then
+        assertEquals(result, "탈퇴 성공");
+    }
+
+    @Test
+    public void withdrawGeneralUserFailedByWrongPassword() {
+        // given
+        SiteUser generalSiteUser = getGeneralSiteUser();
+
+        given(siteUserRepository.findByEmail(generalSiteUser.getEmail()))
+                .willReturn(Optional.of(generalSiteUser));
+        given(passwordEncoder.matches("wrongPassword", generalSiteUser.getPassword()))
+                .willReturn(false);
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.withdraw(generalSiteUser.getEmail(), "wrongPassword"));
+
+        // then
+        assertEquals("비밀번호가 일치하지 않습니다.", exception.getMessage());
+    }
+
     private AccessTokenDto getAccessTokenDto() {
         return new AccessTokenDto("accessToken");
+    }
+
+    private SiteUser getGeneralSiteUser() {
+        return SiteUser.builder()
+                .id(1L)
+                .email("email@naver.com")
+                .password(passwordEncoder.encode("password"))
+                .nickname("nickName")
+                .siteUserName("userName")
+                .phoneNumber("010-1234-5678")
+                .mannerScore(3.0)
+                .gender(GenderType.FEMALE)
+                .ntrp(Ntrp.BEGINNER)
+                .address("address")
+                .zipCode("zipCode")
+                .ageGroup(AgeGroup.TWENTIES)
+                .profileImg("img.png")
+                .isPhoneVerified(true)
+                .createDate(LocalDateTime.now())
+                .authType(AuthType.GENERAL)
+                .build();
+    }
+
+    private SiteUser getKakaoSiteUser() {
+        return SiteUser.builder()
+                .id(1L)
+                .email("email@naver.com")
+                .password("")
+                .nickname("nickName")
+                .siteUserName("userName")
+                .phoneNumber("010-1234-5678")
+                .mannerScore(3.0)
+                .gender(GenderType.FEMALE)
+                .ntrp(Ntrp.BEGINNER)
+                .address("address")
+                .zipCode("zipCode")
+                .ageGroup(AgeGroup.TWENTIES)
+                .profileImg("img.png")
+                .isPhoneVerified(true)
+                .createDate(LocalDateTime.now())
+                .authType(AuthType.KAKAO)
+                .build();
     }
 }
