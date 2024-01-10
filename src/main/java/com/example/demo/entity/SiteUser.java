@@ -6,6 +6,7 @@ import com.example.demo.type.AgeGroup;
 import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
+import com.example.demo.type.PenaltyType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -168,5 +169,9 @@ public class SiteUser implements UserDetails {
 
     public void sumMannerScore(int positiveScore, int negativeScore) {
         this.mannerScore = positiveScore + negativeScore;
+    }
+
+    public void penalize(PenaltyType penaltyType) {
+        this.mannerScore = this.mannerScore + penaltyType.getScore();
     }
 }

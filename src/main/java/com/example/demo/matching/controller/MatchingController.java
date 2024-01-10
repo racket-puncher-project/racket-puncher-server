@@ -2,24 +2,31 @@ package com.example.demo.matching.controller;
 
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
-import com.example.demo.matching.dto.*;
-import com.example.demo.openfeign.service.address.AddressService;
 import com.example.demo.matching.dto.ApplyContents;
+import com.example.demo.matching.dto.FilterRequestDto;
+import com.example.demo.matching.dto.LocationDto;
 import com.example.demo.matching.dto.MatchingDetailRequestDto;
+import com.example.demo.matching.dto.MatchingDetailResponseDto;
 import com.example.demo.matching.dto.MatchingPreviewDto;
-import com.example.demo.openfeign.dto.address.AddressResponseDto;
 import com.example.demo.matching.service.MatchingService;
-
+import com.example.demo.openfeign.dto.address.AddressResponseDto;
+import com.example.demo.openfeign.service.address.AddressService;
 import java.security.Principal;
 import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
@@ -31,16 +38,14 @@ public class MatchingController {
 
     @PostMapping
     public void createMatching(
-            @RequestBody MatchingDetailRequestDto matchingDetailRequestDto,
-            Principal principal) {
+            @RequestBody MatchingDetailRequestDto matchingDetailRequestDto, Principal principal) {
 
         String email = principal.getName();
         matchingService.create(email, matchingDetailRequestDto);
     }
 
-    @GetMapping("/{matchingId}")
-    public ResponseDto<MatchingDetailResponseDto> getDetailedMatching(
-            @PathVariable Long matchingId) {
+    @GetMapping("/detail/{matchingId}")
+    public ResponseDto<MatchingDetailResponseDto> getDetailedMatching(@PathVariable Long matchingId) {
 
         MatchingDetailResponseDto result = matchingService.getDetail(matchingId);
 
@@ -48,19 +53,15 @@ public class MatchingController {
     }
 
     @PatchMapping("/{matchingId}")
-    public void editMatching(
-            @RequestBody MatchingDetailRequestDto matchingDetailRequestDto,
-            @PathVariable Long matchingId,
-            Principal principal) {
+    public void editMatching(@RequestBody MatchingDetailRequestDto matchingDetailRequestDto,
+                             @PathVariable(value = "matchingId") Long matchingId, Principal principal) {
 
         String email = principal.getName();
         matchingService.update(email, matchingId, matchingDetailRequestDto);
     }
 
     @DeleteMapping("/{matchingId}")
-    public void deleteMatching(
-            @PathVariable Long matchingId,
-            Principal principal) {
+    public void deleteMatching(@PathVariable Long matchingId, Principal principal) {
 
         String email = principal.getName();
         matchingService.delete(email, matchingId);
@@ -105,12 +106,10 @@ public class MatchingController {
     }
 
     @SneakyThrows
-    @GetMapping("/{matching_id}/apply")
-    public ResponseDto<ApplyContents> getApplyContents(@PathVariable(value = "matching_id") long matchingId,
+    @GetMapping("/{matchingId}/apply")
+    public ResponseDto<ApplyContents> getApplyContents(@PathVariable(value = "matchingId") long matchingId,
                                                        Principal principal) {
-
-        String email = principal.getName();
-
+        var email = principal.getName();
         var result = matchingService.getApplyContents(email, matchingId);
 
         return ResponseUtil.SUCCESS(result);

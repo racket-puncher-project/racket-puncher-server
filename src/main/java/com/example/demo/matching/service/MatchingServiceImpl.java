@@ -26,9 +26,11 @@ import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
+import com.example.demo.type.PenaltyType;
 import com.example.demo.type.RecruitStatus;
 import com.example.demo.util.geometry.GeometryUtil;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -64,8 +66,9 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Override
     public Matching create(String email, MatchingDetailRequestDto matchingDetailRequestDto) {
-        SiteUser siteUser = siteUserRepository.findByEmail(email).orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
-        List<Double> latAndLon = getLatLon(getUserAddressInfo(matchingDetailRequestDto.getLocation()));
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+        List<Double> latAndLon = getLatAndLon(getUserAddressInfo(matchingDetailRequestDto.getLocation()));
         matchingDetailRequestDto.setLat(latAndLon.get(0));
         matchingDetailRequestDto.setLon(latAndLon.get(1));
         Matching matching = matchingRepository.save(Matching.fromDto(matchingDetailRequestDto, siteUser));
@@ -83,38 +86,56 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     @Override
+    @Transactional
     public Matching update(String email, Long matchingId, MatchingDetailRequestDto matchingDetailRequestDto) {
-        SiteUser siteUser = siteUserRepository.findByEmail(email).orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
+        var siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
 
-        Matching matching = validateMatchingGivenId(matchingId);
+        var matching = findEntity.findMatching(matchingId);
 
-        if (!isUserMadeThisMatching(matchingId, siteUser)) {
-            throw new RacketPuncherException(PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING);
-        }
+        var confirmedApplies
+                = applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED).get();
+
+        validateOrganizer(matchingId, siteUser);
 
         // 주소 다르다면 위경도 업데이트
+        updateLatAndLon(matchingDetailRequestDto, matching);
+
+        sendNotificationToApplyUser(matchingId, siteUser, matching, NotificationType.MODIFY_MATCHING);
+        penalizeToOrganizer(confirmedApplies, siteUser, PenaltyType.MATCHING_MODIFY);
+        confirmedApplies.forEach(apply -> {
+            if (!apply.getSiteUser().equals(siteUser)) {
+                apply.changeApplyStatus(ApplyStatus.PENDING);
+            }
+        });
+
+        matching.update(Matching.fromDto(matchingDetailRequestDto, siteUser));
+        return matching;
+    }
+
+    private void updateLatAndLon(MatchingDetailRequestDto matchingDetailRequestDto, Matching matching) {
         if(!matchingDetailRequestDto.getLocation().equals(matching.getLocation())){
-            List<Double> latAndLon = getLatLon(getUserAddressInfo(matchingDetailRequestDto.getLocation()));
+            List<Double> latAndLon = getLatAndLon(getUserAddressInfo(matchingDetailRequestDto.getLocation()));
             matchingDetailRequestDto.setLat(latAndLon.get(0));
             matchingDetailRequestDto.setLon(latAndLon.get(1));
         }
+    }
 
-        sendNotificationToApplyUser(matchingId, siteUser, matching, NotificationType.MODIFY_MATCHING);
-
-        matching.update(Matching.fromDto(matchingDetailRequestDto, siteUser));
-        return matchingRepository.save(matching);
+    private void penalizeToOrganizer(List<Apply> confirmedApplies, SiteUser siteUser, PenaltyType penaltyType) {
+        if (confirmedApplies.size() >= 2) {
+            siteUser.penalize(penaltyType);
+        }
     }
 
     private void sendNotificationToApplyUser(Long matchingId, SiteUser siteUser, Matching matching,
-                                             NotificationType modifyMatching) {
-        var applies = applyRepository.findAllByMatching_Id(matchingId);
-        for (Apply apply : applies.get()) {
-            if (apply.getSiteUser() == siteUser) {
-                continue;
+                                             NotificationType notificationType) {
+        var applies = applyRepository.findAllByMatching_Id(matchingId).get();
+
+        applies.forEach(apply -> {
+            if (!apply.getSiteUser().equals(siteUser)) {
+                notificationService.createAndSendNotification(apply.getSiteUser(), matching, notificationType);
             }
-            notificationService.createAndSendNotification(apply.getSiteUser(), matching,
-                    modifyMatching);
-        }
+        });
     }
 
     @Override
@@ -122,23 +143,27 @@ public class MatchingServiceImpl implements MatchingService {
         SiteUser siteUser = siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
 
-        Matching matching = validateMatchingGivenId(matchingId);
+        Matching matching = findEntity.findMatching(matchingId);
 
-        if (!isUserMadeThisMatching(matchingId, siteUser)) {
-            throw new RacketPuncherException(PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING);
+        var confirmedApplies
+                = applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED).get();
+
+        validateOrganizer(matchingId, siteUser);
+
+        if (!matching.getRecruitStatus().equals(RecruitStatus.WEATHER_ISSUE)) { // 우천으로 인한 취소가 아니면 패널티 적용
+            penalizeToOrganizer(confirmedApplies, siteUser, PenaltyType.MATCHING_DELETE);
         }
 
         sendNotificationToApplyUser(matchingId, siteUser, matching, NotificationType.DELETE_MATCHING);
-        if (matching.getRecruitStatus().equals(RecruitStatus.WEATHER_ISSUE)) { // 우천 시 패널티 적용 없이 삭제 가능
-            matchingRepository.delete(matching);
-            //TODO : 매칭에 신청한 유저들의 매칭 해제
-            return;
-        }
-        //TODO : 신청자 존재하는데 매칭 글 삭제 시 패널티 부여
-        if (matching.getConfirmedNum() > 0) {
-            //TODO : 매칭에 신청한 유저들의 매칭 해제
-        }
+        confirmedApplies.forEach(apply -> applyRepository.delete(apply));
+
         matchingRepository.delete(matching);
+    }
+
+    private void validateOrganizer(Long matchingId, SiteUser siteUser) {
+        if (!isUserMadeThisMatching(matchingId, siteUser)) {
+            throw new RacketPuncherException(PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING);
+        }
     }
 
     @Override
@@ -195,7 +220,7 @@ public class MatchingServiceImpl implements MatchingService {
                 .block();
     }
 
-    private List<Double> getLatLon(String address) {
+    private List<Double> getLatAndLon(String address) {
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
 
@@ -215,14 +240,8 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Override
     public MatchingDetailResponseDto getDetail(Long matchingId) {
-        Matching matching = validateMatchingGivenId(matchingId);
+        Matching matching = findEntity.findMatching(matchingId);
         return MatchingDetailResponseDto.fromEntity(matching);
-    }
-
-    private Matching validateMatchingGivenId(Long matchingId) {
-        Matching matching = matchingRepository.findById(matchingId)
-                .orElseThrow(() -> new RacketPuncherException(MATCHING_NOT_FOUND));
-        return matching;
     }
 
     private boolean isUserMadeThisMatching(Long matchingId, SiteUser siteUser) {
@@ -231,6 +250,8 @@ public class MatchingServiceImpl implements MatchingService {
 
     @Override
     public ApplyContents getApplyContents(String email, long matchingId) {
+        var siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
         var matching = findEntity.findMatching(matchingId);
         var recruitNum = matching.getRecruitNum();
         var confirmedNum = matching.getConfirmedNum();
@@ -239,7 +260,7 @@ public class MatchingServiceImpl implements MatchingService {
         var appliedMembers = findAppliedMembers(matchingId);
         var confirmedMembers = findConfirmedMembers(matchingId);
 
-        if (isOrganizer(matching.getSiteUser().getId(), matching)) {
+        if (isOrganizer(siteUser.getId(), matching)) {
             var applyContentsForOrganizer = ApplyContents.builder()
                     .applyNum(applyNum)
                     .recruitNum(recruitNum)
@@ -262,7 +283,8 @@ public class MatchingServiceImpl implements MatchingService {
 
     private List<ApplyMember> findConfirmedMembers(long matchingId) {
         return applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED)
-                .get().stream().map((apply)
+                .orElse(Collections.emptyList())
+                .stream().map((apply)
                         -> ApplyMember.builder()
                         .applyId(apply.getId())
                         .siteUserId(apply.getSiteUser().getId())
@@ -272,7 +294,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     private List<ApplyMember> findAppliedMembers(long matchingId) {
         return applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.PENDING)
-                .orElseThrow(() -> new RacketPuncherException(APPLY_NOT_FOUND))
+                .orElse(Collections.emptyList())
                 .stream().map((apply)
                         -> ApplyMember.builder()
                         .applyId(apply.getId())

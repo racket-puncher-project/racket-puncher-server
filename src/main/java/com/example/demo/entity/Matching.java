@@ -147,8 +147,9 @@ public class Matching {
                 .isReserved(matchingDetailRequestDto.getIsReserved())
                 .ntrp(matchingDetailRequestDto.getNtrp())
                 .age(matchingDetailRequestDto.getAgeGroup())
-                .recruitStatus(matchingDetailRequestDto.getRecruitStatus())
+                .recruitStatus(RecruitStatus.OPEN)
                 .matchingType(matchingDetailRequestDto.getMatchingType())
+                .confirmedNum(1)
                 .build();
     }
 
@@ -170,6 +171,8 @@ public class Matching {
         this.ntrp = matching.getNtrp();
         this.age = matching.getAge();
         this.matchingType = matching.getMatchingType();
+        this.recruitStatus = matching.getRecruitStatus();
+        this.confirmedNum = matching.getConfirmedNum();
     }
 
     public void updateConfirmedNum(int confirmedNum) {
