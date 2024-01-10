@@ -123,9 +123,6 @@ public class AuthService implements UserDetailsService {
         if (user.getAuthType().equals(AuthType.GENERAL) && !passwordEncoder.matches(password, user.getPassword())) {
             throw new RacketPuncherException(WRONG_PASSWORD);
         }
-        if (redisTemplate.opsForValue().get(email) == null) {
-            throw new RacketPuncherException(REFRESH_TOKEN_EXPIRED);
-        }
         redisTemplate.delete(email);
         siteUserRepository.delete(user);
         return SUCCESS_WITHDRAWAL;
