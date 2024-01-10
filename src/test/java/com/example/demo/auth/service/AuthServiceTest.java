@@ -211,10 +211,6 @@ class AuthServiceTest {
                 .willReturn(Optional.of(generalSiteUser));
         given(passwordEncoder.matches("password", generalSiteUser.getPassword()))
                 .willReturn(true);
-        given(redisTemplate.opsForValue())
-                .willReturn(valueOperations);
-        given(redisTemplate.opsForValue().get(generalSiteUser.getEmail()))
-                .willReturn("refreshToken");
         given(redisTemplate.delete(generalSiteUser.getEmail()))
                 .willReturn(null);
 
@@ -233,10 +229,6 @@ class AuthServiceTest {
 
         given(siteUserRepository.findByEmail(kakaoSiteUser.getEmail()))
                 .willReturn(Optional.of(kakaoSiteUser));
-        given(redisTemplate.opsForValue())
-                .willReturn(valueOperations);
-        given(redisTemplate.opsForValue().get(kakaoSiteUser.getEmail()))
-                .willReturn("refreshToken");
         given(redisTemplate.delete(kakaoSiteUser.getEmail()))
                 .willReturn(null);
 
