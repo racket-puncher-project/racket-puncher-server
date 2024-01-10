@@ -17,8 +17,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class MatchingDetailRequestDto {
-    private long id;
-    private long creatorUserId;
     private String title;
     private String content;
     private String location;
@@ -35,8 +33,5 @@ public class MatchingDetailRequestDto {
     private Boolean isReserved;
     private Ntrp ntrp;
     private AgeGroup ageGroup;
-    private RecruitStatus recruitStatus;
     private MatchingType matchingType;
-    private int confirmedNum;
-    private String createTime;
 }
