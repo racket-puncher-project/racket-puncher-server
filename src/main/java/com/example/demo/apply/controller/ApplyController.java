@@ -1,6 +1,6 @@
 package com.example.demo.apply.controller;
 
-import com.example.demo.apply.dto.AppliedListAndConfirmedList;
+import com.example.demo.apply.dto.PendingAppliesAndAcceptedApplies;
 import com.example.demo.apply.service.ApplyService;
 import java.security.Principal;
 import java.util.List;
@@ -23,7 +23,7 @@ public class ApplyController {
     @PostMapping("/matches/{match_id}")
     public void apply(@PathVariable(value = "match_id") long matchingId, Principal principal) {
 
-        String email = principal.getName(); // 로그인 정보 검증 필요
+        String email = principal.getName();
 
         applyService.apply(email, matchingId);
     }
@@ -35,12 +35,13 @@ public class ApplyController {
     }
 
     @PatchMapping("/matches/{matching_id}")
-    public void acceptApply(@RequestBody AppliedListAndConfirmedList appliedListAndConfirmedList,
-                                   @PathVariable(value = "matching_id") long matchingId) {
+    public void acceptApply(@RequestBody PendingAppliesAndAcceptedApplies pendingAppliesAndAcceptedApplies,
+                                   @PathVariable(value = "matching_id") long matchingId, Principal principal) {
 
-        List<Long> appliedList = appliedListAndConfirmedList.getAppliedList();
-        List<Long> confirmedList = appliedListAndConfirmedList.getConfirmedList();
+        var email = principal.getName();
+        List<Long> pendingApplies = pendingAppliesAndAcceptedApplies.getPendingApplies();
+        List<Long> acceptedApplies = pendingAppliesAndAcceptedApplies.getAcceptedApplies();
 
-        applyService.accept(appliedList, confirmedList, matchingId);
+        applyService.accept(email, pendingApplies, acceptedApplies, matchingId);
     }
 }

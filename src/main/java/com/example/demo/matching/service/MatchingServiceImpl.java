@@ -1,9 +1,7 @@
 package com.example.demo.matching.service;
 
-import static com.example.demo.exception.type.ErrorCode.APPLY_NOT_FOUND;
 import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
 import static com.example.demo.exception.type.ErrorCode.JSON_PARSING_FAILED;
-import static com.example.demo.exception.type.ErrorCode.MATCHING_NOT_FOUND;
 import static com.example.demo.exception.type.ErrorCode.PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING;
 import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
 
@@ -93,7 +91,7 @@ public class MatchingServiceImpl implements MatchingService {
 
         var matching = findEntity.findMatching(matchingId);
 
-        var confirmedApplies
+        var acceptedApplies
                 = applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED).get();
 
         validateOrganizer(matchingId, siteUser);
@@ -102,8 +100,8 @@ public class MatchingServiceImpl implements MatchingService {
         updateLatAndLon(matchingDetailRequestDto, matching);
 
         sendNotificationToApplyUser(matchingId, siteUser, matching, NotificationType.MODIFY_MATCHING);
-        penalizeToOrganizer(confirmedApplies, siteUser, PenaltyType.MATCHING_MODIFY);
-        confirmedApplies.forEach(apply -> {
+        penalizeToOrganizer(acceptedApplies, siteUser, PenaltyType.MATCHING_MODIFY);
+        acceptedApplies.forEach(apply -> {
             if (!apply.getSiteUser().equals(siteUser)) {
                 apply.changeApplyStatus(ApplyStatus.PENDING);
             }
@@ -145,17 +143,17 @@ public class MatchingServiceImpl implements MatchingService {
 
         Matching matching = findEntity.findMatching(matchingId);
 
-        var confirmedApplies
+        var acceptedApplies
                 = applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED).get();
 
         validateOrganizer(matchingId, siteUser);
 
         if (!matching.getRecruitStatus().equals(RecruitStatus.WEATHER_ISSUE)) { // 우천으로 인한 취소가 아니면 패널티 적용
-            penalizeToOrganizer(confirmedApplies, siteUser, PenaltyType.MATCHING_DELETE);
+            penalizeToOrganizer(acceptedApplies, siteUser, PenaltyType.MATCHING_DELETE);
         }
 
         sendNotificationToApplyUser(matchingId, siteUser, matching, NotificationType.DELETE_MATCHING);
-        confirmedApplies.forEach(apply -> applyRepository.delete(apply));
+        acceptedApplies.forEach(apply -> applyRepository.delete(apply));
 
         matchingRepository.delete(matching);
     }
@@ -254,19 +252,19 @@ public class MatchingServiceImpl implements MatchingService {
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
         var matching = findEntity.findMatching(matchingId);
         var recruitNum = matching.getRecruitNum();
-        var confirmedNum = matching.getConfirmedNum();
+        var acceptedNum = matching.getAcceptedNum();
         var applyNum = applyRepository.countByMatching_IdAndApplyStatus(matchingId, ApplyStatus.PENDING).get();
 
         var appliedMembers = findAppliedMembers(matchingId);
-        var confirmedMembers = findConfirmedMembers(matchingId);
+        var acceptedMembers = findAcceptedMembers(matchingId);
 
         if (isOrganizer(siteUser.getId(), matching)) {
             var applyContentsForOrganizer = ApplyContents.builder()
                     .applyNum(applyNum)
                     .recruitNum(recruitNum)
-                    .confirmedNum(confirmedNum)
+                    .acceptedNum(acceptedNum)
                     .appliedMembers(appliedMembers)
-                    .confirmedMembers(confirmedMembers)
+                    .acceptedMembers(acceptedMembers)
                     .build();
 
             return applyContentsForOrganizer;
@@ -274,14 +272,14 @@ public class MatchingServiceImpl implements MatchingService {
 
         var applyContentsForUser = ApplyContents.builder()
                 .recruitNum(recruitNum)
-                .confirmedNum(confirmedNum)
-                .confirmedMembers(confirmedMembers)
+                .acceptedNum(acceptedNum)
+                .acceptedMembers(acceptedMembers)
                 .build();
 
         return applyContentsForUser;
     }
 
-    private List<ApplyMember> findConfirmedMembers(long matchingId) {
+    private List<ApplyMember> findAcceptedMembers(long matchingId) {
         return applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED)
                 .orElse(Collections.emptyList())
                 .stream().map((apply)

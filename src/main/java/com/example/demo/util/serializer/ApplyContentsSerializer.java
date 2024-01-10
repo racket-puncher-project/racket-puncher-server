@@ -17,11 +17,11 @@ public class ApplyContentsSerializer extends JsonSerializer<ApplyContents> {
             gen.writeNumberField("applyNum", applyContents.getApplyNum());
         }
         gen.writeNumberField("recruitNum", applyContents.getRecruitNum());
-        gen.writeNumberField("confirmedNum", applyContents.getConfirmedNum());
+        gen.writeNumberField("confirmedNum", applyContents.getAcceptedNum());
         if (applyContents.getAppliedMembers() != null) {
             gen.writeObjectField("appliedMembers", applyContents.getAppliedMembers());
         }
-        gen.writeObjectField("confirmedMembers", applyContents.getConfirmedMembers());
+        gen.writeObjectField("confirmedMembers", applyContents.getAcceptedMembers());
 
         gen.writeEndObject();
     }

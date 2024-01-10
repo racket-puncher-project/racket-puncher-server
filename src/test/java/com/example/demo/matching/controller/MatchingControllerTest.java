@@ -181,7 +181,7 @@ class MatchingControllerTest {
                 .createTime(LocalDateTime.now())
                 .age(AgeGroup.FORTIES)
                 .content("내용")
-                .confirmedNum(1)
+                .acceptedNum(1)
                 .matchingType(MatchingType.SINGLE)
                 .ntrp(Ntrp.PRO)
                 .isReserved(true)
@@ -230,14 +230,14 @@ class MatchingControllerTest {
         return ApplyContents.builder()
                 .applyNum(1)
                 .recruitNum(4)
-                .confirmedNum(1)
+                .acceptedNum(1)
                 .appliedMembers(List.of(ApplyMember
                         .builder()
                                 .applyId(2L)
                                 .siteUserId(2L)
                                 .nickname("닉네임2")
                         .build()))
-                .confirmedMembers(List.of(ApplyMember
+                .acceptedMembers(List.of(ApplyMember
                         .builder()
                         .applyId(1L)
                         .siteUserId(1L)
