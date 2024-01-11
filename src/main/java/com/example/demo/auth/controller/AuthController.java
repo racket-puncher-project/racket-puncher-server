@@ -68,13 +68,13 @@ public class AuthController {
     }
 
     @PostMapping("/phone/send-code")
-    public ResponseDto<StringResponseDto> sendSMS(@RequestBody PhoneNumberRequestDto phoneNumberRequestDto) {
+    public ResponseDto<StringResponseDto> sendCode(@RequestBody PhoneNumberRequestDto phoneNumberRequestDto) {
         var result = phoneAuthService.sendCode(phoneNumberRequestDto.getPhoneNumber());
         return ResponseUtil.SUCCESS(result);
     }
 
     @PostMapping("/phone/verify-code")
-    public ResponseDto<StringResponseDto> verifySMS(@RequestBody AuthCodeRequestDto authCodeRequestDto) {
+    public ResponseDto<StringResponseDto> verifyCode(@RequestBody AuthCodeRequestDto authCodeRequestDto) {
         var result = phoneAuthService.verifyCode(authCodeRequestDto.getPhoneNumber(), authCodeRequestDto.getAuthCode());
         return ResponseUtil.SUCCESS(result);
     }
