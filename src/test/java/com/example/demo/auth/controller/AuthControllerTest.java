@@ -8,6 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 
 import com.example.demo.auth.dto.*;
 import com.example.demo.auth.service.KakaoOAuthService;
+import com.example.demo.auth.service.PhoneAuthService;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.auth.security.JwtAuthenticationFilter;
 import com.example.demo.auth.security.SecurityConfiguration;
@@ -17,6 +18,7 @@ import com.example.demo.type.AgeGroup;
 import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @WebMvcTest(AuthController.class)
 @Import(SecurityConfiguration.class)
 class AuthControllerTest {
-
     @MockBean
     private RedisTemplate<String, String> redisTemplate;
 
@@ -42,6 +43,9 @@ class AuthControllerTest {
 
     @MockBean
     private KakaoOAuthService kakaoOAuthService;
+
+    @MockBean
+    private PhoneAuthService phoneAuthService;
 
     @MockBean
     private TokenProvider tokenProvider;
@@ -197,6 +201,34 @@ class AuthControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    public void sendCode() throws Exception {
+        // given
+        given(phoneAuthService.sendCode("01012345678"))
+                .willReturn(new StringResponseDto("sms 문자가 전송되었습니다."));
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/phone/send-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(getPhoneNumberRequestDto())))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void verifyCode() throws Exception {
+        // given
+        given(phoneAuthService.verifyCode("01012345678", "12345"))
+                .willReturn(new StringResponseDto("휴대폰 번호가 성공적으로 인증되었습니다."));
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/phone/verify-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(getAuthCodeRequestDto())))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SignUpDto getSignUpDto() {
         return SignUpDto.builder()
                 .email("email@naver.com")
@@ -266,5 +298,13 @@ class AuthControllerTest {
 
     private PasswordRequestDto getPasswordRequestDto() {
         return new PasswordRequestDto("password");
+    }
+
+    private PhoneNumberRequestDto getPhoneNumberRequestDto(){
+        return new PhoneNumberRequestDto("01012345678");
+    }
+
+    private AuthCodeRequestDto getAuthCodeRequestDto(){
+        return new AuthCodeRequestDto("01012345678", "12345");
     }
 }
