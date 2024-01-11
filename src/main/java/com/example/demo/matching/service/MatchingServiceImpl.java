@@ -7,13 +7,7 @@ import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.matching.dto.ApplyContents;
-import com.example.demo.matching.dto.ApplyMember;
-import com.example.demo.matching.dto.FilterRequestDto;
-import com.example.demo.matching.dto.LocationDto;
-import com.example.demo.matching.dto.MatchingDetailRequestDto;
-import com.example.demo.matching.dto.MatchingDetailResponseDto;
-import com.example.demo.matching.dto.MatchingPreviewDto;
+import com.example.demo.matching.dto.*;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.openfeign.feignclient.LatAndLonApiFeignClient;
@@ -200,21 +194,11 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     private List<Double> getLatAndLon(String address) {
-        String latAndLonResponse = latAndLonApiFeignClient.getLatAndLon(address, "KakaoAK " + apiKey);
-        JSONParser jsonParser = new JSONParser();
-        JSONObject jsonObject;
-
+        LatAndLonResponseDto latAndLonResponse = latAndLonApiFeignClient.getLatAndLon(address, "KakaoAK " + apiKey);
         try {
-            jsonObject = (JSONObject) jsonParser.parse(latAndLonResponse);
-        } catch (ParseException e) {
-            throw new RacketPuncherException(JSON_PARSING_FAILED);
-        }
-
-        try {
-            JSONArray documents = (JSONArray) jsonObject.get("documents");
-            JSONObject firstDocument = (JSONObject) documents.get(0);
-            double lon = Double.parseDouble((String) firstDocument.get("x")); // 경도
-            double lat = Double.parseDouble((String) firstDocument.get("y")); // 위도
+            DocumentForAddressDto firstDocument = latAndLonResponse.getDocuments().get(0);
+            double lon = Double.parseDouble(firstDocument.getX()); // 경도
+            double lat = Double.parseDouble(firstDocument.getY()); // 위도
             return new ArrayList<>(Arrays.asList(lat, lon));
         } catch (Exception e) {
             throw new RacketPuncherException(LAT_AND_LON_NOT_FOUND);
