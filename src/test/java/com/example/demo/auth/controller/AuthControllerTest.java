@@ -25,6 +25,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -181,6 +182,21 @@ class AuthControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    public void withdraw() throws Exception {
+        // given
+        given(authService.withdraw("email", getPasswordRequestDto().getPassword()))
+                .willReturn("탈퇴 성공");
+
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/auth/withdraw")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(getPasswordRequestDto())))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SignUpDto getSignUpDto() {
         return SignUpDto.builder()
                 .email("email@naver.com")
@@ -246,5 +262,9 @@ class AuthControllerTest {
 
     private NicknameRequestDto getNicknameRequestDto() {
         return new NicknameRequestDto("nickname");
+    }
+
+    private PasswordRequestDto getPasswordRequestDto() {
+        return new PasswordRequestDto("password");
     }
 }

@@ -1,10 +1,5 @@
 package com.example.demo.matching.service;
 
-import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.JSON_PARSING_FAILED;
-import static com.example.demo.exception.type.ErrorCode.PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING;
-import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
-
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
@@ -21,6 +16,7 @@ import com.example.demo.matching.dto.MatchingDetailResponseDto;
 import com.example.demo.matching.dto.MatchingPreviewDto;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.service.NotificationService;
+import com.example.demo.openfeign.feignclient.LatAndLonApiFeignClient;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
@@ -28,6 +24,8 @@ import com.example.demo.type.PenaltyType;
 import com.example.demo.type.RecruitStatus;
 import com.example.demo.util.geometry.GeometryUtil;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +39,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
+
+import static com.example.demo.exception.type.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -53,10 +52,10 @@ public class MatchingServiceImpl implements MatchingService {
     private final FindEntity findEntity;
     private final SiteUserRepository siteUserRepository;
     private final NotificationService notificationService;
+    private final LatAndLonApiFeignClient latAndLonApiFeignClient;
 
     @Value("${kakao.client_id}")
     private String apiKey;
-
 
     private static boolean isOrganizer(long userId, Matching matching) {
         return matching.getSiteUser().getId() == userId;
@@ -66,7 +65,7 @@ public class MatchingServiceImpl implements MatchingService {
     public Matching create(String email, MatchingDetailRequestDto matchingDetailRequestDto) {
         SiteUser siteUser = siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
-        List<Double> latAndLon = getLatAndLon(getUserAddressInfo(matchingDetailRequestDto.getLocation()));
+        List<Double> latAndLon = getLatAndLon(matchingDetailRequestDto.getLocation());
         matchingDetailRequestDto.setLat(latAndLon.get(0));
         matchingDetailRequestDto.setLon(latAndLon.get(1));
         Matching matching = matchingRepository.save(Matching.fromDto(matchingDetailRequestDto, siteUser));
@@ -95,10 +94,7 @@ public class MatchingServiceImpl implements MatchingService {
                 = applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED).get();
 
         validateOrganizer(matchingId, siteUser);
-
-        // 주소 다르다면 위경도 업데이트
         updateLatAndLon(matchingDetailRequestDto, matching);
-
         sendNotificationToApplyUser(matchingId, siteUser, matching, NotificationType.MODIFY_MATCHING);
         penalizeToOrganizer(acceptedApplies, siteUser, PenaltyType.MATCHING_MODIFY);
         acceptedApplies.forEach(apply -> {
@@ -113,7 +109,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     private void updateLatAndLon(MatchingDetailRequestDto matchingDetailRequestDto, Matching matching) {
         if(!matchingDetailRequestDto.getLocation().equals(matching.getLocation())){
-            List<Double> latAndLon = getLatAndLon(getUserAddressInfo(matchingDetailRequestDto.getLocation()));
+            List<Double> latAndLon = getLatAndLon(matchingDetailRequestDto.getLocation());
             matchingDetailRequestDto.setLat(latAndLon.get(0));
             matchingDetailRequestDto.setLon(latAndLon.get(1));
         }
@@ -203,37 +199,26 @@ public class MatchingServiceImpl implements MatchingService {
                 .map(MatchingPreviewDto::fromEntity);
     }
 
-    private String getUserAddressInfo(String address) {
-        WebClient webClient = WebClient.builder()
-                .baseUrl("https://dapi.kakao.com/v2/local/search/address")
-                .defaultHeader("Authorization", apiKey)
-                .build();
-
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .queryParam("query", address)
-                        .build())
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
-    }
-
     private List<Double> getLatAndLon(String address) {
+        String latAndLonResponse = latAndLonApiFeignClient.getLatAndLon(address, "KakaoAK " + apiKey);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject;
 
         try {
-            jsonObject = (JSONObject) jsonParser.parse(address);
+            jsonObject = (JSONObject) jsonParser.parse(latAndLonResponse);
         } catch (ParseException e) {
             throw new RacketPuncherException(JSON_PARSING_FAILED);
         }
 
-        JSONArray documents = (JSONArray) jsonObject.get("documents");
-        JSONObject firstDocument = (JSONObject) documents.get(0);
-        double lon = Double.parseDouble((String) firstDocument.get("x")); // 경도
-        double lat = Double.parseDouble((String) firstDocument.get("y")); // 위도
-
-        return List.of(lat, lon);
+        try {
+            JSONArray documents = (JSONArray) jsonObject.get("documents");
+            JSONObject firstDocument = (JSONObject) documents.get(0);
+            double lon = Double.parseDouble((String) firstDocument.get("x")); // 경도
+            double lat = Double.parseDouble((String) firstDocument.get("y")); // 위도
+            return new ArrayList<>(Arrays.asList(lat, lon));
+        } catch (Exception e) {
+            throw new RacketPuncherException(LAT_AND_LON_NOT_FOUND);
+        }
     }
 
     @Override

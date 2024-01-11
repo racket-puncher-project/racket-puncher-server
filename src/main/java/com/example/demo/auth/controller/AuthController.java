@@ -7,6 +7,7 @@ import com.example.demo.common.ResponseUtil;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.auth.service.AuthService;
 
+import java.security.Principal;
 import java.util.concurrent.TimeUnit;
 
 import lombok.RequiredArgsConstructor;
@@ -69,20 +70,9 @@ public class AuthController {
         return ResponseUtil.SUCCESS(result);
     }
 
-    @DeleteMapping("/quit")
-    public ResponseEntity<?> quit(@RequestBody QuitDto request) {
-        var accessToken = request.getAccessToken();
-        if (!StringUtils.hasText(accessToken) || !this.tokenProvider.validateToken(accessToken)) {
-            return new ResponseEntity<>("Wrong Request", HttpStatus.BAD_REQUEST);
-        }
-        Authentication authentication = tokenProvider.getAuthentication(accessToken);
-        if (redisTemplate.opsForValue().get(authentication.getName()) != null) {
-            redisTemplate.delete(authentication.getName());
-        }
-        Long expiration = tokenProvider.getExpiration(accessToken);
-        redisTemplate.opsForValue().set(accessToken, "quit", expiration, TimeUnit.MILLISECONDS);
-
-        var result = this.authService.withdraw(request);
-        return new ResponseEntity<>("Quit Completed", HttpStatus.OK);
+    @DeleteMapping("/withdraw")
+    public void quit(Principal principal, @RequestBody PasswordRequestDto passwordRequestDto) {
+        var email = principal.getName();
+        authService.withdraw(email, passwordRequestDto.getPassword());
     }
 }
