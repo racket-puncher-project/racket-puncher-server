@@ -158,6 +158,9 @@ public class SiteUserServiceImpl implements SiteUserService {
                     .build();
 
             reviewRepository.save(Review.fromDto(processedReviewDto));
+            applyRepository.findBySiteUser_IdAndMatching_Id(subjectUser.getId(), matchingId).orElseThrow(()
+                            -> new RacketPuncherException(APPLY_NOT_FOUND))
+                    .changeApplyStatus(ApplyStatus.EVALUATION_COMPLETED);
         }
     }
 }
