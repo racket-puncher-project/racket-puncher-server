@@ -3,7 +3,7 @@ package com.example.demo.type;
 import com.example.demo.openfeign.dto.weather.WeatherResponseDto;
 
 public enum NotificationType {
-    MODIFY_MATCHING("신청한 매칭글이 수정돼, 매칭 확정이 상태가 매칭 대기 상태로 변경되었습니다."),
+    MODIFY_MATCHING("신청한 매칭글이 수정돼, 매칭 확정 상태가 매칭 대기 상태로 변경되었습니다."),
     DELETE_MATCHING("신청한 매칭글이 삭제되었습니다."),
     REQUEST_APPLY("주최한 매칭에 참가 신청 요청이 들어왔습니다."),
     ACCEPT_APPLY("신청한 매칭글의 주최자가 참가 신청을 수락하였습니다."),
