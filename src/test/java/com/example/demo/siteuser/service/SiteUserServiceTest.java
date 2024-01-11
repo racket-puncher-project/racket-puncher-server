@@ -473,15 +473,15 @@ public class SiteUserServiceTest {
         InputReviewDto inputReviewDto1 = InputReviewDto
                 .builder()
                 .objectUserId(2L)
-                .positiveReviewTypes(List.of(PositiveReviewType.PROACTIVE))
-                .negativeReviewTypes(List.of(NegativeReviewType.AGGRESSIVE))
+                .positiveReviews(List.of(PositiveReviewType.PROACTIVE))
+                .negativeReviews(List.of(NegativeReviewType.AGGRESSIVE))
                 .build();
 
         InputReviewDto inputReviewDto2 = InputReviewDto
                 .builder()
                 .objectUserId(3L)
-                .positiveReviewTypes(List.of(PositiveReviewType.PROACTIVE))
-                .negativeReviewTypes(List.of(NegativeReviewType.AGGRESSIVE))
+                .positiveReviews(List.of(PositiveReviewType.PROACTIVE))
+                .negativeReviews(List.of(NegativeReviewType.AGGRESSIVE))
                 .build();
 
         inputReviewDtoList.add(inputReviewDto1);

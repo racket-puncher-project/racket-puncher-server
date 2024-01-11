@@ -20,7 +20,7 @@ public class ProcessedReviewDto {
     private Matching matching;
     private SiteUser objectUser;
     private SiteUser subjectUser;
-    private List<PositiveReviewType> positiveReviewTypes;
-    private List<NegativeReviewType> negativeReviewTypes;
+    private List<PositiveReviewType> positiveReviews;
+    private List<NegativeReviewType> negativeReviews;
     private int score;
 }

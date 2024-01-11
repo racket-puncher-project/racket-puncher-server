@@ -62,19 +62,19 @@ public class Review {
 
     @Column(name = "POSITIVE_REVIEWS", columnDefinition = "json")
     @Convert(converter = PositiveReviewsConverter.class)
-    private List<PositiveReviewType> positiveReviewTypes;
+    private List<PositiveReviewType> positiveReviews;
 
     @Column(name = "NEGATIVE_REVIEWS", columnDefinition = "json")
     @Convert(converter = NegativeReviewsConverter.class)
-    private List<NegativeReviewType> negativeReviewTypes;
+    private List<NegativeReviewType> negativeReviews;
 
     public static Review fromDto(ProcessedReviewDto processedReviewDto) {
         return Review.builder()
                 .matching(processedReviewDto.getMatching())
                 .objectUser(processedReviewDto.getObjectUser())
                 .subjectUser(processedReviewDto.getSubjectUser())
-                .positiveReviewTypes(processedReviewDto.getPositiveReviewTypes())
-                .negativeReviewTypes(processedReviewDto.getNegativeReviewTypes())
+                .positiveReviews(processedReviewDto.getPositiveReviews())
+                .negativeReviews(processedReviewDto.getNegativeReviews())
                 .score(processedReviewDto.getScore())
                 .build();
     }

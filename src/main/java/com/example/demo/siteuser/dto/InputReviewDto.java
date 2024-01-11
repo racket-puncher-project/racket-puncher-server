@@ -16,6 +16,6 @@ import lombok.Setter;
 @Builder
 public class InputReviewDto {
     private long objectUserId;
-    private List<PositiveReviewType> positiveReviewTypes;
-    private List<NegativeReviewType> negativeReviewTypes;
+    private List<PositiveReviewType> positiveReviews;
+    private List<NegativeReviewType> negativeReviews;
 }
