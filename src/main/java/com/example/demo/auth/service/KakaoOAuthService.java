@@ -5,6 +5,7 @@ import com.example.demo.auth.dto.*;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.common.ResponseUtil;
 import com.example.demo.exception.RacketPuncherException;
+import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AuthType;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
 import static com.example.demo.exception.type.ErrorCode.KAKAO_ACCESS_TOKEN_FAIL;
 import static com.example.demo.exception.type.ErrorCode.KAKAO_USER_INFO_FAIL;
 
@@ -25,6 +27,7 @@ public class KakaoOAuthService {
     private final RestTemplate restTemplate;
     private final TokenProvider tokenProvider;
     private final SiteUserRepository siteUserRepository;
+    private final NotificationService notificationService;
 
     @Value("${kakao.client_id}")
     private String clientId;
@@ -43,6 +46,7 @@ public class KakaoOAuthService {
         if (isAlreadyRegistered) {
             return kakaoSignIn(email);
         }
+
         return KakaoFirstSignInResponseDto.fromKakaoUserInfo(kakaoUserInfoDto);
     }
 
@@ -96,6 +100,9 @@ public class KakaoOAuthService {
     }
 
     private KakaoSignInResponseDto kakaoSignIn(String email) {
+        var siteUserId = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND)).getId();
+
         var accessToken = tokenProvider.generateAccessToken(email);
         var refreshToken = tokenProvider.generateAndSaveRefreshToken(email);
         return KakaoSignInResponseDto.builder()

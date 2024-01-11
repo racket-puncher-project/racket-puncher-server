@@ -1,18 +1,18 @@
 package com.example.demo.notification.repository;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @Repository
 public class EmitterRepository {
 
-    private Map<String, SseEmitter> emitterMap = new HashMap<>();
+    private Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
     public SseEmitter save(Long userId, SseEmitter sseEmitter) {
-        emitterMap.put(getKey(userId), sseEmitter);
+        emitters.put(getKey(userId), sseEmitter);
         return sseEmitter;
     }
 
@@ -21,11 +21,10 @@ public class EmitterRepository {
     }
 
     public Optional<SseEmitter> get(Long userId) {
-        return Optional.ofNullable(emitterMap.get(getKey(userId)));
+        return Optional.ofNullable(emitters.get(getKey(userId)));
     }
 
     public void delete(Long userId) {
-        emitterMap.remove(getKey(userId));
+        emitters.remove(getKey(userId));
     }
-
 }

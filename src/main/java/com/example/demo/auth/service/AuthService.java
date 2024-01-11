@@ -11,6 +11,7 @@ import com.example.demo.auth.dto.SignInDto;
 import com.example.demo.auth.dto.SignUpDto;
 import com.example.demo.auth.dto.StringResponseDto;
 import com.example.demo.auth.security.TokenProvider;
+import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AuthType;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class AuthService implements UserDetailsService {
     private final SiteUserRepository siteUserRepository;
     private final TokenProvider tokenProvider;
     private final RedisTemplate<String, String> redisTemplate;
+    private final NotificationService notificationService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -44,14 +46,15 @@ public class AuthService implements UserDetailsService {
     }
 
     public SiteUser register(SignUpDto signUpDto) {
-        boolean exists = this.siteUserRepository.existsByEmail(signUpDto.getEmail());
+        boolean exists = siteUserRepository.existsByEmail(signUpDto.getEmail());
         if (exists) {
             throw new RacketPuncherException(EMAIL_ALREADY_EXISTED);
         }
         if(AuthType.GENERAL.equals(signUpDto.getAuthType())){
             signUpDto.setPassword(this.passwordEncoder.encode(signUpDto.getPassword()));
         }
-        return this.siteUserRepository.save(SiteUser.fromDto(signUpDto));
+        var siteUser = siteUserRepository.save(SiteUser.fromDto(signUpDto));
+        return siteUser;
     }
 
     public SiteUser withdraw(QuitDto member) {
@@ -92,8 +95,10 @@ public class AuthService implements UserDetailsService {
 
     public GeneralSignInResponseDto signIn(SignInDto signInDto) {
         authenticate(signInDto);
+
         var accessToken = tokenProvider.generateAccessToken(signInDto.getEmail());
         var refreshToken = tokenProvider.generateAndSaveRefreshToken(signInDto.getEmail());
+
         return GeneralSignInResponseDto.builder()
                 .authType(AuthType.GENERAL)
                 .accessToken(accessToken)

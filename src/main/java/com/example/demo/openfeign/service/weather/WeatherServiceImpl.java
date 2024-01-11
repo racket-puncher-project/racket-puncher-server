@@ -1,5 +1,6 @@
 package com.example.demo.openfeign.service.weather;
 
+import com.example.demo.entity.Matching;
 import com.example.demo.notification.dto.LocationAndDateFromMatching;
 import com.example.demo.openfeign.dto.weather.Item;
 import com.example.demo.openfeign.dto.weather.WeatherRequestDto;
@@ -7,6 +8,8 @@ import com.example.demo.openfeign.dto.weather.WeatherResponse;
 import com.example.demo.openfeign.dto.weather.WeatherResponseDto;
 import com.example.demo.openfeign.feignclient.WeatherApiFeignClient;
 import com.example.demo.type.PrecipitationType;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class WeatherServiceImpl implements WeatherService {
 
+    private static final DateTimeFormatter formForWeather = DateTimeFormatter.ofPattern("yyyyMMdd");
     private final WeatherApiFeignClient weatherApiFeignClient;
     @Value("${weather-api.key}")
     private String apiKey;
@@ -51,5 +55,20 @@ public class WeatherServiceImpl implements WeatherService {
                 .precipitationProbability(precipitationProbability)
                 .precipitationType(PrecipitationType.findPrecipitationType(precipitationCode))
                 .build();
+    }
+
+    @Override
+    public WeatherResponseDto getWeatherResponseDtoByMatching(Matching matching) {
+        String nx = String.valueOf((int) Math.round(matching.getLat()));
+        String ny = String.valueOf((int) Math.round(matching.getLon()));
+        var locationAndDateFromMatching
+                = LocationAndDateFromMatching.builder()
+                .baseDate(LocalDateTime.now().format(formForWeather))
+                .nx(nx)
+                .ny(ny)
+                .build();
+
+        var weatherDto = getWeather(locationAndDateFromMatching);
+        return weatherDto;
     }
 }
