@@ -33,7 +33,10 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND.value(),"사용자를 찾을 수 없습니다."),
     SELF_APPLY_CANCEL_DENIED(HttpStatus.BAD_REQUEST.value(), "본인이 주최한 경기는 참가 신청 취소를 할 수 없습니다."),
     KAKAO_ACCESS_TOKEN_FAIL(HttpStatus.BAD_REQUEST.value(),"카카오 엑세스 토큰 발급에 실패했습니다."),
-    KAKAO_USER_INFO_FAIL(HttpStatus.BAD_REQUEST.value(),"카카오 사용자 정보 조회에 실패했습니다.")
+    KAKAO_USER_INFO_FAIL(HttpStatus.BAD_REQUEST.value(),"카카오 사용자 정보 조회에 실패했습니다."),
+    SMS_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR.value(), "sms 문자 전송에 실패했습니다."),
+    PHONE_AUTH_NUM_EXPIRED(HttpStatus.BAD_REQUEST.value(), "휴대폰 인증 번호가 만료되었습니다."),
+    PHONE_AUTH_NUM_DOESNT_MATCH(HttpStatus.BAD_REQUEST.value(), "휴대폰 인증 번호가 일치하지 않습니다."),
     ;
 
     private final int code;

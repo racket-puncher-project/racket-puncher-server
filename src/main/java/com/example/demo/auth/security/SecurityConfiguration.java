@@ -53,7 +53,7 @@ public class SecurityConfiguration {
                                 "/api/auth/upload-profile-image",  "/api/matches/list/**",
                                 "/api/matches/detail/**", "/api/users/profile/**", "/api/aws/**",
                                 "/api/auth/check-nickname", "/api/auth/check-email", "/api/auth/redis",
-                                "/api/auth/kakao")
+                                "/api/auth/kakao", "/api/auth/phone/send-code", "/api/auth/phone/verify-code")
 
                         .permitAll()
                         .anyRequest().authenticated())
