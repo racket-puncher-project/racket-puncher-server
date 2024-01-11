@@ -33,7 +33,8 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND.value(),"사용자를 찾을 수 없습니다."),
     SELF_APPLY_CANCEL_DENIED(HttpStatus.BAD_REQUEST.value(), "본인이 주최한 경기는 참가 신청 취소를 할 수 없습니다."),
     KAKAO_ACCESS_TOKEN_FAIL(HttpStatus.BAD_REQUEST.value(),"카카오 엑세스 토큰 발급에 실패했습니다."),
-    KAKAO_USER_INFO_FAIL(HttpStatus.BAD_REQUEST.value(),"카카오 사용자 정보 조회에 실패했습니다.")
+    KAKAO_USER_INFO_FAIL(HttpStatus.BAD_REQUEST.value(),"카카오 사용자 정보 조회에 실패했습니다."),
+    LAT_AND_LON_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "위경도를 찾을 수 없는 주소입니다.")
     ;
 
     private final int code;
