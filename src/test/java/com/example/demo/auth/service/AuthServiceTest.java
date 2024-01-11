@@ -2,32 +2,27 @@ package com.example.demo.auth.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.example.demo.auth.dto.SignInDto;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.auth.dto.AccessTokenDto;
 import com.example.demo.auth.dto.SignUpDto;
 import com.example.demo.auth.security.TokenProvider;
-import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.TestComponent;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.Authentication;
@@ -97,60 +92,6 @@ class AuthServiceTest {
 
         // then
         assertEquals(exception.getMessage(), "이미 사용 중인 이메일입니다.");
-    }
-
-    @Test
-    void signInSuccess() {
-        // given
-        given(siteUserRepository.findByEmail(getSignInDto().getEmail()))
-                .willReturn(Optional.ofNullable(getSiteUser()));
-        given(passwordEncoder.matches(getSignInDto().getPassword(), getSiteUser().getPassword()))
-                .willReturn(true);
-
-        // when
-        var result = authService.signIn(getSignInDto());
-
-        // then
-        assertEquals(AuthType.GENERAL, result.getAuthType());
-    }
-
-    @Test
-    void signInFailedByEmailNotFound() {
-        // given
-        given(siteUserRepository.findByEmail(getSignInDto().getEmail()))
-                .willReturn(Optional.ofNullable(null));
-
-        // when
-        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
-                () -> authService.signIn(getSignInDto()));
-
-        // then
-        assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
-    }
-
-    @Test
-    void signInFailedByPassword() {
-        // given
-        given(siteUserRepository.findByEmail(getSignInDto().getEmail()))
-                .willReturn(Optional.ofNullable(getSiteUser()));
-        given(passwordEncoder.matches(getSignInDto().getPassword(), getSiteUser().getPassword()))
-                .willReturn(false);
-
-        // when
-        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
-                () -> authService.signIn(getSignInDto()));
-
-        // then
-        assertEquals(exception.getMessage(), "비밀번호가 일치하지 않습니다.");
-    }
-
-    private SiteUser getSiteUser() {
-        return SiteUser
-                .builder()
-                .id(1L)
-                .email("email@naver.com")
-                .password("1234")
-                .build();
     }
 
     @Test
@@ -319,10 +260,6 @@ class AuthServiceTest {
     private AccessTokenDto getAccessTokenDto() {
         return new AccessTokenDto("accessToken");
     }
-
-
-    private SignInDto getSignInDto() {
-        return new SignInDto("email@naver.com", "1234");
 
     private SiteUser getGeneralSiteUser() {
         return SiteUser.builder()
