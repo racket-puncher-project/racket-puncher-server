@@ -17,10 +17,7 @@ import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.aws.S3Uploader;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
-import com.example.demo.matching.dto.ApplyContents;
-import com.example.demo.matching.dto.ApplyMember;
-import com.example.demo.matching.dto.MatchingDetailRequestDto;
-import com.example.demo.matching.dto.MatchingPreviewDto;
+import com.example.demo.matching.dto.*;
 import com.example.demo.matching.service.MatchingService;
 import com.example.demo.openfeign.dto.address.AddressResponseDto;
 import com.example.demo.openfeign.service.address.AddressService;
@@ -67,14 +64,14 @@ class MatchingControllerTest {
     ObjectMapper objectMapper;
 
     @Test
-    @DisplayName("매칭글 등록 - 구장 이미지 없는 경우")
     public void createMatchingTest() throws Exception {
         //given
-        Matching matching = makeMatching();
-        MatchingDetailRequestDto matchingDetailRequestDto = makeMatchingDetailDto();
+        Matching matching = getMatchingEntity();
+        MatchingDetailRequestDto matchingDetailRequestDto = getMatchingDetailRequestDto();
+        String content = objectMapper.writeValueAsString(matchingDetailRequestDto);
+
         given(matchingService.create(anyString(), eq(matchingDetailRequestDto)))
                 .willReturn(matching);
-        String content = objectMapper.writeValueAsString(matchingDetailRequestDto);
 
         //when
         //then
@@ -85,27 +82,22 @@ class MatchingControllerTest {
     }
 
     @Test
-    @DisplayName("매칭글 조회")
     public void getDetailedMatchingTest() throws Exception {
-        /*
         //given
-        MatchingDetailResponseDto matchingDetailResponseDto = makeMatchingDetailDto();
         given(matchingService.getDetail(1L))
-                .willReturn(matchingDetailRequestDto);
+                .willReturn(getMatchingDetailResponseDto());
         //when
         //then
-        MvcResult mvcResult = mockMvc.perform(get("/api/matches/1"))
+        mockMvc.perform(get("/api/matches/1"))
                 .andExpect(status().isOk())
-                .andReturn();
-        */
+                .andDo(print());
     }
 
     @Test
-    @DisplayName("매칭글 수정 - 구장 이미지 바꾸지 않은 경우")
     public void editMatchingTest() throws Exception {
         //given
-        Matching matching = makeMatching();
-        MatchingDetailRequestDto matchingDetailRequestDto = makeMatchingDetailDto();
+        Matching matching = getMatchingEntity();
+        MatchingDetailRequestDto matchingDetailRequestDto = getMatchingDetailRequestDto();
         given(matchingService.update(anyString(), eq(1L), eq(matchingDetailRequestDto)))
                 .willReturn(matching);
         String content = objectMapper.writeValueAsString(matchingDetailRequestDto);
@@ -119,7 +111,6 @@ class MatchingControllerTest {
     }
 
     @Test
-    @DisplayName("매칭글 삭제")
     public void deleteMatchingTest() throws Exception {
         //given
         doNothing().when(matchingService).delete(anyString(), eq(1L));
@@ -176,7 +167,7 @@ class MatchingControllerTest {
                 .andDo(print());
     }
 
-    private Matching makeMatching(){
+    private Matching getMatchingEntity(){
         return Matching.builder()
                 .createTime(LocalDateTime.now())
                 .age(AgeGroup.FORTIES)
@@ -196,13 +187,31 @@ class MatchingControllerTest {
                 .build();
     }
 
-    private MatchingDetailRequestDto makeMatchingDetailDto(){
+    private MatchingDetailRequestDto getMatchingDetailRequestDto(){
         return MatchingDetailRequestDto.builder()
                 .title("제목")
                 .content("본문")
                 .location("서울특별시 중구 을지로 66")
-                .lat(37.56556383681641)
-                .lon(126.98540998152264)
+                .locationImg("구장 이미지 주소")
+                .date("2023-11-07")
+                .startTime("18:00")
+                .endTime("20:00")
+                .recruitNum(4)
+                .cost(5000)
+                .isReserved(false)
+                .ntrp(Ntrp.DEVELOPMENT)
+                .ageGroup(AgeGroup.SENIOR)
+                .matchingType(MatchingType.MIXED_DOUBLE)
+                .build();
+    }
+
+    private MatchingDetailResponseDto getMatchingDetailResponseDto(){
+        return MatchingDetailResponseDto.builder()
+                .title("제목")
+                .content("본문")
+                .location("서울특별시 중구 을지로 66")
+                .lat(37.2636)
+                .lon(127.0286)
                 .locationImg("구장 이미지 주소")
                 .date("2023-11-07")
                 .startTime("18:00")
