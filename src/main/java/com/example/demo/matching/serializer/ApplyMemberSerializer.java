@@ -1,4 +1,4 @@
-package com.example.demo.util.serializer;
+package com.example.demo.matching.serializer;
 
 import com.example.demo.matching.dto.ApplyMember;
 import com.fasterxml.jackson.core.JsonGenerator;

@@ -1,5 +1,9 @@
 package com.example.demo.entity;
 
+import static com.example.demo.util.dateformatter.DateFormatter.formForDate;
+import static com.example.demo.util.dateformatter.DateFormatter.formForDateTime;
+import static com.example.demo.util.dateformatter.DateFormatter.formForTime;
+
 import com.example.demo.matching.dto.MatchingDetailRequestDto;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.MatchingType;
@@ -114,9 +118,6 @@ public class Matching {
 
     public static Matching fromDto(MatchingDetailRequestDto matchingDetailRequestDto, SiteUser siteUser) {
         // 시간 파싱
-        DateTimeFormatter formForDateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        DateTimeFormatter formForTime = DateTimeFormatter.ofPattern("HH:mm");
-        DateTimeFormatter formForDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String recruitDueDateTimeFromDto = matchingDetailRequestDto.getRecruitDueDate()
                 + " " + matchingDetailRequestDto.getRecruitDueTime() + ":00";
 

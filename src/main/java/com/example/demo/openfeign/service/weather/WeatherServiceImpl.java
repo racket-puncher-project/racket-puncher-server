@@ -1,5 +1,7 @@
 package com.example.demo.openfeign.service.weather;
 
+import static com.example.demo.util.dateformatter.DateFormatter.*;
+
 import com.example.demo.entity.Matching;
 import com.example.demo.notification.dto.LocationAndDateFromMatching;
 import com.example.demo.openfeign.dto.weather.Item;
@@ -8,6 +10,7 @@ import com.example.demo.openfeign.dto.weather.WeatherResponse;
 import com.example.demo.openfeign.dto.weather.WeatherResponseDto;
 import com.example.demo.openfeign.feignclient.WeatherApiFeignClient;
 import com.example.demo.type.PrecipitationType;
+import com.example.demo.util.dateformatter.DateFormatter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -20,9 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class WeatherServiceImpl implements WeatherService {
-
-    private static final DateTimeFormatter formForWeather = DateTimeFormatter.ofPattern("yyyyMMdd");
     private final WeatherApiFeignClient weatherApiFeignClient;
+
     @Value("${weather-api.key}")
     private String apiKey;
 

@@ -1,5 +1,9 @@
 package com.example.demo.scheduler;
 
+import static com.example.demo.util.dateformatter.DateFormatter.formForDate;
+import static com.example.demo.util.dateformatter.DateFormatter.formForDateTime;
+import static com.example.demo.util.dateformatter.DateFormatter.formForTime;
+
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
@@ -13,7 +17,6 @@ import com.example.demo.type.RecruitStatus;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,9 +32,6 @@ import org.springframework.util.CollectionUtils;
 @Transactional
 public class Scheduler {
     private final MatchingRepository matchingRepository;
-    private static final DateTimeFormatter formForDateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter formForDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter formForTime = DateTimeFormatter.ofPattern("HH:mm");
     private final NotificationService notificationService;
     private final ApplyRepository applyRepository;
     private final WeatherService weatherService;
@@ -103,7 +103,6 @@ public class Scheduler {
         }
     }
 
-
     private void changeStatusOfMatches(List<Matching> matchesForConfirm) {
         matchesForConfirm
                 .forEach(matching
@@ -151,7 +150,8 @@ public class Scheduler {
     @Scheduled(cron = "${scheduler.cron.notification.delete}") // 매일 00:30분에 수행
     public void deleteNotifications() {
         LocalDateTime threeDaysBeforeNow = LocalDateTime.now().minusDays(3);
-        log.info("scheduler for notification deleting is started at " + LocalDateTime.now().format(formForDateTime));
+        log.info("scheduler for notification deleting is started at " + LocalDateTime.now()
+                .format(formForDateTime));
 
         notificationRepository.deleteAllByCreateTimeBefore(threeDaysBeforeNow);
     }

@@ -1,6 +1,7 @@
 package com.example.demo.apply.service;
 
 import static com.example.demo.exception.type.ErrorCode.*;
+import static com.example.demo.util.dateformatter.DateFormatter.formForDate;
 
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
@@ -15,6 +16,7 @@ import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.PenaltyType;
 import com.example.demo.type.RecruitStatus;
+import com.example.demo.util.dateformatter.DateFormatter;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -31,7 +33,6 @@ public class ApplyServiceImpl implements ApplyService {
     private final NotificationService notificationService;
     private final FindEntity findEntity;
     private final WeatherService weatherService;
-    private static final DateTimeFormatter formForDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Override
     @Transactional
