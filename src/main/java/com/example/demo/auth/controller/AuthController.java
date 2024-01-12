@@ -2,21 +2,17 @@ package com.example.demo.auth.controller;
 
 import com.example.demo.auth.dto.*;
 import com.example.demo.auth.service.KakaoOAuthService;
+import com.example.demo.auth.service.PhoneAuthService;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.auth.service.AuthService;
 
 import java.security.Principal;
-import java.util.concurrent.TimeUnit;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -29,6 +25,7 @@ public class AuthController {
     private final AuthService authService;
     private final TokenProvider tokenProvider;
     private final KakaoOAuthService kakaoOAuthService;
+    private final PhoneAuthService phoneAuthService;
 
     @PostMapping("/sign-up")
     public void signUp(@RequestBody SignUpDto signUpDto) {
@@ -67,6 +64,18 @@ public class AuthController {
     @PostMapping("/check-nickname")
     public ResponseDto<StringResponseDto> checkNickname(@RequestBody NicknameRequestDto nicknameRequestDto) {
         var result = authService.checkNickname(nicknameRequestDto.getNickname());
+        return ResponseUtil.SUCCESS(result);
+    }
+
+    @PostMapping("/phone/send-code")
+    public ResponseDto<StringResponseDto> sendCode(@RequestBody PhoneNumberRequestDto phoneNumberRequestDto) {
+        var result = phoneAuthService.sendCode(phoneNumberRequestDto.getPhoneNumber());
+        return ResponseUtil.SUCCESS(result);
+    }
+
+    @PostMapping("/phone/verify-code")
+    public ResponseDto<StringResponseDto> verifyCode(@RequestBody AuthCodeRequestDto authCodeRequestDto) {
+        var result = phoneAuthService.verifyCode(authCodeRequestDto.getPhoneNumber(), authCodeRequestDto.getAuthCode());
         return ResponseUtil.SUCCESS(result);
     }
 

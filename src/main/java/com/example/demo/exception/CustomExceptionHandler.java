@@ -3,6 +3,7 @@ package com.example.demo.exception;
 import com.example.demo.exception.type.ErrorCode;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
+import net.nurigo.sdk.message.exception.NurigoBadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -30,6 +31,17 @@ public class CustomExceptionHandler {
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .code(ErrorCode.JSON_PARSING_FAILED.getCode())
                 .message(ErrorCode.JSON_PARSING_FAILED.getDescription())
+                .build();
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.resolve(errorResponse.getCode()));
+    }
+
+    @ExceptionHandler(NurigoBadRequestException.class)
+    protected ResponseEntity<ErrorResponse> handelSmsSendException(NurigoBadRequestException e) {
+        log.error("smsSendException", e);
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .code(ErrorCode.SMS_SEND_FAIL.getCode())
+                .message(ErrorCode.SMS_SEND_FAIL.getDescription() + e.getMessage())
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.resolve(errorResponse.getCode()));
