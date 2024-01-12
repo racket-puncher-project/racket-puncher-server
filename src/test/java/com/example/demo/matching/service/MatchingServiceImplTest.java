@@ -13,6 +13,8 @@ import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
+import com.example.demo.matching.dto.DocumentForAddressDto;
+import com.example.demo.matching.dto.LatAndLonResponseDto;
 import com.example.demo.matching.dto.MatchingDetailRequestDto;
 import com.example.demo.matching.dto.MatchingPreviewDto;
 import com.example.demo.matching.repository.MatchingRepository;
@@ -76,12 +78,12 @@ class MatchingServiceImplTest {
         SiteUser siteUser = getSiteUser();
         MatchingDetailRequestDto matchingDetailRequestDto = getMatchingDetailDto();
         ApplyDto applyDto = getApplyDto(siteUser, Matching.fromDto(matchingDetailRequestDto, siteUser));
-        String latAndLonResponse = "{ \"documents\": [ { \"x\": \"127.0\", \"y\": \"37.0\" } ] }";
+        LatAndLonResponseDto latAndLonResponseDto = getLatAndLonResponseDto();
 
         given(siteUserRepository.findByEmail(siteUser.getEmail()))
                 .willReturn(Optional.of(siteUser));
         given(latAndLonApiFeignClient.getLatAndLon(matchingDetailRequestDto.getLocation(), "KakaoAK kakaoClientId"))
-                .willReturn(latAndLonResponse);
+                .willReturn(latAndLonResponseDto);
         given(matchingRepository.save(any(Matching.class)))
                 .willReturn(Matching.fromDto(matchingDetailRequestDto, siteUser));
         given(applyRepository.save(any(Apply.class)))
@@ -101,13 +103,13 @@ class MatchingServiceImplTest {
         //given
         SiteUser siteUser = getSiteUser();
         MatchingDetailRequestDto matchingDetailRequestDto = getMatchingDetailDto();
-        ApplyDto applyDto = getApplyDto(siteUser, Matching.fromDto(matchingDetailRequestDto, siteUser));
-        String latAndLonResponse = "{}";
+        LatAndLonResponseDto latAndLonResponseDto = getLatAndLonResponseDto();
+        latAndLonResponseDto.setDocuments(new ArrayList<>());
 
         given(siteUserRepository.findByEmail(siteUser.getEmail()))
                 .willReturn(Optional.of(siteUser));
         given(latAndLonApiFeignClient.getLatAndLon(matchingDetailRequestDto.getLocation(), "KakaoAK kakaoClientId"))
-                .willReturn(latAndLonResponse);
+                .willReturn(latAndLonResponseDto);
 
         //when
         RacketPuncherException exception = assertThrows(RacketPuncherException.class,
@@ -364,5 +366,17 @@ class MatchingServiceImplTest {
         confirmedMembers.add(applyMember2);
 
         return confirmedMembers;
+    }
+
+    private LatAndLonResponseDto getLatAndLonResponseDto(){
+        List<DocumentForAddressDto> documentList = Arrays.asList(
+                DocumentForAddressDto.builder()
+                        .x("37.8")
+                        .y("127.5")
+                        .build());
+
+        return LatAndLonResponseDto.builder()
+                .documents(documentList)
+                .build();
     }
 }
