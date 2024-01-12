@@ -141,9 +141,9 @@ public class SiteUserServiceImpl implements SiteUserService {
         for (InputReviewDto inputReviewDto : inputReviewDtos) {
             var objectUser = findEntity.findUser(inputReviewDto.getObjectUserId());
 
-            int positiveScore = inputReviewDto.getPositiveReviewTypes()
+            int positiveScore = inputReviewDto.getPositiveReviews()
                     .stream().mapToInt(PositiveReviewType::getScore).sum();
-            int negativeScore = inputReviewDto.getNegativeReviewTypes()
+            int negativeScore = inputReviewDto.getNegativeReviews()
                     .stream().mapToInt(NegativeReviewType::getScore).sum();
 
             objectUser.sumMannerScore(positiveScore, negativeScore);
@@ -152,12 +152,15 @@ public class SiteUserServiceImpl implements SiteUserService {
                     .matching(matching)
                     .objectUser(objectUser)
                     .subjectUser(subjectUser)
-                    .positiveReviewTypes(inputReviewDto.getPositiveReviewTypes())
-                    .negativeReviewTypes(inputReviewDto.getNegativeReviewTypes())
+                    .positiveReviews(inputReviewDto.getPositiveReviews())
+                    .negativeReviews(inputReviewDto.getNegativeReviews())
                     .score(positiveScore + negativeScore)
                     .build();
 
             reviewRepository.save(Review.fromDto(processedReviewDto));
+            applyRepository.findBySiteUser_IdAndMatching_Id(subjectUser.getId(), matchingId).orElseThrow(()
+                            -> new RacketPuncherException(APPLY_NOT_FOUND))
+                    .changeApplyStatus(ApplyStatus.EVALUATION_COMPLETED);
         }
     }
 }

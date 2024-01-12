@@ -11,12 +11,14 @@ import com.example.demo.matching.dto.*;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.openfeign.feignclient.LatAndLonApiFeignClient;
+import com.example.demo.openfeign.service.weather.WeatherService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.PenaltyType;
 import com.example.demo.type.RecruitStatus;
 import com.example.demo.util.geometry.GeometryUtil;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.format.DateTimeFormatter;
 
 import static com.example.demo.exception.type.ErrorCode.*;
 
@@ -47,6 +50,9 @@ public class MatchingServiceImpl implements MatchingService {
     private final SiteUserRepository siteUserRepository;
     private final NotificationService notificationService;
     private final LatAndLonApiFeignClient latAndLonApiFeignClient;
+    private final WeatherService weatherService;
+    private static final DateTimeFormatter formForDate = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
 
     @Value("${kakao.client_id}")
     private String apiKey;
@@ -64,6 +70,19 @@ public class MatchingServiceImpl implements MatchingService {
         matchingDetailRequestDto.setLon(latAndLon.get(1));
         Matching matching = matchingRepository.save(Matching.fromDto(matchingDetailRequestDto, siteUser));
         saveApplyForOrganizer(matching, siteUser);
+        if (!LocalDate.now().format(formForDate).equals(matchingDetailRequestDto.getDate())) {
+            return matching;
+        }
+        var weatherDto = weatherService.getWeatherResponseDtoByMatching(matching);
+
+        if (weatherDto != null) {
+            matching.changeRecruitStatus(RecruitStatus.WEATHER_ISSUE);
+            notificationService.createAndSendNotification(siteUser, matching,
+                    NotificationType.makeWeatherIssueMessage(weatherDto));
+            return matching;
+        }
+        notificationService.createAndSendNotification(siteUser, matching,
+                NotificationType.makeWeatherMessage());
         return matching;
     }
 

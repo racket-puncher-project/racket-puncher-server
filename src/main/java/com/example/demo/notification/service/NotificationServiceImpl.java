@@ -32,10 +32,10 @@ public class NotificationServiceImpl implements NotificationService {
     public SseEmitter connectNotification(Long userId) {
         SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
         emitterRepository.save(userId, sseEmitter);
+        log.info("emitter created.");
 
-        sseEmitter.onCompletion(() -> emitterRepository.delete(userId));
         sseEmitter.onTimeout(() -> emitterRepository.delete(userId));
-
+        sseEmitter.onCompletion(() -> emitterRepository.delete(userId));
         try {
             sseEmitter.send(SseEmitter.event().id("").name(NOTIFICATION_NAME).data("Connection succeed"));
         } catch (IOException e) {

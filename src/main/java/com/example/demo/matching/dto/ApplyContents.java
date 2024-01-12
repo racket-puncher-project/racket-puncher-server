@@ -1,6 +1,6 @@
 package com.example.demo.matching.dto;
 
-import com.example.demo.util.serializer.ApplyContentsSerializer;
+import com.example.demo.matching.serializer.ApplyContentsSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.util.List;
 import lombok.AllArgsConstructor;

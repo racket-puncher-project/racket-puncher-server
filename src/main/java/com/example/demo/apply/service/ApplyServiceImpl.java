@@ -1,6 +1,7 @@
 package com.example.demo.apply.service;
 
 import static com.example.demo.exception.type.ErrorCode.*;
+import static com.example.demo.util.dateformatter.DateFormatter.formForDate;
 
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
@@ -9,11 +10,15 @@ import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.notification.service.NotificationService;
+import com.example.demo.openfeign.service.weather.WeatherService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.PenaltyType;
 import com.example.demo.type.RecruitStatus;
+import com.example.demo.util.dateformatter.DateFormatter;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +32,7 @@ public class ApplyServiceImpl implements ApplyService {
     private final SiteUserRepository siteUserRepository;
     private final NotificationService notificationService;
     private final FindEntity findEntity;
+    private final WeatherService weatherService;
 
     @Override
     @Transactional
@@ -50,9 +56,23 @@ public class ApplyServiceImpl implements ApplyService {
                 .siteUser(user)
                 .build();
 
+        var apply = applyRepository.save(Apply.fromDto(applyDto));
         notificationService.createAndSendNotification(organizer, matching, NotificationType.REQUEST_APPLY);
 
-        return applyRepository.save(Apply.fromDto(applyDto));
+        if (!LocalDate.now().format(formForDate).equals(matching.getDate())) {
+            return apply;
+        }
+        var weatherDto = weatherService.getWeatherResponseDtoByMatching(matching);
+
+        if (weatherDto != null) {
+            matching.changeRecruitStatus(RecruitStatus.WEATHER_ISSUE);
+            notificationService.createAndSendNotification(user, matching,
+                    NotificationType.makeWeatherIssueMessage(weatherDto));
+            return apply;
+        }
+        notificationService.createAndSendNotification(user, matching,
+                NotificationType.makeWeatherMessage());
+        return apply;
     }
 
     private boolean isAlreadyExisted(long userId, long matchingId) {

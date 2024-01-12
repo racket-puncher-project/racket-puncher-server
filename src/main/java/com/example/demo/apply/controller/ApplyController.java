@@ -20,23 +20,23 @@ public class ApplyController {
 
     private final ApplyService applyService;
 
-    @PostMapping("/matches/{match_id}")
-    public void apply(@PathVariable(value = "match_id") long matchingId, Principal principal) {
+    @PostMapping("/matches/{matchingId}")
+    public void apply(@PathVariable(value = "matchingId") long matchingId, Principal principal) {
 
         String email = principal.getName();
 
         applyService.apply(email, matchingId);
     }
 
-    @DeleteMapping("/{apply_id}")
-    public void cancelApply(@PathVariable(value = "apply_id") long applyId) {
+    @DeleteMapping("/{applyId}")
+    public void cancelApply(@PathVariable(value = "applyId") long applyId) {
 
         applyService.cancel(applyId);
     }
 
-    @PatchMapping("/matches/{matching_id}")
+    @PatchMapping("/matches/{matchingId}")
     public void acceptApply(@RequestBody PendingAppliesAndAcceptedApplies pendingAppliesAndAcceptedApplies,
-                                   @PathVariable(value = "matching_id") long matchingId, Principal principal) {
+                            @PathVariable(value = "matchingId") long matchingId, Principal principal) {
 
         var email = principal.getName();
         List<Long> pendingApplies = pendingAppliesAndAcceptedApplies.getPendingApplies();

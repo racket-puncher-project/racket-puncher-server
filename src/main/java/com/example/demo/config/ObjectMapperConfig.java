@@ -1,9 +1,9 @@
-package com.example.demo.util.config;
+package com.example.demo.config;
 
 import com.example.demo.matching.dto.ApplyContents;
 import com.example.demo.matching.dto.ApplyMember;
-import com.example.demo.util.serializer.ApplyContentsSerializer;
-import com.example.demo.util.serializer.ApplyMemberSerializer;
+import com.example.demo.matching.serializer.ApplyContentsSerializer;
+import com.example.demo.matching.serializer.ApplyMemberSerializer;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;

@@ -1,5 +1,5 @@
 package com.example.demo.type;
 
 public enum ApplyStatus {
-    PENDING, ACCEPTED, CANCELED;
+    PENDING, ACCEPTED, CANCELED, EVALUATION_COMPLETED;
 }

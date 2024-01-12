@@ -2,8 +2,11 @@ package com.example.demo.auth.service;
 
 import com.example.demo.auth.dto.*;
 import com.example.demo.auth.security.TokenProvider;
+import com.example.demo.entity.SiteUser;
+import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AuthType;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -90,6 +93,8 @@ class KakaoOAuthServiceTest {
                 .willReturn(testAccessToken);
         given(tokenProvider.generateAndSaveRefreshToken(testEmail))
                 .willReturn(testRefreshToken);
+        given(siteUserRepository.findByEmail(anyString()))
+                .willReturn(Optional.ofNullable(getSiteUser()));
 
         // when
         KakaoSignInResponseDto actualKakaoUser = (KakaoSignInResponseDto) kakaoOAuthService.processOauth(kakaoOauthTestCode);
@@ -109,5 +114,14 @@ class KakaoOAuthServiceTest {
         KakaoProfile kakaoProfile = new KakaoProfile("nickname", "profileImageUrl");
         KakaoAccount kakaoAccount = new KakaoAccount(kakaoProfile, "testEmail");
         return new KakaoUserInfoDto(kakaoAccount);
+    }
+
+    private SiteUser getSiteUser() {
+        return SiteUser
+                .builder()
+                .id(1L)
+                .email("email@naver.com")
+                .password("1234")
+                .build();
     }
 }

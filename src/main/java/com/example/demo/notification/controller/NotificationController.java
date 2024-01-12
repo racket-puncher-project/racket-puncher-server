@@ -11,14 +11,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 
 @RestController
-@RequestMapping("/api/notification")
+@RequestMapping("/api/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
 
     private final NotificationService notificationService;
     private final SiteUserRepository siteUserRepository;
-    @GetMapping("/subscribe")
-    public SseEmitter subscribe(Principal principal) { // 인증 수단 생기면 변경
+    @GetMapping("/connect")
+    public SseEmitter connect(Principal principal) {
 
         String email = principal.getName();
         var siteUser = siteUserRepository.findByEmail(email);
