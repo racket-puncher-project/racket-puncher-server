@@ -39,8 +39,8 @@ public class AuthController {
     }
 
     @GetMapping("/kakao")
-    public ResponseDto<?> kakaoCallback(@RequestParam String code) {
-        var result = kakaoOAuthService.processOauth(code);
+    public ResponseDto<?> kakaoCallback(@RequestBody KakaoCodeDto kakaoCodeDto) {
+        var result = kakaoOAuthService.processOauth(kakaoCodeDto.getCode());
         return ResponseUtil.SUCCESS(result);
     }
 
