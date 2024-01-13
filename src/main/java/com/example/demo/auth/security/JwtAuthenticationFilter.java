@@ -81,6 +81,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/api/auth/check-nickname");
         permitAllEndpoints.add("/api/auth/check-email");
         permitAllEndpoints.add("/api/auth/kakao");
+        permitAllEndpoints.add("/api/auth/phone/send-code");
+        permitAllEndpoints.add("/api/auth/phone/verify-code");
 
         return permitAllEndpoints;
     }
