@@ -121,7 +121,8 @@ class AuthControllerTest {
         // when
         // then
         mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/kakao")
-                        .param("code", kakaoOauthTestCode))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(getKakaoCodeDto())))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andDo(print());
     }
@@ -306,5 +307,9 @@ class AuthControllerTest {
 
     private AuthCodeRequestDto getAuthCodeRequestDto(){
         return new AuthCodeRequestDto("01012345678", "12345");
+    }
+
+    private KakaoCodeDto getKakaoCodeDto(){
+        return new KakaoCodeDto("kakaoCode");
     }
 }
