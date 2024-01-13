@@ -120,7 +120,7 @@ class AuthControllerTest {
                 .willReturn(kakaoSignInResponseDto);
         // when
         // then
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/kakao")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/kakao")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(getKakaoCodeDto())))
                 .andExpect(MockMvcResultMatchers.status().isOk())
