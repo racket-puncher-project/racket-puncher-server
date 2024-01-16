@@ -230,6 +230,20 @@ class AuthControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    public void findEmail() throws Exception {
+        // given
+        given(authService.findEmail("01012345678"))
+                .willReturn(getFindEmailResponseDto());
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/find-id")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(getPhoneNumberRequestDto())))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SignUpDto getSignUpDto() {
         return SignUpDto.builder()
                 .email("email@naver.com")
@@ -311,5 +325,12 @@ class AuthControllerTest {
 
     private KakaoCodeDto getKakaoCodeDto(){
         return new KakaoCodeDto("kakaoCode");
+    }
+
+    private FindEmailResponseDto getFindEmailResponseDto(){
+        return FindEmailResponseDto.builder()
+                .authType(AuthType.GENERAL)
+                .email("email")
+                .build();
     }
 }

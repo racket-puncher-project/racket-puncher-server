@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.example.demo.auth.dto.FindEmailResponseDto;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.auth.dto.AccessTokenDto;
@@ -255,6 +256,52 @@ class AuthServiceTest {
 
         // then
         assertEquals("비밀번호가 일치하지 않습니다.", exception.getMessage());
+    }
+
+    @Test
+    public void findEmailSuccessForGeneralUser() {
+        // given
+        SiteUser generalSiteUser = getGeneralSiteUser();
+
+        given(siteUserRepository.findByPhoneNumber(generalSiteUser.getPhoneNumber()))
+                .willReturn(Optional.of(generalSiteUser));
+
+        // when
+        FindEmailResponseDto result = authService.findEmail(generalSiteUser.getPhoneNumber());
+
+        // then
+        assertEquals(AuthType.GENERAL, result.getAuthType());
+        assertEquals(generalSiteUser.getEmail(), result.getEmail());
+    }
+
+    @Test
+    public void findEmailSuccessForKakaoUser() {
+        // given
+        SiteUser kakaoSiteUser = getKakaoSiteUser();
+
+        given(siteUserRepository.findByPhoneNumber(kakaoSiteUser.getPhoneNumber()))
+                .willReturn(Optional.of(kakaoSiteUser));
+
+        // when
+        FindEmailResponseDto result = authService.findEmail(kakaoSiteUser.getPhoneNumber());
+
+        // then
+        assertEquals(AuthType.KAKAO, result.getAuthType());
+        assertEquals("", result.getEmail());
+    }
+
+    @Test
+    public void findEmailFailByUserNotFound() {
+        // given
+        String wrongPhoneNumber = "wrong phone number";
+        given(siteUserRepository.findByPhoneNumber(wrongPhoneNumber))
+                .willReturn(Optional.empty());
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.findEmail(wrongPhoneNumber));
+        // then
+        assertEquals(exception.getMessage(), "가입 정보가 없습니다.");
     }
 
     private AccessTokenDto getAccessTokenDto() {
