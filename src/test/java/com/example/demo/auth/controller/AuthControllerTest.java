@@ -244,6 +244,35 @@ class AuthControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    public void verifyUserForResetPassword() throws Exception {
+        // given
+        given(authService.verifyUserForResetPassword("email","01012345678"))
+                .willReturn(getResetTokenDto());
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/password/verify-user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(getUserInfoForPasswordDto())))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    public void resetPassword() throws Exception {
+        // given
+        ResetPasswordDto resetPasswordDto = getResetPasswordDto();
+        given(authService.resetPassword(resetPasswordDto.getResetToken(),resetPasswordDto.getNewPassword()))
+                .willReturn(new StringResponseDto("비밀번호 초기화 성공"));
+        // when
+        // then
+        mockMvc.perform(MockMvcRequestBuilders.patch("/api/auth/password/reset")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(resetPasswordDto)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andDo(print());
+    }
+
     private SignUpDto getSignUpDto() {
         return SignUpDto.builder()
                 .email("email@naver.com")
@@ -331,6 +360,27 @@ class AuthControllerTest {
         return FindEmailResponseDto.builder()
                 .authType(AuthType.GENERAL)
                 .email("email")
+                .build();
+    }
+
+    private UserInfoForPasswordDto getUserInfoForPasswordDto(){
+        return UserInfoForPasswordDto.builder()
+                .phoneNumber("01012345678")
+                .email("email")
+                .build();
+    }
+
+    private ResetTokenDto getResetTokenDto(){
+        return ResetTokenDto.builder()
+                .authType(AuthType.GENERAL)
+                .resetToken("resetToken")
+                .build();
+    }
+
+    private ResetPasswordDto getResetPasswordDto(){
+        return ResetPasswordDto.builder()
+                .resetToken("resetToken")
+                .newPassword("newPassword")
                 .build();
     }
 }

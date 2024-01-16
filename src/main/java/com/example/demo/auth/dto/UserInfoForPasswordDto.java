@@ -1,14 +1,12 @@
 package com.example.demo.auth.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class UserInfoForPasswordDto {
     private String email;
     private String phoneNumber;

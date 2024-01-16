@@ -55,7 +55,7 @@ public class SecurityConfiguration {
                                 "/api/auth/check-nickname", "/api/auth/check-email", "/api/auth/redis",
                                 "/api/auth/kakao", "/api/matches/address", 
                                 "/api/auth/phone/send-code", "/api/auth/phone/verify-code",
-                                "/api/auth/find-id")
+                                "/api/auth/find-id", "/api/auth/password/verify-user", "/api/auth/password/reset")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

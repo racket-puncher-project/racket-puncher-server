@@ -7,11 +7,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import com.example.demo.auth.dto.FindEmailResponseDto;
+import com.example.demo.auth.dto.*;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.SignUpDto;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
@@ -302,6 +300,71 @@ class AuthServiceTest {
                 () -> authService.findEmail(wrongPhoneNumber));
         // then
         assertEquals(exception.getMessage(), "가입 정보가 없습니다.");
+    }
+
+    @Test
+    public void verifyUserForResetPasswordSuccessForGeneralUser() {
+        // given
+        SiteUser generalSiteUser = getGeneralSiteUser();
+        given(siteUserRepository.findByEmailAndPhoneNumber(generalSiteUser.getEmail(), generalSiteUser.getPhoneNumber()))
+                .willReturn(Optional.of(generalSiteUser));
+        given(tokenProvider.generateAccessToken(generalSiteUser.getEmail()))
+                .willReturn("ResetToken");
+
+        // when
+        ResetTokenDto result = authService.verifyUserForResetPassword(generalSiteUser.getEmail(), generalSiteUser.getPhoneNumber());
+
+        // then
+        assertEquals(AuthType.GENERAL, result.getAuthType());
+        assertEquals("ResetToken", result.getResetToken());
+    }
+
+    @Test
+    public void verifyUserForResetPasswordFailByUserNotFound() {
+        // given
+        given(siteUserRepository.findByEmailAndPhoneNumber("WrongEmail", "WrongPhoneNumber"))
+                .willReturn(Optional.empty());
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.verifyUserForResetPassword("WrongEmail", "WrongPhoneNumber"));
+
+        // then
+        assertEquals(exception.getMessage(), "가입 정보가 없습니다.");
+    }
+
+    @Test
+    public void verifyUserForResetPasswordSuccessForKakaoUser() {
+        // given
+        SiteUser kakaoSiteUser = getKakaoSiteUser();
+        given(siteUserRepository.findByEmailAndPhoneNumber(kakaoSiteUser.getEmail(), kakaoSiteUser.getPhoneNumber()))
+                .willReturn(Optional.of(kakaoSiteUser));
+
+        // when
+        ResetTokenDto result = authService.verifyUserForResetPassword(kakaoSiteUser.getEmail(), kakaoSiteUser.getPhoneNumber());
+
+        // then
+        assertEquals(AuthType.KAKAO, result.getAuthType());
+        assertEquals("", result.getResetToken());
+    }
+
+    @Test
+    public void resetPassword() {
+        // given
+        String resetToken = "ResetToken";
+        SiteUser siteUser = getGeneralSiteUser();
+        given(tokenProvider.validateResetToken(resetToken))
+                .willReturn(true);
+        given(tokenProvider.getUserEmail(resetToken))
+                .willReturn(siteUser.getEmail());
+        given(siteUserRepository.findByEmail(siteUser.getEmail()))
+                .willReturn(Optional.of(siteUser));
+
+        // when
+        StringResponseDto result = authService.resetPassword(resetToken, "NewPassword");
+
+        // then
+        assertEquals(result.getMessage(), "비밀번호 초기화 성공");
     }
 
     private AccessTokenDto getAccessTokenDto() {

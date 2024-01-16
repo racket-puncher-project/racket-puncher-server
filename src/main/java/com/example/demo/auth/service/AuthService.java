@@ -151,8 +151,6 @@ public class AuthService implements UserDetailsService {
         var user = siteUserRepository.findByEmailAndPhoneNumber(email, phoneNumber)
                 .orElseThrow(() -> new RacketPuncherException(REGISTRATION_INFO_NOT_FOUND));
 
-        String resetToken = tokenProvider.generateAccessToken(email);
-
         if (user.getAuthType().equals(AuthType.KAKAO)) {
             return ResetTokenDto.builder()
                     .authType(AuthType.KAKAO)
@@ -162,7 +160,7 @@ public class AuthService implements UserDetailsService {
 
         return ResetTokenDto.builder()
                 .authType(AuthType.GENERAL)
-                .resetToken(resetToken)
+                .resetToken(tokenProvider.generateAccessToken(email))
                 .build();
     }
 
