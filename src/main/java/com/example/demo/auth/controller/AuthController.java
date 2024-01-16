@@ -84,4 +84,10 @@ public class AuthController {
         var email = principal.getName();
         authService.withdraw(email, passwordRequestDto.getPassword());
     }
+
+    @PostMapping("/find-id")
+    public ResponseDto<FindEmailResponseDto> findId(@RequestBody PhoneNumberRequestDto phoneNumberRequestDto) {
+        var result = authService.findEmail(phoneNumberRequestDto.getPhoneNumber());
+        return ResponseUtil.SUCCESS(result);
+    }
 }

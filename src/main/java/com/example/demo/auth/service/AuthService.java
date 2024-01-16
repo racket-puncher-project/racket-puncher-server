@@ -2,14 +2,9 @@ package com.example.demo.auth.service;
 
 import static com.example.demo.exception.type.ErrorCode.*;
 
+import com.example.demo.auth.dto.*;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.GeneralSignInResponseDto;
-import com.example.demo.auth.dto.QuitDto;
-import com.example.demo.auth.dto.SignInDto;
-import com.example.demo.auth.dto.SignUpDto;
-import com.example.demo.auth.dto.StringResponseDto;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
@@ -131,5 +126,22 @@ public class AuthService implements UserDetailsService {
         redisTemplate.delete(email);
         siteUserRepository.delete(user);
         return SUCCESS_WITHDRAWAL;
+    }
+
+    public FindEmailResponseDto findEmail(String phoneNumber) {
+        var user = siteUserRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RacketPuncherException(PHONE_NOT_FOUND));
+
+        if (user.getAuthType().equals(AuthType.KAKAO)) {
+            return FindEmailResponseDto.builder()
+                    .authType(AuthType.KAKAO)
+                    .email("")
+                    .build();
+        }
+
+        return FindEmailResponseDto.builder()
+                .authType(AuthType.GENERAL)
+                .email(user.getEmail())
+                .build();
     }
 }
