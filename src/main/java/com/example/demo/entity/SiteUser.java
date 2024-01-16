@@ -90,9 +90,6 @@ public class SiteUser implements UserDetails {
     @Column(name = "CREATE_DATE")
     private LocalDateTime createDate;
 
-    @Column(name = "IS_PHONE_VERIFIED") // 1:true, 0:false, default = 0
-    private Boolean isPhoneVerified;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "AUTH_TYPE", length = 50, nullable = false)
     private AuthType authType;

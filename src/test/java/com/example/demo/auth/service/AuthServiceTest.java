@@ -386,7 +386,6 @@ class AuthServiceTest {
                 .zipCode("zipCode")
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("img.png")
-                .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .authType(AuthType.GENERAL)
                 .build();
@@ -407,7 +406,6 @@ class AuthServiceTest {
                 .zipCode("zipCode")
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("img.png")
-                .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .authType(AuthType.KAKAO)
                 .build();
