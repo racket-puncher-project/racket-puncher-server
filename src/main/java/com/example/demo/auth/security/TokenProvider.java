@@ -102,4 +102,12 @@ public class TokenProvider {
         Long now = new Date().getTime();
         return (expiration.getTime() - now);
     }
+
+    public boolean validateResetToken(String token) {
+        if (!StringUtils.hasText(token)) {
+            return false;
+        }
+        var claims = this.parseClaims(token);
+        return !claims.getExpiration().before(new Date());
+    }
 }

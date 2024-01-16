@@ -18,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 @Slf4j
@@ -29,6 +30,7 @@ public class AuthService implements UserDetailsService {
     public static final String VALID_NICKNAME = "사용 가능한 닉네임입니다.";
     public static final String SUCCESS_LOGOUT = "로그아웃 성공";
     public static final String SUCCESS_WITHDRAWAL = "탈퇴 성공";
+    public static final String SUCCESS_PASSWORD_RESET = "비밀번호 초기화 성공";
 
     private final PasswordEncoder passwordEncoder;
     private final SiteUserRepository siteUserRepository;
@@ -130,7 +132,7 @@ public class AuthService implements UserDetailsService {
 
     public FindEmailResponseDto findEmail(String phoneNumber) {
         var user = siteUserRepository.findByPhoneNumber(phoneNumber)
-                .orElseThrow(() -> new RacketPuncherException(PHONE_NOT_FOUND));
+                .orElseThrow(() -> new RacketPuncherException(REGISTRATION_INFO_NOT_FOUND));
 
         if (user.getAuthType().equals(AuthType.KAKAO)) {
             return FindEmailResponseDto.builder()
@@ -143,5 +145,38 @@ public class AuthService implements UserDetailsService {
                 .authType(AuthType.GENERAL)
                 .email(user.getEmail())
                 .build();
+    }
+
+    public ResetTokenDto verifyUserForResetPassword(String email, String phoneNumber){
+        var user = siteUserRepository.findByEmailAndPhoneNumber(email, phoneNumber)
+                .orElseThrow(() -> new RacketPuncherException(REGISTRATION_INFO_NOT_FOUND));
+
+        String resetToken = tokenProvider.generateAccessToken(email);
+
+        if (user.getAuthType().equals(AuthType.KAKAO)) {
+            return ResetTokenDto.builder()
+                    .authType(AuthType.KAKAO)
+                    .resetToken("")
+                    .build();
+        }
+
+        return ResetTokenDto.builder()
+                .authType(AuthType.GENERAL)
+                .resetToken(resetToken)
+                .build();
+    }
+
+    @Transactional
+    public StringResponseDto resetPassword(String resetToken, String newPassword){
+        if (!tokenProvider.validateResetToken(resetToken)) {
+            throw new RacketPuncherException(RESET_TOKEN_EXPIRED);
+        }
+
+        String email = tokenProvider.getUserEmail(resetToken);
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+
+        siteUser.setPassword(passwordEncoder.encode(newPassword));
+        return new StringResponseDto(SUCCESS_PASSWORD_RESET);
     }
 }

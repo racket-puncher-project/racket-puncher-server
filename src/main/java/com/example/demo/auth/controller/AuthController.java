@@ -90,4 +90,16 @@ public class AuthController {
         var result = authService.findEmail(phoneNumberRequestDto.getPhoneNumber());
         return ResponseUtil.SUCCESS(result);
     }
+
+    @PostMapping("/password/verify-user")
+    public ResponseDto<ResetTokenDto> verifyUserForResetPassword(@RequestBody UserInfoForPasswordDto userInfoForPasswordDto) {
+        var result = authService.verifyUserForResetPassword(userInfoForPasswordDto.getEmail(), userInfoForPasswordDto.getPhoneNumber());
+        return ResponseUtil.SUCCESS(result);
+    }
+
+    @PatchMapping("/password/reset")
+    public ResponseDto<StringResponseDto> resetPassword(@RequestBody ResetPasswordDto resetPasswordDto) {
+        var result = authService.resetPassword(resetPasswordDto.getResetToken(), resetPasswordDto.getNewPassword());
+        return ResponseUtil.SUCCESS(result);
+    }
 }
