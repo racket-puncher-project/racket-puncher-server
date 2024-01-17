@@ -186,7 +186,6 @@ public class SiteUserControllerTest {
                 .zipCode("zipCode")
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("update.png")
-                .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .build();
     }
