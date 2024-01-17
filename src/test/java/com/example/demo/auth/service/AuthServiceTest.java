@@ -306,9 +306,12 @@ class AuthServiceTest {
     public void verifyUserForResetPasswordSuccessForGeneralUser() {
         // given
         SiteUser generalSiteUser = getGeneralSiteUser();
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        given(redisTemplate.opsForValue())
+                .willReturn(valueOperations);
         given(siteUserRepository.findByEmailAndPhoneNumber(generalSiteUser.getEmail(), generalSiteUser.getPhoneNumber()))
                 .willReturn(Optional.of(generalSiteUser));
-        given(tokenProvider.generateAccessToken(generalSiteUser.getEmail()))
+        given(tokenProvider.generateResetToken(generalSiteUser.getEmail()))
                 .willReturn("ResetToken");
 
         // when
@@ -317,20 +320,7 @@ class AuthServiceTest {
         // then
         assertEquals(AuthType.GENERAL, result.getAuthType());
         assertEquals("ResetToken", result.getResetToken());
-    }
-
-    @Test
-    public void verifyUserForResetPasswordFailByUserNotFound() {
-        // given
-        given(siteUserRepository.findByEmailAndPhoneNumber("WrongEmail", "WrongPhoneNumber"))
-                .willReturn(Optional.empty());
-
-        // when
-        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
-                () -> authService.verifyUserForResetPassword("WrongEmail", "WrongPhoneNumber"));
-
-        // then
-        assertEquals(exception.getMessage(), "가입 정보가 없습니다.");
+        verify(redisTemplate.opsForValue(), times(1)).set("reset:" + generalSiteUser.getEmail(), "ResetToken");
     }
 
     @Test
@@ -349,14 +339,33 @@ class AuthServiceTest {
     }
 
     @Test
+    public void verifyUserForResetPasswordFailByUserNotFound() {
+        // given
+        given(siteUserRepository.findByEmailAndPhoneNumber("WrongEmail", "WrongPhoneNumber"))
+                .willReturn(Optional.empty());
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.verifyUserForResetPassword("WrongEmail", "WrongPhoneNumber"));
+
+        // then
+        assertEquals(exception.getMessage(), "가입 정보가 없습니다.");
+    }
+
+    @Test
     public void resetPassword() {
         // given
         String resetToken = "ResetToken";
         SiteUser siteUser = getGeneralSiteUser();
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        given(redisTemplate.opsForValue())
+                .willReturn(valueOperations);
         given(tokenProvider.validateResetToken(resetToken))
                 .willReturn(true);
-        given(tokenProvider.getUserEmail(resetToken))
+        given(tokenProvider.getUserEmailForResetToken(resetToken))
                 .willReturn(siteUser.getEmail());
+        given(redisTemplate.opsForValue().get("reset:"+siteUser.getEmail()))
+                .willReturn(resetToken);
         given(siteUserRepository.findByEmail(siteUser.getEmail()))
                 .willReturn(Optional.of(siteUser));
 
@@ -365,6 +374,7 @@ class AuthServiceTest {
 
         // then
         assertEquals(result.getMessage(), "비밀번호 초기화 성공");
+        verify(redisTemplate, times(1)).delete("reset:" + siteUser.getEmail());
     }
 
     private AccessTokenDto getAccessTokenDto() {

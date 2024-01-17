@@ -340,7 +340,6 @@ class ApplyServiceTest {
                 .zipCode("12345")
                 .ageGroup(AgeGroup.TWENTIES)
                 .createDate(LocalDateTime.now())
-                .isPhoneVerified(true)
                 .build();
     }
 
@@ -357,7 +356,6 @@ class ApplyServiceTest {
                 .zipCode("12345")
                 .ageGroup(AgeGroup.TWENTIES)
                 .createDate(LocalDateTime.now())
-                .isPhoneVerified(true)
                 .build();
     }
 
