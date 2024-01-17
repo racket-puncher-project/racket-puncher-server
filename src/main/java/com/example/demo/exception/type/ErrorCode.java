@@ -37,7 +37,10 @@ public enum ErrorCode {
     SMS_SEND_FAIL(HttpStatus.INTERNAL_SERVER_ERROR.value(), "sms 문자 전송에 실패했습니다."),
     PHONE_AUTH_NUM_EXPIRED(HttpStatus.BAD_REQUEST.value(), "휴대폰 인증 번호가 만료되었습니다."),
     PHONE_AUTH_NUM_DOESNT_MATCH(HttpStatus.BAD_REQUEST.value(), "휴대폰 인증 번호가 일치하지 않습니다."),
-    LAT_AND_LON_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "위경도를 찾을 수 없는 주소입니다.")
+    LAT_AND_LON_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "위경도를 찾을 수 없는 주소입니다."),
+    REGISTRATION_INFO_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "가입 정보가 없습니다."),
+    RESET_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED.value(), "리셋 토큰이 만료되었습니다."),
+    RESET_TOKEN_ALREADY_USED(HttpStatus.UNAUTHORIZED.value(), "이미 사용된 리셋 토큰입니다.")
     ;
 
     private final int code;

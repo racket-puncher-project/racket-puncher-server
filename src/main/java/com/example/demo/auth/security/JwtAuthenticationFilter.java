@@ -83,6 +83,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/api/auth/kakao");
         permitAllEndpoints.add("/api/auth/phone/send-code");
         permitAllEndpoints.add("/api/auth/phone/verify-code");
+        permitAllEndpoints.add("/api/auth/find-id");
+        permitAllEndpoints.add("/api/auth/password/verify-user");
+        permitAllEndpoints.add("/api/auth/password/reset");
 
         return permitAllEndpoints;
     }

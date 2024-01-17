@@ -7,10 +7,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.example.demo.auth.dto.*;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.SignUpDto;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AgeGroup;
@@ -257,6 +256,127 @@ class AuthServiceTest {
         assertEquals("비밀번호가 일치하지 않습니다.", exception.getMessage());
     }
 
+    @Test
+    public void findEmailSuccessForGeneralUser() {
+        // given
+        SiteUser generalSiteUser = getGeneralSiteUser();
+
+        given(siteUserRepository.findByPhoneNumber(generalSiteUser.getPhoneNumber()))
+                .willReturn(Optional.of(generalSiteUser));
+
+        // when
+        FindEmailResponseDto result = authService.findEmail(generalSiteUser.getPhoneNumber());
+
+        // then
+        assertEquals(AuthType.GENERAL, result.getAuthType());
+        assertEquals(generalSiteUser.getEmail(), result.getEmail());
+    }
+
+    @Test
+    public void findEmailSuccessForKakaoUser() {
+        // given
+        SiteUser kakaoSiteUser = getKakaoSiteUser();
+
+        given(siteUserRepository.findByPhoneNumber(kakaoSiteUser.getPhoneNumber()))
+                .willReturn(Optional.of(kakaoSiteUser));
+
+        // when
+        FindEmailResponseDto result = authService.findEmail(kakaoSiteUser.getPhoneNumber());
+
+        // then
+        assertEquals(AuthType.KAKAO, result.getAuthType());
+        assertEquals("", result.getEmail());
+    }
+
+    @Test
+    public void findEmailFailByUserNotFound() {
+        // given
+        String wrongPhoneNumber = "wrong phone number";
+        given(siteUserRepository.findByPhoneNumber(wrongPhoneNumber))
+                .willReturn(Optional.empty());
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.findEmail(wrongPhoneNumber));
+        // then
+        assertEquals(exception.getMessage(), "가입 정보가 없습니다.");
+    }
+
+    @Test
+    public void verifyUserForResetPasswordSuccessForGeneralUser() {
+        // given
+        SiteUser generalSiteUser = getGeneralSiteUser();
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        given(redisTemplate.opsForValue())
+                .willReturn(valueOperations);
+        given(siteUserRepository.findByEmailAndPhoneNumber(generalSiteUser.getEmail(), generalSiteUser.getPhoneNumber()))
+                .willReturn(Optional.of(generalSiteUser));
+        given(tokenProvider.generateResetToken(generalSiteUser.getEmail()))
+                .willReturn("ResetToken");
+
+        // when
+        ResetTokenDto result = authService.verifyUserForResetPassword(generalSiteUser.getEmail(), generalSiteUser.getPhoneNumber());
+
+        // then
+        assertEquals(AuthType.GENERAL, result.getAuthType());
+        assertEquals("ResetToken", result.getResetToken());
+        verify(redisTemplate.opsForValue(), times(1)).set("reset:" + generalSiteUser.getEmail(), "ResetToken");
+    }
+
+    @Test
+    public void verifyUserForResetPasswordSuccessForKakaoUser() {
+        // given
+        SiteUser kakaoSiteUser = getKakaoSiteUser();
+        given(siteUserRepository.findByEmailAndPhoneNumber(kakaoSiteUser.getEmail(), kakaoSiteUser.getPhoneNumber()))
+                .willReturn(Optional.of(kakaoSiteUser));
+
+        // when
+        ResetTokenDto result = authService.verifyUserForResetPassword(kakaoSiteUser.getEmail(), kakaoSiteUser.getPhoneNumber());
+
+        // then
+        assertEquals(AuthType.KAKAO, result.getAuthType());
+        assertEquals("", result.getResetToken());
+    }
+
+    @Test
+    public void verifyUserForResetPasswordFailByUserNotFound() {
+        // given
+        given(siteUserRepository.findByEmailAndPhoneNumber("WrongEmail", "WrongPhoneNumber"))
+                .willReturn(Optional.empty());
+
+        // when
+        RacketPuncherException exception = assertThrows(RacketPuncherException.class,
+                () -> authService.verifyUserForResetPassword("WrongEmail", "WrongPhoneNumber"));
+
+        // then
+        assertEquals(exception.getMessage(), "가입 정보가 없습니다.");
+    }
+
+    @Test
+    public void resetPassword() {
+        // given
+        String resetToken = "ResetToken";
+        SiteUser siteUser = getGeneralSiteUser();
+        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
+        given(redisTemplate.opsForValue())
+                .willReturn(valueOperations);
+        given(tokenProvider.validateResetToken(resetToken))
+                .willReturn(true);
+        given(tokenProvider.getUserEmailForResetToken(resetToken))
+                .willReturn(siteUser.getEmail());
+        given(redisTemplate.opsForValue().get("reset:"+siteUser.getEmail()))
+                .willReturn(resetToken);
+        given(siteUserRepository.findByEmail(siteUser.getEmail()))
+                .willReturn(Optional.of(siteUser));
+
+        // when
+        StringResponseDto result = authService.resetPassword(resetToken, "NewPassword");
+
+        // then
+        assertEquals(result.getMessage(), "비밀번호 초기화 성공");
+        verify(redisTemplate, times(1)).delete("reset:" + siteUser.getEmail());
+    }
+
     private AccessTokenDto getAccessTokenDto() {
         return new AccessTokenDto("accessToken");
     }
@@ -276,7 +396,6 @@ class AuthServiceTest {
                 .zipCode("zipCode")
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("img.png")
-                .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .authType(AuthType.GENERAL)
                 .build();
@@ -297,7 +416,6 @@ class AuthServiceTest {
                 .zipCode("zipCode")
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("img.png")
-                .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .authType(AuthType.KAKAO)
                 .build();

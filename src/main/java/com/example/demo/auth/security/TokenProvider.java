@@ -28,12 +28,16 @@ import org.springframework.util.StringUtils;
 public class TokenProvider {
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 14; // 2주
+    private static final long RESET_TOKEN_EXPIRE_TIME = 1000 * 60 * 60; // 1시간
 
     private final RedisTemplate<String, String> redisTemplate;
     private final SiteUserRepository siteUserRepository;
 
-    @Value("{spring.jwt.secret}")
+    @Value("{jwt.secret}")
     private String secretKey;
+
+    @Value("{jwt.reset-secret}")
+    private String secretKeyForReset;
 
     public String generateAccessToken(String email) {
         Claims claims = Jwts.claims().setSubject(email);
@@ -101,5 +105,40 @@ public class TokenProvider {
         Date expiration = Jwts.parser().setSigningKey(this.secretKey).parseClaimsJws(token).getBody().getExpiration();
         Long now = new Date().getTime();
         return (expiration.getTime() - now);
+    }
+
+    public String generateResetToken(String email) {
+        Claims claims = Jwts.claims().setSubject(email);
+
+        var now = new Date();
+        var expiredDate = new Date(now.getTime() + RESET_TOKEN_EXPIRE_TIME);
+
+        return Jwts.builder()
+                .setClaims(claims) // 발행 유저 정보 저장
+                .setIssuedAt(now) // 토큰 생성 시간
+                .setExpiration(expiredDate) // 토큰 만료 시간
+                .signWith(SignatureAlgorithm.HS512, this.secretKeyForReset) // 사용할 암호화 알고리즘, 비밀키
+                .compact(); // 생성
+    }
+
+    public boolean validateResetToken(String token) {
+        if (!StringUtils.hasText(token)) {
+            return false;
+        }
+        var claims = this.parseClaimsForResetToken(token);
+        return !claims.getExpiration().before(new Date());
+    }
+
+    private Claims parseClaimsForResetToken(String token) {
+        try {
+            return Jwts.parser().setSigningKey(this.secretKeyForReset).parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException e) {
+            log.error("만료된 토큰입니다.");
+            return e.getClaims();
+        }
+    }
+
+    public String getUserEmailForResetToken(String token) {
+        return this.parseClaimsForResetToken(token).getSubject();
     }
 }

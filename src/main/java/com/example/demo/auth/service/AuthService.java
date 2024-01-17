@@ -2,14 +2,9 @@ package com.example.demo.auth.service;
 
 import static com.example.demo.exception.type.ErrorCode.*;
 
+import com.example.demo.auth.dto.*;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.GeneralSignInResponseDto;
-import com.example.demo.auth.dto.QuitDto;
-import com.example.demo.auth.dto.SignInDto;
-import com.example.demo.auth.dto.SignUpDto;
-import com.example.demo.auth.dto.StringResponseDto;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
@@ -23,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 
 @Slf4j
@@ -34,6 +30,8 @@ public class AuthService implements UserDetailsService {
     public static final String VALID_NICKNAME = "사용 가능한 닉네임입니다.";
     public static final String SUCCESS_LOGOUT = "로그아웃 성공";
     public static final String SUCCESS_WITHDRAWAL = "탈퇴 성공";
+    public static final String SUCCESS_PASSWORD_RESET = "비밀번호 초기화 성공";
+    public static final String RESET_TOKEN_PREFIX = "reset:";
 
     private final PasswordEncoder passwordEncoder;
     private final SiteUserRepository siteUserRepository;
@@ -131,5 +129,63 @@ public class AuthService implements UserDetailsService {
         redisTemplate.delete(email);
         siteUserRepository.delete(user);
         return SUCCESS_WITHDRAWAL;
+    }
+
+    public FindEmailResponseDto findEmail(String phoneNumber) {
+        var user = siteUserRepository.findByPhoneNumber(phoneNumber)
+                .orElseThrow(() -> new RacketPuncherException(REGISTRATION_INFO_NOT_FOUND));
+
+        if (user.getAuthType().equals(AuthType.KAKAO)) {
+            return FindEmailResponseDto.builder()
+                    .authType(AuthType.KAKAO)
+                    .email("")
+                    .build();
+        }
+
+        return FindEmailResponseDto.builder()
+                .authType(AuthType.GENERAL)
+                .email(user.getEmail())
+                .build();
+    }
+
+    public ResetTokenDto verifyUserForResetPassword(String email, String phoneNumber){
+        var user = siteUserRepository.findByEmailAndPhoneNumber(email, phoneNumber)
+                .orElseThrow(() -> new RacketPuncherException(REGISTRATION_INFO_NOT_FOUND));
+
+        if (user.getAuthType().equals(AuthType.KAKAO)) {
+            return ResetTokenDto.builder()
+                    .authType(AuthType.KAKAO)
+                    .resetToken("")
+                    .build();
+        }
+
+        String resetToken = tokenProvider.generateResetToken(email);
+        redisTemplate.opsForValue().set(RESET_TOKEN_PREFIX+email, resetToken);
+
+        return ResetTokenDto.builder()
+                .authType(AuthType.GENERAL)
+                .resetToken(resetToken)
+                .build();
+    }
+
+    @Transactional
+    public StringResponseDto resetPassword(String resetToken, String newPassword){
+        if (!tokenProvider.validateResetToken(resetToken)) {
+            throw new RacketPuncherException(RESET_TOKEN_EXPIRED);
+        }
+
+        String email = tokenProvider.getUserEmailForResetToken(resetToken);
+        String resetKey = RESET_TOKEN_PREFIX + email;
+
+        if (!resetToken.equals(redisTemplate.opsForValue().get(resetKey))) { // ResetToken이 null 이거나 일치하지 않으면
+            throw new RacketPuncherException(RESET_TOKEN_ALREADY_USED);
+        }
+
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
+
+        redisTemplate.delete(resetKey);
+        siteUser.setPassword(passwordEncoder.encode(newPassword));
+        return new StringResponseDto(SUCCESS_PASSWORD_RESET);
     }
 }

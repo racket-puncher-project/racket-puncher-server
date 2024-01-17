@@ -297,7 +297,6 @@ public class SiteUserServiceTest {
                 .zipCode("zipCode")
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("img.png")
-                .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .build();
     }
@@ -317,7 +316,6 @@ public class SiteUserServiceTest {
                 .zipCode("zipCode")
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("img.png")
-                .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .build();
     }
@@ -337,7 +335,6 @@ public class SiteUserServiceTest {
                 .zipCode("zipCode")
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("img.png")
-                .isPhoneVerified(true)
                 .createDate(LocalDateTime.now())
                 .build();
     }
