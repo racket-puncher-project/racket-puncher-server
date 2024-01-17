@@ -31,6 +31,7 @@ public class AuthService implements UserDetailsService {
     public static final String SUCCESS_LOGOUT = "로그아웃 성공";
     public static final String SUCCESS_WITHDRAWAL = "탈퇴 성공";
     public static final String SUCCESS_PASSWORD_RESET = "비밀번호 초기화 성공";
+    public static final String RESET_TOKEN_PREFIX = "reset:";
 
     private final PasswordEncoder passwordEncoder;
     private final SiteUserRepository siteUserRepository;
@@ -158,9 +159,12 @@ public class AuthService implements UserDetailsService {
                     .build();
         }
 
+        String resetToken = tokenProvider.generateResetToken(email);
+        redisTemplate.opsForValue().set(RESET_TOKEN_PREFIX+email, resetToken);
+
         return ResetTokenDto.builder()
                 .authType(AuthType.GENERAL)
-                .resetToken(tokenProvider.generateAccessToken(email))
+                .resetToken(resetToken)
                 .build();
     }
 
@@ -170,10 +174,17 @@ public class AuthService implements UserDetailsService {
             throw new RacketPuncherException(RESET_TOKEN_EXPIRED);
         }
 
-        String email = tokenProvider.getUserEmail(resetToken);
-        SiteUser siteUser = siteUserRepository.findByEmail(email)
-                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+        String email = tokenProvider.getUserEmailForResetToken(resetToken);
+        String resetKey = RESET_TOKEN_PREFIX + email;
 
+        if (!resetToken.equals(redisTemplate.opsForValue().get(resetKey))) { // ResetToken이 null 이거나 일치하지 않으면
+            throw new RacketPuncherException(RESET_TOKEN_ALREADY_USED);
+        }
+
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
+
+        redisTemplate.delete(resetKey);
         siteUser.setPassword(passwordEncoder.encode(newPassword));
         return new StringResponseDto(SUCCESS_PASSWORD_RESET);
     }
