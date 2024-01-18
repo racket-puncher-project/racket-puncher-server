@@ -11,22 +11,17 @@ import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.repository.NotificationRepository;
-import com.example.demo.siteuser.dto.InputReviewDto;
-import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
-import com.example.demo.siteuser.dto.ProcessedReviewDto;
-import com.example.demo.siteuser.dto.SiteUserInfoDto;
-import com.example.demo.siteuser.dto.MyInfoDto;
-import com.example.demo.siteuser.dto.NotificationDto;
-import com.example.demo.siteuser.dto.ReviewPageInfoDto;
-import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
+import com.example.demo.siteuser.dto.*;
 import com.example.demo.siteuser.repository.ReviewRepository;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NegativeReviewType;
 import com.example.demo.type.PositiveReviewType;
-import jakarta.persistence.EntityNotFoundException;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,6 +38,12 @@ public class SiteUserServiceImpl implements SiteUserService {
     private final FindEntity findEntity;
     private final PasswordEncoder passwordEncoder;
     private final ReviewRepository reviewRepository;
+
+    private static void validatePassword(UpdateSiteUserInfoDto updateSiteUserInfoDto) {
+        if (!updateSiteUserInfoDto.getPassword().equals(updateSiteUserInfoDto.getCheckPassword())) {
+            throw new RacketPuncherException(WRONG_PASSWORD);
+        }
+    }
 
     @Override
     public SiteUserInfoDto getSiteUserInfo(Long userId) {
@@ -73,38 +74,37 @@ public class SiteUserServiceImpl implements SiteUserService {
         return siteUser;
     }
 
-    private static void validatePassword(UpdateSiteUserInfoDto updateSiteUserInfoDto) {
-        if (!updateSiteUserInfoDto.getPassword().equals(updateSiteUserInfoDto.getCheckPassword())) {
-            throw new RacketPuncherException(WRONG_PASSWORD);
+    @Override
+    public List<HostedMatchingDto> getMatchingHostedBySiteUser(String email) {
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+
+        List<Matching> hostedMatchingList = matchingRepository.findAllBySiteUser_Email(email);
+        List<HostedMatchingDto> hostedMatchingDtos = new ArrayList<>();
+        for(Matching hostedMatching : hostedMatchingList){
+            Apply apply = applyRepository.findBySiteUser_IdAndMatching_Id(siteUser.getId(), hostedMatching.getId()).get();
+            hostedMatchingDtos.add(HostedMatchingDto.makeHostedMatchingDto(hostedMatching, apply.getApplyStatus(), getUsersInSameMatching(apply)));
         }
+        return hostedMatchingDtos;
     }
 
     @Override
-    public List<MatchingMyMatchingDto> getMatchingBySiteUser(Long userId) {
-        List<Matching> matchingList = matchingRepository.findBySiteUser_Id(userId);
+    public List<AppliedMatchingDto> getMatchingAppliedBySiteUser(String email) {
+        SiteUser siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
+        List<Apply> applyList = applyRepository.findAllBySiteUser_Email(email);
 
-        if (matchingList != null && !matchingList.isEmpty()) {
-            return matchingList.stream()
-                    .map(MatchingMyMatchingDto::fromEntity)
-                    .collect(Collectors.toList());
-        } else {
-            throw new EntityNotFoundException("No matching data found for user with ID: " + userId);
-        }
+        return applyList.stream()
+                .filter(apply -> !apply.getMatching().getSiteUser().getId().equals(siteUser.getId())) // 등록한 매칭은 제외
+                .map(apply -> AppliedMatchingDto.makeAppliedMatchingDto(apply.getMatching(), apply.getApplyStatus(), getUsersInSameMatching(apply)))
+                .toList();
     }
 
-    @Override
-    public List<MatchingMyMatchingDto> getApplyBySiteUser(Long userId) {
-        List<Apply> applyList = applyRepository.findAllBySiteUser_Id(userId);
-
-        if (applyList != null && !applyList.isEmpty()) {
-            List<MatchingMyMatchingDto> matchingDtos = applyList.stream()
-                    .filter(apply -> apply.getMatching() != null)
-                    .map(apply -> MatchingMyMatchingDto.fromEntity(apply.getMatching()))
-                    .collect(Collectors.toList());
-            return matchingDtos;
-        } else {
-            throw new EntityNotFoundException("No matching data found for user with ID: " + userId);
-        }
+    private List<SiteUserInfoForListDto> getUsersInSameMatching(Apply apply){
+        return applyRepository.findAllByMatching_Id(apply.getMatching().getId()).stream()
+                .map(Apply::getSiteUser)
+                .map(SiteUserInfoForListDto::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override

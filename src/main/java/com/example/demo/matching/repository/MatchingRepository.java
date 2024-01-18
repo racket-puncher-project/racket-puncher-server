@@ -19,7 +19,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MatchingRepository extends JpaRepository<Matching, Long>, FilteringRepositoryCustom {
-    List<Matching> findBySiteUser_Id(Long userId);
+    List<Matching> findAllBySiteUser_Email(String email);
 
     boolean existsByIdAndSiteUser(Long id, SiteUser siteUser);
 

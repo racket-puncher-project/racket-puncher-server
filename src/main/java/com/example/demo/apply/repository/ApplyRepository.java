@@ -19,7 +19,7 @@ public interface ApplyRepository extends JpaRepository<Apply, Long> {
 
     Optional<Integer> countByMatching_IdAndApplyStatus(long matchingId, ApplyStatus applyStatus);
   
-    List<Apply> findAllBySiteUser_Id(Long userId);
+    List<Apply> findAllBySiteUser_Email(String email);
 
-    Optional<List<Apply>> findAllByMatching_Id(long matchingId);
+    List<Apply> findAllByMatching_Id(long matchingId);
 }
