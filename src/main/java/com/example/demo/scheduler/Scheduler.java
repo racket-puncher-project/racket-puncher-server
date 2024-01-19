@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -49,17 +50,15 @@ public class Scheduler {
         log.info("scheduler is started at " + now);
 
         List<Matching> matchesForConfirm
-                = matchingRepository.findAllByRecruitDueDateTime(recruitDueDateTime).get();
+                = matchingRepository.findAllByRecruitDueDateTime(recruitDueDateTime);
 
         List<Matching> confirmedMatchesForFinish
                 = matchingRepository
-                .findAllByRecruitStatusFinished(RecruitStatus.CONFIRMED, today, currentTime)
-                .get();
+                .findAllByRecruitStatusFinished(RecruitStatus.CONFIRMED, today, currentTime);
 
         List<Matching> weatherIssueMatchesForFinish
                 = matchingRepository
-                .findAllByRecruitStatusFinished(RecruitStatus.WEATHER_ISSUE, today, currentTime)
-                .get();
+                .findAllByRecruitStatusFinished(RecruitStatus.WEATHER_ISSUE, today, currentTime);
 
         if (!CollectionUtils.isEmpty(matchesForConfirm)) {
             changeStatusOfMatches(matchesForConfirm);
@@ -75,14 +74,12 @@ public class Scheduler {
     }
 
     private void changeRecruitStatusesToFinished(List<Matching> matchesForFinish) {
-        matchesForFinish.forEach(matching -> {
-            changeRecruitStatusToFinished(matching);
-        });
+        matchesForFinish.forEach(this::changeRecruitStatusToFinished);
     }
 
     private void changeRecruitStatusIfMatchingFinished(List<Matching> weatherIssueMatches) {
         weatherIssueMatches.forEach(matching -> {
-            if (matching.getRecruitNum() == matching.getAcceptedNum()) {
+            if (Objects.equals(matching.getRecruitNum(), matching.getAcceptedNum())) {
                 changeRecruitStatusToFinished(matching);
             }
         });
@@ -96,7 +93,7 @@ public class Scheduler {
         var applies = applyRepository
                 .findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED);
 
-        for (Apply apply : applies.get()) {
+        for (Apply apply : applies) {
             notificationService.connectNotification(apply.getSiteUser().getId());
             notificationService.createAndSendNotification(apply.getSiteUser(), matching,
                     NotificationType.MATCHING_FINISHED);
@@ -114,7 +111,7 @@ public class Scheduler {
                         matching.changeRecruitStatus(RecruitStatus.CONFIRMED);
                         log.info("matching succeed -> " + matching.getId());
 
-                        for (Apply apply : applies.get()) {
+                        for (Apply apply : applies) {
                             notificationService.connectNotification(apply.getSiteUser().getId());
                             notificationService.createAndSendNotification(apply.getSiteUser(), matching,
                                     NotificationType.MATCHING_CLOSED);
@@ -122,7 +119,7 @@ public class Scheduler {
                     } if(RecruitStatus.OPEN.equals(matching.getRecruitStatus())) {
                         matching.changeRecruitStatus(RecruitStatus.FAILED);
                         log.info("matching failed -> " + matching.getId());
-                        for (Apply apply : applies.get()) {
+                        for (Apply apply : applies) {
                             notificationService.connectNotification(apply.getSiteUser().getId());
                             notificationService.createAndSendNotification(apply.getSiteUser(), matching,
                                     NotificationType.MATCHING_FAILED);
@@ -139,7 +136,7 @@ public class Scheduler {
         log.info("scheduler for weather notification is started at " + now);
 
         List<Matching> matchesForWeatherNotification
-                = matchingRepository.findAllByDate(matchingDate).get();
+                = matchingRepository.findAllByDate(matchingDate);
 
         if (!CollectionUtils.isEmpty(matchesForWeatherNotification)) {
             sendWeatherNotification(matchesForWeatherNotification);
@@ -165,11 +162,11 @@ public class Scheduler {
                             .findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED);
 
                     if (weatherDto != null) {
-                        log.info("강수확률: " + weatherDto.getPrecipitationProbability()
+                        log.info("강수 확률: " + weatherDto.getPrecipitationProbability()
                                 + ", 예상 날씨: " + weatherDto.getPrecipitationType().getMessage());
                         matching.changeRecruitStatus(RecruitStatus.WEATHER_ISSUE);
 
-                        for (Apply apply : applies.get()) {
+                        for (Apply apply : applies) {
                             notificationService.connectNotification(apply.getSiteUser().getId());
                             notificationService.createAndSendNotification(apply.getSiteUser(), matching,
                                     NotificationType.makeWeatherIssueMessage(weatherDto));
@@ -177,7 +174,7 @@ public class Scheduler {
                         }
                     }
 
-                    for (Apply apply : applies.get()) {
+                    for (Apply apply : applies) {
                         notificationService.connectNotification(apply.getSiteUser().getId());
                         notificationService.createAndSendNotification(apply.getSiteUser(), matching,
                                 NotificationType.makeWeatherMessage());

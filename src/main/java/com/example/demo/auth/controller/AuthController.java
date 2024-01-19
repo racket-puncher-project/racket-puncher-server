@@ -1,19 +1,34 @@
 package com.example.demo.auth.controller;
 
-import com.example.demo.auth.dto.*;
+import com.example.demo.auth.dto.AccessTokenDto;
+import com.example.demo.auth.dto.AuthCodeRequestDto;
+import com.example.demo.auth.dto.EmailRequestDto;
+import com.example.demo.auth.dto.FindEmailResponseDto;
+import com.example.demo.auth.dto.GeneralSignInResponseDto;
+import com.example.demo.auth.dto.KakaoCodeDto;
+import com.example.demo.auth.dto.NicknameRequestDto;
+import com.example.demo.auth.dto.PasswordRequestDto;
+import com.example.demo.auth.dto.PhoneNumberRequestDto;
+import com.example.demo.auth.dto.ResetPasswordDto;
+import com.example.demo.auth.dto.ResetTokenDto;
+import com.example.demo.auth.dto.SignInDto;
+import com.example.demo.auth.dto.SignUpDto;
+import com.example.demo.auth.dto.StringResponseDto;
+import com.example.demo.auth.dto.UserInfoForPasswordDto;
+import com.example.demo.auth.service.AuthService;
 import com.example.demo.auth.service.KakaoOAuthService;
 import com.example.demo.auth.service.PhoneAuthService;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
-import com.example.demo.auth.security.TokenProvider;
-import com.example.demo.auth.service.AuthService;
-
 import java.security.Principal;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -21,9 +36,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final RedisTemplate<String, String> redisTemplate;
     private final AuthService authService;
-    private final TokenProvider tokenProvider;
     private final KakaoOAuthService kakaoOAuthService;
     private final PhoneAuthService phoneAuthService;
 

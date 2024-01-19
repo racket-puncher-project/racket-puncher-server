@@ -98,7 +98,7 @@ public class SiteUserServiceTest {
     void getMyInfoFailedByEmailNotFound() {
         // given
         given(siteUserRepository.findByEmail("email@naver.com"))
-                .willReturn(Optional.ofNullable(null));
+                .willReturn(Optional.empty());
 
         // when
         RacketPuncherException exception = assertThrows(RacketPuncherException.class,
@@ -138,7 +138,7 @@ public class SiteUserServiceTest {
     void updateSiteUserInfoFailedByEmailNotFound() {
         // given
         given(siteUserRepository.findByEmail("email@naver.com"))
-                .willReturn(Optional.ofNullable(null));
+                .willReturn(Optional.empty());
 
         // when
         RacketPuncherException exception = assertThrows(RacketPuncherException.class,
@@ -170,7 +170,7 @@ public class SiteUserServiceTest {
         given(siteUserRepository.findByEmail("email@naver.com"))
                 .willReturn(Optional.ofNullable(getSiteUser()));
         given(notificationRepository.findAllBySiteUser_Email("email@naver.com"))
-                .willReturn(Optional.ofNullable(getNotifications()));
+                .willReturn(getNotifications());
 
         // when
         var result = siteUserService.getNotifications("email@naver.com");
@@ -183,7 +183,7 @@ public class SiteUserServiceTest {
     void getNotificationsFailedByEmailNotFound() {
         // given
         given(siteUserRepository.findByEmail("email@naver.com"))
-                .willReturn(Optional.ofNullable(null));
+                .willReturn(Optional.empty());
 
         // when
         RacketPuncherException exception = assertThrows(RacketPuncherException.class,
@@ -199,7 +199,7 @@ public class SiteUserServiceTest {
         given(siteUserRepository.findByEmail("email@naver.com"))
                 .willReturn(Optional.ofNullable(getSiteUser()));
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.ACCEPTED))
-                .willReturn(Optional.ofNullable(getApplies()));
+                .willReturn(getApplies());
 
         // when
         var result = siteUserService.getReviewPageInfo("email@naver.com", 1L);
@@ -212,7 +212,7 @@ public class SiteUserServiceTest {
     void getReviewPageInfoFailedByEmailNotFound() {
         // given
         given(siteUserRepository.findByEmail("email@naver.com"))
-                .willReturn(Optional.ofNullable(null));
+                .willReturn(Optional.empty());
 
         // when
         RacketPuncherException exception = assertThrows(RacketPuncherException.class,
@@ -245,7 +245,7 @@ public class SiteUserServiceTest {
     void reviewFailedByEmailNotFound() {
         // given
         given(siteUserRepository.findByEmail("email@naver.com"))
-                .willReturn(Optional.ofNullable(null));
+                .willReturn(Optional.empty());
 
         // when
         RacketPuncherException exception = assertThrows(RacketPuncherException.class,

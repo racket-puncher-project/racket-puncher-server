@@ -1,12 +1,26 @@
 package com.example.demo.auth.service;
 
-import static com.example.demo.exception.type.ErrorCode.*;
+import static com.example.demo.exception.type.ErrorCode.EMAIL_ALREADY_EXISTED;
+import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
+import static com.example.demo.exception.type.ErrorCode.INVALID_TOKEN;
+import static com.example.demo.exception.type.ErrorCode.NICKNAME_ALREADY_EXISTED;
+import static com.example.demo.exception.type.ErrorCode.REFRESH_TOKEN_EXPIRED;
+import static com.example.demo.exception.type.ErrorCode.REGISTRATION_INFO_NOT_FOUND;
+import static com.example.demo.exception.type.ErrorCode.RESET_TOKEN_ALREADY_USED;
+import static com.example.demo.exception.type.ErrorCode.RESET_TOKEN_EXPIRED;
+import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
+import static com.example.demo.exception.type.ErrorCode.WRONG_PASSWORD;
 
-import com.example.demo.auth.dto.*;
+import com.example.demo.auth.dto.AccessTokenDto;
+import com.example.demo.auth.dto.FindEmailResponseDto;
+import com.example.demo.auth.dto.GeneralSignInResponseDto;
+import com.example.demo.auth.dto.ResetTokenDto;
+import com.example.demo.auth.dto.SignInDto;
+import com.example.demo.auth.dto.SignUpDto;
+import com.example.demo.auth.dto.StringResponseDto;
+import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.auth.security.TokenProvider;
-import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.AuthType;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +51,6 @@ public class AuthService implements UserDetailsService {
     private final SiteUserRepository siteUserRepository;
     private final TokenProvider tokenProvider;
     private final RedisTemplate<String, String> redisTemplate;
-    private final NotificationService notificationService;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -53,8 +66,7 @@ public class AuthService implements UserDetailsService {
         if (AuthType.GENERAL.equals(signUpDto.getAuthType())) {
             signUpDto.setPassword(this.passwordEncoder.encode(signUpDto.getPassword()));
         }
-        var siteUser = siteUserRepository.save(SiteUser.fromDto(signUpDto));
-        return siteUser;
+        return siteUserRepository.save(SiteUser.fromDto(signUpDto));
     }
 
     public SiteUser authenticate(SignInDto signInDto) {

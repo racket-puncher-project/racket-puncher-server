@@ -131,7 +131,7 @@ class MatchingServiceImplTest {
         given(findEntity.findMatching(matching.getId()))
                 .willReturn(matching);
         given(applyRepository.findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED))
-                .willReturn(Optional.of(getApplyMember()));
+                .willReturn(getApplyMember());
         given(applyRepository.findAllByMatching_Id(matching.getId()))
                 .willReturn(new ArrayList<>());
         given(matchingRepository.existsByIdAndSiteUser(anyLong(), any(SiteUser.class)))
@@ -168,9 +168,9 @@ class MatchingServiceImplTest {
         given(applyRepository.countByMatching_IdAndApplyStatus(1L, ApplyStatus.PENDING))
                 .willReturn(Optional.of(2));
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.PENDING))
-                .willReturn(Optional.of(getApplyMember()));
+                .willReturn(getApplyMember());
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.ACCEPTED))
-                .willReturn(Optional.of(getConfirmedMember()));
+                .willReturn(getConfirmedMember());
 
         // when
         var result = matchingService.getApplyContents("example@example.com", 1L);
@@ -189,9 +189,9 @@ class MatchingServiceImplTest {
         given(applyRepository.countByMatching_IdAndApplyStatus(1L, ApplyStatus.PENDING))
                 .willReturn(Optional.of(2));
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.PENDING))
-                .willReturn(Optional.of(getApplyMember()));
+                .willReturn(getApplyMember());
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.ACCEPTED))
-                .willReturn(Optional.of(getConfirmedMember()));
+                .willReturn(getConfirmedMember());
 
         // when
         var result = matchingService.getApplyContents("example@example.com", 1L);

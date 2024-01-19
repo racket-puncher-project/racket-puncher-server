@@ -15,7 +15,7 @@ public interface ApplyRepository extends JpaRepository<Apply, Long> {
 
     Optional<Apply> findBySiteUser_IdAndMatching_Id(long userId, long matchingId);
 
-    Optional<List<Apply>> findAllByMatching_IdAndApplyStatus(long matchingId, ApplyStatus applyStatus);
+    List<Apply> findAllByMatching_IdAndApplyStatus(long matchingId, ApplyStatus applyStatus);
 
     Optional<Integer> countByMatching_IdAndApplyStatus(long matchingId, ApplyStatus applyStatus);
   
