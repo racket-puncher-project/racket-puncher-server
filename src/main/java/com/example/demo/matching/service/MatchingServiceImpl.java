@@ -136,7 +136,7 @@ public class MatchingServiceImpl implements MatchingService {
 
     private void sendNotificationToApplyUser(Long matchingId, SiteUser siteUser, Matching matching,
                                              NotificationType notificationType) {
-        var applies = applyRepository.findAllByMatching_Id(matchingId).get();
+        var applies = applyRepository.findAllByMatching_Id(matchingId);
 
         applies.forEach(apply -> {
             if (!apply.getSiteUser().equals(siteUser)) {

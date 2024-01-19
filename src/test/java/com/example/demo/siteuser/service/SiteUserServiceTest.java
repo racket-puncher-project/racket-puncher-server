@@ -1,7 +1,6 @@
 package com.example.demo.siteuser.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,6 +27,8 @@ import com.example.demo.type.NegativeReviewType;
 import com.example.demo.type.Ntrp;
 import com.example.demo.type.PositiveReviewType;
 import com.example.demo.type.RecruitStatus;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -254,6 +255,52 @@ public class SiteUserServiceTest {
         assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
     }
 
+    @Test
+    void getMatchingHostedBySiteUser() {
+        // given
+        SiteUser siteUser = getSiteUser();
+        Matching matching = getMatching();
+        Apply apply = getApply();
+        given(siteUserRepository.findByEmail(siteUser.getEmail()))
+                .willReturn(Optional.of(siteUser));
+        given(matchingRepository.findAllBySiteUser_Email(siteUser.getEmail()))
+                .willReturn(List.of(matching));
+        given(applyRepository.findBySiteUser_IdAndMatching_Id(siteUser.getId(), matching.getId()))
+                .willReturn(Optional.of(apply));
+        given(applyRepository.findAllByMatching_Id(matching.getId()))
+                .willReturn(List.of(apply));
+
+        // when
+        var result = siteUserService.getMatchingHostedBySiteUser(siteUser.getEmail());
+
+        // then
+        assertNotNull(result);
+        assertEquals(result.size(), 1);
+        assertEquals(result.get(0).getId(), matching.getId());
+    }
+
+    @Test
+    void getMatchingAppliedBySiteUser() {
+        // given
+        SiteUser siteUser = getSiteUser();
+        Matching matching = getMatching();
+        Apply apply = getApply();
+        given(siteUserRepository.findByEmail(siteUser.getEmail()))
+                .willReturn(Optional.of(siteUser));
+        given(applyRepository.findAllBySiteUser_Email(siteUser.getEmail()))
+                .willReturn(List.of(apply));
+        given(applyRepository.findAllByMatching_Id(matching.getId()))
+                .willReturn(List.of(apply));
+
+        // when
+        var result = siteUserService.getMatchingAppliedBySiteUser(siteUser.getEmail());
+
+        // then
+        assertNotNull(result);
+        assertEquals(result.size(), 1);
+        assertEquals(result.get(0).getId(), matching.getId());
+    }
+
     private SiteUserInfoDto getSiteUserInfoDto() {
         return SiteUserInfoDto.builder()
                 .profileImg("img.png")
@@ -273,11 +320,13 @@ public class SiteUserServiceTest {
                 .id(1L)
                 .title("title")
                 .acceptedNum(4)
+                .date(LocalDate.now())
                 .recruitDueDateTime(LocalDateTime.now())
                 .matchingType(MatchingType.DOUBLE)
                 .siteUser(getSiteUser())
                 .recruitStatus(RecruitStatus.CONFIRMED)
                 .content("content")
+                .location("서울시 테니스구")
                 .cost(40000)
                 .build();
     }
@@ -485,5 +534,26 @@ public class SiteUserServiceTest {
         inputReviewDtoList.add(inputReviewDto2);
 
         return inputReviewDtoList;
+    }
+
+    private Apply getApply() {
+        return Apply.builder()
+                .matching(Matching.builder()
+                        .id(1L)
+                        .title("title1")
+                        .location("서울시 테니스구")
+                        .date(LocalDate.now())
+                        .siteUser(SiteUser.builder()
+                                .id(2L)
+                                .build())
+                        .build())
+                .siteUser(SiteUser.builder()
+                        .id(1L)
+                        .profileImg("img.png")
+                        .nickname("nickName1")
+                        .build())
+                .applyStatus(ApplyStatus.ACCEPTED)
+                .createTime(LocalDateTime.now())
+                .build();
     }
 }

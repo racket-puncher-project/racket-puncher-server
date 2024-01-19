@@ -3,13 +3,7 @@ package com.example.demo.siteuser.controller;
 import com.example.demo.aws.S3Uploader;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
-import com.example.demo.siteuser.dto.InputReviewDto;
-import com.example.demo.siteuser.dto.MatchingMyMatchingDto;
-import com.example.demo.siteuser.dto.SiteUserInfoDto;
-import com.example.demo.siteuser.dto.MyInfoDto;
-import com.example.demo.siteuser.dto.NotificationDto;
-import com.example.demo.siteuser.dto.ReviewPageInfoDto;
-import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
+import com.example.demo.siteuser.dto.*;
 import com.example.demo.siteuser.service.SiteUserService;
 import java.security.Principal;
 import java.util.Collections;
@@ -49,28 +43,18 @@ public class SiteUserController {
         return  ResponseUtil.SUCCESS(result);
     }
 
-    @GetMapping("/my-page/hosted/{userId}")
-    public ResponseEntity<ResponseDto<List<MatchingMyMatchingDto>>> getMatchingBySiteUser(
-            @PathVariable(value = "userId") Long userId) {
-        List<MatchingMyMatchingDto> matchingMyHostedDtos = siteUserService.getMatchingBySiteUser(userId);
-
-        if (!matchingMyHostedDtos.isEmpty()) {
-            return new ResponseEntity<>(ResponseUtil.SUCCESS(matchingMyHostedDtos), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(ResponseUtil.SUCCESS(Collections.emptyList()), HttpStatus.NOT_FOUND);
-        }
+    @GetMapping("/my-page/hosted")
+    public ResponseDto<List<HostedMatchingDto>> getMatchingHostedBySiteUser(Principal principal) {
+        var email = principal.getName();
+        var result = siteUserService.getMatchingHostedBySiteUser(email);
+        return ResponseUtil.SUCCESS(result);
     }
 
-    @GetMapping("/my-page/apply/{userId}")
-    public ResponseEntity<ResponseDto<List<MatchingMyMatchingDto>>> findApplyBySiteUser_Id(
-            @PathVariable(value = "userId") Long userId) {
-        List<MatchingMyMatchingDto> matchingMyAppliedDtos = siteUserService.getApplyBySiteUser(userId);
-
-        if (!matchingMyAppliedDtos.isEmpty()) {
-            return new ResponseEntity<>(ResponseUtil.SUCCESS(matchingMyAppliedDtos), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(ResponseUtil.SUCCESS(Collections.emptyList()), HttpStatus.NOT_FOUND);
-        }
+    @GetMapping("/my-page/applied")
+    public ResponseDto<List<AppliedMatchingDto>> getMatchingAppliedBySiteUser(Principal principal) {
+        var email = principal.getName();
+        var result = siteUserService.getMatchingAppliedBySiteUser(email);
+        return ResponseUtil.SUCCESS(result);
     }
 
     @PatchMapping("my-page/modify")

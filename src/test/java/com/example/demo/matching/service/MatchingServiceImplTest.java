@@ -133,7 +133,7 @@ class MatchingServiceImplTest {
         given(applyRepository.findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED))
                 .willReturn(Optional.of(getApplyMember()));
         given(applyRepository.findAllByMatching_Id(matching.getId()))
-                .willReturn(Optional.of(new ArrayList<>()));
+                .willReturn(new ArrayList<>());
         given(matchingRepository.existsByIdAndSiteUser(anyLong(), any(SiteUser.class)))
                 .willReturn(true);
 
