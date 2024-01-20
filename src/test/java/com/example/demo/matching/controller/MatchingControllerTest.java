@@ -1,16 +1,5 @@
 package com.example.demo.matching.controller;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import com.example.demo.auth.security.JwtAuthenticationFilter;
 import com.example.demo.auth.security.SecurityConfiguration;
 import com.example.demo.auth.security.TokenProvider;
@@ -26,16 +15,27 @@ import com.example.demo.type.MatchingType;
 import com.example.demo.type.Ntrp;
 import com.example.demo.type.RecruitStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.time.LocalDateTime;
-import java.util.List;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(MatchingController.class)
 @Import(SecurityConfiguration.class)
@@ -167,6 +167,44 @@ class MatchingControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    void getMatchingWithinDistance() throws Exception {
+        //given
+        LocationDto locationDto = getLocationDto();
+        Pageable pageable = PageRequest.of(0, 5);
+        String content = objectMapper.writeValueAsString(locationDto);
+
+        given(matchingService.getMatchingWithinDistance(locationDto,3.0, pageable))
+                .willReturn(new PageImpl<>(List.of(getMatchingPreviewDto()), pageable, 1));
+
+        //when
+        //then
+        mockMvc.perform(post("/api/matches/list/map")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void getMatchingList() throws Exception {
+        //given
+        FilterRequestDto filterRequestDto = getFilterRequestDto();
+        Pageable pageable = PageRequest.of(0, 5);
+        String content = objectMapper.writeValueAsString(filterRequestDto);
+
+        given(matchingService.getMatchingByFilter(filterRequestDto.getFilter(), pageable))
+                .willReturn(new PageImpl<>(List.of(getMatchingPreviewDto()), pageable, 1));
+
+        //when
+        //then
+        mockMvc.perform(post("/api/matches/list")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
     private Matching getMatchingEntity(){
         return Matching.builder()
                 .createTime(LocalDateTime.now())
@@ -225,7 +263,7 @@ class MatchingControllerTest {
                 .build();
     }
 
-    private MatchingPreviewDto makeMatchingPreviewDto(){
+    private MatchingPreviewDto getMatchingPreviewDto(){
         return MatchingPreviewDto.builder()
                 .isReserved(true)
                 .matchingType(MatchingType.SINGLE)
@@ -260,6 +298,25 @@ class MatchingControllerTest {
                 .roadAddr("서울특별시 강남구 삼성로 629 (삼성동, 삼성동센트럴아이파크)")
                 .jibunAddr("서울특별시 강남구 삼성동 188 삼성동센트럴아이파크")
                 .zipNo("06094")
+                .build();
+    }
+
+    private LocationDto getLocationDto(){
+        return LocationDto.builder()
+                .lat(38.0)
+                .lon(127.0)
+                .build();
+    }
+
+    public FilterRequestDto getFilterRequestDto() {
+        return FilterRequestDto.builder()
+                .filter(FilterDto.builder()
+                        .date("")
+                        .ntrps(List.of())
+                        .matchingTypes(List.of())
+                        .ageGroups(List.of())
+                        .regions(List.of())
+                        .build())
                 .build();
     }
 }

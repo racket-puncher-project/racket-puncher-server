@@ -13,10 +13,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FilterDto {
-    private String date;
+public class FilterDto {    private String date;
     private List<Region> regions;
     private List<MatchingType> matchingTypes;
     private List<AgeGroup> ageGroups;
     private List<Ntrp> ntrps;
+
+    public static boolean isFilterDtoEmpty(FilterDto filterDto) {
+        return filterDto.getDate().isBlank()
+                && filterDto.getRegions().isEmpty()
+                && filterDto.getMatchingTypes().isEmpty()
+                && filterDto.getAgeGroups().isEmpty()
+                && filterDto.getNtrps().isEmpty();
+    }
 }

@@ -1,11 +1,5 @@
 package com.example.demo.matching.service;
 
-import static com.example.demo.exception.type.ErrorCode.APPLY_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.LAT_AND_LON_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING;
-import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
-
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
@@ -13,15 +7,7 @@ import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.matching.dto.ApplyContents;
-import com.example.demo.matching.dto.ApplyMember;
-import com.example.demo.matching.dto.DocumentForAddressDto;
-import com.example.demo.matching.dto.FilterRequestDto;
-import com.example.demo.matching.dto.LatAndLonResponseDto;
-import com.example.demo.matching.dto.LocationDto;
-import com.example.demo.matching.dto.MatchingDetailRequestDto;
-import com.example.demo.matching.dto.MatchingDetailResponseDto;
-import com.example.demo.matching.dto.MatchingPreviewDto;
+import com.example.demo.matching.dto.*;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.openfeign.feignclient.LatAndLonApiFeignClient;
@@ -32,6 +18,13 @@ import com.example.demo.type.NotificationType;
 import com.example.demo.type.PenaltyType;
 import com.example.demo.type.RecruitStatus;
 import com.example.demo.util.geometry.GeometryUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -39,12 +32,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.example.demo.exception.type.ErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -181,41 +170,23 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     @Override
-    public Page<MatchingPreviewDto> findFilteredMatching(FilterRequestDto filterRequestDto, Pageable pageable) {
-        // 필터링 없으면 정렬만 하고 반환
-        if (checkFilterEmpty(filterRequestDto)) {
+    public Page<MatchingPreviewDto> getMatchingByFilter(FilterDto filterDto, Pageable pageable) {
+        if (FilterDto.isFilterDtoEmpty(filterDto)) {
             return matchingRepository.findByRecruitStatusAndRecruitDueDateTimeAfter(RecruitStatus.OPEN, LocalDateTime.now(), pageable)
                     .map(MatchingPreviewDto::fromEntity);
         }
 
-        // 필터링 있으면 필터링 후 반환
-        return matchingRepository.searchWithFilter(filterRequestDto, pageable)
+        return matchingRepository.findAllByFilter(filterDto, pageable)
                 .map(MatchingPreviewDto::fromEntity);
     }
 
-    private boolean checkFilterEmpty(FilterRequestDto filterRequestDto) {
-        // location
-        if (filterRequestDto.getLocation().getLat() == 0
-                && filterRequestDto.getLocation().getLon() == 0
-                && filterRequestDto.getFilters().getDate().length() == 0
-                && filterRequestDto.getFilters().getRegions().size() == 0
-                && filterRequestDto.getFilters().getMatchingTypes().size() == 0
-                && filterRequestDto.getFilters().getAgeGroups().size() == 0
-                && filterRequestDto.getFilters().getNtrps().size() == 0
-        ) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     @Override
-    public Page<MatchingPreviewDto> findCloseMatching(LocationDto locationDto, Double distance, Pageable pageable) {
+    public Page<MatchingPreviewDto> getMatchingWithinDistance(LocationDto locationDto, Double distance, Pageable pageable) {
         Double x = locationDto.getLat();
         Double y = locationDto.getLon();
-        LocationDto northEast = GeometryUtil.calculate(x, y, distance / 2, 45.0);
-        LocationDto southWest = GeometryUtil.calculate(x, y, distance / 2, 225.0);
-        return matchingRepository.searchWithin(locationDto, northEast, southWest, pageable)
+        LocationDto northEastBound = GeometryUtil.calculate(x, y, distance / 2, 45.0);
+        LocationDto southWestBound = GeometryUtil.calculate(x, y, distance / 2, 225.0);
+        return matchingRepository.findAllWithinBoundary(locationDto, northEastBound, southWestBound, pageable)
                 .map(MatchingPreviewDto::fromEntity);
     }
 

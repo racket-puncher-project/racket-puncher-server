@@ -1,11 +1,5 @@
 package com.example.demo.matching.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
-
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.common.FindEntity;
@@ -13,36 +7,37 @@ import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
-import com.example.demo.matching.dto.DocumentForAddressDto;
-import com.example.demo.matching.dto.LatAndLonResponseDto;
-import com.example.demo.matching.dto.MatchingDetailRequestDto;
-import com.example.demo.matching.dto.MatchingPreviewDto;
+import com.example.demo.matching.dto.*;
+import com.example.demo.matching.filter.Region;
 import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.openfeign.feignclient.LatAndLonApiFeignClient;
 import com.example.demo.siteuser.repository.SiteUserRepository;
-import com.example.demo.type.AgeGroup;
-import com.example.demo.type.ApplyStatus;
-import com.example.demo.type.GenderType;
-import com.example.demo.type.MatchingType;
-import com.example.demo.type.Ntrp;
-import com.example.demo.type.RecruitStatus;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.bouncycastle.asn1.est.AttrOrOID;
+import com.example.demo.type.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
 class MatchingServiceImplTest {
@@ -215,6 +210,57 @@ class MatchingServiceImplTest {
         assertEquals(exception.getMessage(), "이메일을 찾을 수 없습니다.");
     }
 
+    @Test
+    void getMatchingWithinDistance() {
+        // given
+        LocationDto locationDto = getLocationDto();
+        Pageable pageable = PageRequest.of(0, 5);
+        Matching matching = getMatchingEntity(getSiteUser());
+
+        given(matchingRepository.findAllWithinBoundary(eq(locationDto), any(LocationDto.class), any(LocationDto.class), eq(pageable)))
+                .willReturn(new PageImpl<>(List.of(matching), pageable, 1));
+
+        // when
+        var result = matchingService.getMatchingWithinDistance(locationDto, 3.0, pageable);
+
+        // then
+        assertEquals(matching.getId(), result.get().findFirst().orElseThrow().getId());
+    }
+
+    @Test
+    void getMatchingByEmptyFilter() {
+        // given
+        FilterDto filterDto = getEmptyFilterDto();
+        Pageable pageable = PageRequest.of(0, 5);
+        Matching matching = getMatchingEntity(getSiteUser());
+
+        given(matchingRepository.findByRecruitStatusAndRecruitDueDateTimeAfter(eq(RecruitStatus.OPEN), any(LocalDateTime.class), eq(pageable)))
+                .willReturn(new PageImpl<>(List.of(matching), pageable, 1));
+
+        // when
+        var result = matchingService.getMatchingByFilter(filterDto, pageable);
+
+        // then
+        assertEquals(matching.getId(), result.get().findFirst().orElseThrow().getId());
+    }
+
+    @Test
+    void getMatchingByFilter() {
+        // given
+        FilterDto filterDto = getFilterDto();
+        Pageable pageable = PageRequest.of(0, 5);
+        Matching matching = getMatchingEntity(getSiteUser());
+
+        given(matchingRepository.findAllByFilter(filterDto, pageable))
+                .willReturn(new PageImpl<>(List.of(matching), pageable, 1));
+
+        // when
+        var result = matchingService.getMatchingByFilter(filterDto, pageable);
+
+        // then
+        assertEquals(matching.getId(), result.get().findFirst().orElseThrow().getId());
+    }
+
     private SiteUser getSiteUser() {
         return SiteUser.builder()
                 .id(1L)
@@ -308,11 +354,13 @@ class MatchingServiceImplTest {
                 .recruitNum(4)
                 .acceptedNum(2)
                 .cost(5000)
-                .location("주소")
+                .location("서울시 강남구")
                 .lat(37.56556383681641)
                 .lon(126.98540998152264)
                 .recruitStatus(RecruitStatus.OPEN)
                 .title("같이 테니스 치실분 구해요")
+                .date(LocalDate.now())
+                .startTime(LocalTime.now())
                 .build();
     }
 
@@ -375,6 +423,33 @@ class MatchingServiceImplTest {
 
         return LatAndLonResponseDto.builder()
                 .documents(documentList)
+                .build();
+    }
+
+    private LocationDto getLocationDto(){
+        return LocationDto.builder()
+                .lat(38.0)
+                .lon(127.0)
+                .build();
+    }
+
+    public FilterDto getEmptyFilterDto() {
+        return FilterDto.builder()
+                .date("")
+                .ntrps(List.of())
+                .matchingTypes(List.of())
+                .ageGroups(List.of())
+                .regions(List.of())
+                .build();
+    }
+
+    public FilterDto getFilterDto() {
+        return FilterDto.builder()
+                .date("")
+                .ntrps(List.of(Ntrp.PRO))
+                .matchingTypes(List.of(MatchingType.SINGLE))
+                .ageGroups(List.of(AgeGroup.FORTIES))
+                .regions(List.of(Region.GANGNAM))
                 .build();
     }
 }
