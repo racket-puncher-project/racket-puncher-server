@@ -1,7 +1,7 @@
 package com.example.demo.matching.repository.filtering;
 
 import com.example.demo.entity.Matching;
-import com.example.demo.matching.dto.FilterRequestDto;
+import com.example.demo.matching.dto.FilterDto;
 import com.example.demo.matching.filter.Region;
 import com.example.demo.matching.repository.BaseCustomRepository;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -27,78 +27,60 @@ public class CustomRepositoryForFilteringImpl extends BaseCustomRepository imple
     }
 
     @Override
-    public PageImpl<Matching> findAllByFilter(FilterRequestDto filterRequestDto, Pageable pageable) {
-        JPQLQuery<Matching> matchingList;
-        if(filterRequestDto.getLocation() == null){
-            matchingList =  queryFactory.selectFrom(matching)
+    public PageImpl<Matching> findAllByFilter(FilterDto filterDto, Pageable pageable) {
+        JPQLQuery<Matching> matchingList = queryFactory.selectFrom(matching)
                     .where(
-                            date(filterRequestDto),
-                            region(filterRequestDto),
-                            matchingType(filterRequestDto),
-                            ageGroup(filterRequestDto),
-                            ntrp(filterRequestDto)
+                            date(filterDto),
+                            region(filterDto),
+                            matchingType(filterDto),
+                            ageGroup(filterDto),
+                            ntrp(filterDto)
                     );
-        } else {
-            String haversineFormula = "ST_Distance_Sphere(point({0}, {1}), point("
-                    + filterRequestDto.getLocation().getLon() + ", " + filterRequestDto.getLocation().getLat() + "))";
-            matchingList = queryFactory.selectFrom(matching)
-                    .where(
-                            date(filterRequestDto),
-                            region(filterRequestDto),
-                            matchingType(filterRequestDto),
-                            ageGroup(filterRequestDto),
-                            ntrp(filterRequestDto)
-                    )
-                    .orderBy(Expressions.stringTemplate(haversineFormula, matching.lon, matching.lat).asc());
-        }
 
         return getPageImpl(pageable, matchingList, Matching.class);
     }
 
-    //TODO: 리팩토링 전
-    private BooleanExpression date(FilterRequestDto filterRequestDto){
-        if(filterRequestDto.getFilters().getDate().length() == 0) {
+    private BooleanExpression date(FilterDto filterDto){
+        if(filterDto.getDate().isEmpty()) {
             return null;
         }
-        LocalDate dateOfFilter = LocalDate.parse(filterRequestDto.getFilters().getDate());
+        LocalDate dateOfFilter = LocalDate.parse(filterDto.getDate());
         return matching.date.eq(dateOfFilter);
     }
 
-    private BooleanExpression ageGroup(FilterRequestDto filterRequestDto){
-        if(filterRequestDto.getFilters().getAgeGroups().size() == 0) {
+    private BooleanExpression ageGroup(FilterDto filterDto){
+        if(filterDto.getAgeGroups().isEmpty()) {
             return null;
         }
-        return matching.age.in(filterRequestDto.getFilters().getAgeGroups());
+        return matching.age.in(filterDto.getAgeGroups());
     }
 
-    private BooleanExpression region(FilterRequestDto filterRequestDto){
-        if(filterRequestDto.getFilters().getRegions().size() == 0) {
+    private BooleanExpression region(FilterDto filterDto){
+        if(filterDto.getRegions().isEmpty()) {
             return null;
         }
 
-        // 영어를 한국어로 - 매칭의 위치를 StringExpression로 - 지역이 포함되어있는지 boolean 배열로 - boolean 배열중에 하나라도 true 있으면 true
-        List<String> regions = filterRequestDto.getFilters().getRegions().stream()
+        List<String> regions = filterDto.getRegions().stream()
                 .map(Region::getKorean).toList();
         StringExpression locationExpression = Expressions.asString(matching.location);
 
-        BooleanExpression[] conditions = regions.stream()
+        return regions.stream()
                 .map(region -> locationExpression.likeIgnoreCase("%" + region + "%"))
-                .toArray(BooleanExpression[]::new);
-
-        return Expressions.anyOf(conditions);
+                .reduce(BooleanExpression::or)
+                .orElse(null);
     }
 
-    private BooleanExpression matchingType(FilterRequestDto filterRequestDto){
-        if(filterRequestDto.getFilters().getMatchingTypes().size() == 0) {
+    private BooleanExpression matchingType(FilterDto filterDto){
+        if(filterDto.getMatchingTypes().isEmpty()) {
             return null;
         }
-        return matching.matchingType.in(filterRequestDto.getFilters().getMatchingTypes());
+        return matching.matchingType.in(filterDto.getMatchingTypes());
     }
 
-    private BooleanExpression ntrp(FilterRequestDto filterRequestDto){
-        if(filterRequestDto.getFilters().getNtrps().size() == 0) {
+    private BooleanExpression ntrp(FilterDto filterDto){
+        if(filterDto.getNtrps().isEmpty()) {
             return null;
         }
-        return matching.ntrp.in(filterRequestDto.getFilters().getNtrps());
+        return matching.ntrp.in(filterDto.getNtrps());
     }
 }

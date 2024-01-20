@@ -1,5 +1,7 @@
 package com.example.demo.matching.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Setter
@@ -7,7 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FilterRequestDto {
-    private LocationDto location;
-    private FilterDto filters;
+    @JsonProperty("filters")
+    private FilterDto filter;
 }

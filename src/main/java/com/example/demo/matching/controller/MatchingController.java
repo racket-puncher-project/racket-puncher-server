@@ -62,24 +62,17 @@ public class MatchingController {
             @RequestParam(required = false) String sort,
             @RequestBody(required = false) FilterRequestDto filterRequestDto) {
 
-        // 정렬 없을 때
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        // 등록순 정렬
+        Sort sortOrder = Sort.unsorted();
         if ("register".equals(sort)) {
-            pageRequest = PageRequest.of(page, size, Sort.by("createTime").ascending());
-        }
-        // 마감순 정렬
-        else if ("due-date".equals(sort)) {
-            pageRequest = PageRequest.of(page, size, Sort.by("recruitDueDateTime").ascending());
-        }
-        // 거리순 정렬
-        else if ("distance".equals(sort)) {
-            if (filterRequestDto.getLocation().getLat() != null && filterRequestDto.getLocation().getLon() != null)
-                return ResponseUtil.SUCCESS(matchingService.findFilteredMatching(filterRequestDto, pageRequest));
+            sortOrder = Sort.by("createTime").ascending();
+        } else if ("due-date".equals(sort)) {
+            sortOrder = Sort.by("recruitDueDateTime").descending();
         }
 
-        return ResponseUtil.SUCCESS(matchingService.findFilteredMatching(filterRequestDto, pageRequest));
+        PageRequest pageRequest = PageRequest.of(page, size, sortOrder);
+        var result = matchingService.getMatchingByFilter(filterRequestDto.getFilter(), pageRequest);
+
+        return ResponseUtil.SUCCESS(result);
     }
 
     @PostMapping("/list/map")
@@ -87,10 +80,11 @@ public class MatchingController {
             @RequestParam(required = false, defaultValue = "0") int page,
             @RequestParam(required = false, defaultValue = "5") int size,
             @RequestParam(required = false, defaultValue = "3") double distance,
-            @RequestBody(required = false) LocationDto locationDto) {
+            @RequestBody LocationDto locationDto) {
 
         PageRequest pageRequest = PageRequest.of(page, size);
         var result = matchingService.getMatchingWithinDistance(locationDto, distance, pageRequest);
+
         return ResponseUtil.SUCCESS(result);
     }
 

@@ -170,32 +170,14 @@ public class MatchingServiceImpl implements MatchingService {
     }
 
     @Override
-    public Page<MatchingPreviewDto> findFilteredMatching(FilterRequestDto filterRequestDto, Pageable pageable) {
-        // 필터링 없으면 정렬만 하고 반환
-        if (checkFilterEmpty(filterRequestDto)) {
+    public Page<MatchingPreviewDto> getMatchingByFilter(FilterDto filterDto, Pageable pageable) {
+        if (FilterDto.isFilterDtoEmpty(filterDto)) {
             return matchingRepository.findByRecruitStatusAndRecruitDueDateTimeAfter(RecruitStatus.OPEN, LocalDateTime.now(), pageable)
                     .map(MatchingPreviewDto::fromEntity);
         }
 
-        // 필터링 있으면 필터링 후 반환
-        return matchingRepository.searchWithFilter(filterRequestDto, pageable)
+        return matchingRepository.findAllByFilter(filterDto, pageable)
                 .map(MatchingPreviewDto::fromEntity);
-    }
-
-    private boolean checkFilterEmpty(FilterRequestDto filterRequestDto) {
-        // location
-        if (filterRequestDto.getLocation().getLat() == 0
-                && filterRequestDto.getLocation().getLon() == 0
-                && filterRequestDto.getFilters().getDate().length() == 0
-                && filterRequestDto.getFilters().getRegions().size() == 0
-                && filterRequestDto.getFilters().getMatchingTypes().size() == 0
-                && filterRequestDto.getFilters().getAgeGroups().size() == 0
-                && filterRequestDto.getFilters().getNtrps().size() == 0
-        ) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     @Override

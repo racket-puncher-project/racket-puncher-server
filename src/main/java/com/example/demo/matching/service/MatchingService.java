@@ -10,7 +10,7 @@ public interface MatchingService {
     Matching create(String email, MatchingDetailRequestDto matchingDetailRequestDto);
     Matching update(String email, Long matchingId, MatchingDetailRequestDto matchingDetailRequestDto);
     void delete(String email, Long matchingId);
-    Page<MatchingPreviewDto> findFilteredMatching(FilterRequestDto filterRequestDto, Pageable pageable);
+    Page<MatchingPreviewDto> getMatchingByFilter(FilterDto filterDto, Pageable pageable);
     Page<MatchingPreviewDto> getMatchingWithinDistance(LocationDto locationDto, Double distance, Pageable pageable);
     MatchingDetailResponseDto getDetail(Long matchingId);
     ApplyContents getApplyContents(String email, long matchId) throws JsonProcessingException;
