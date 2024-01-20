@@ -66,7 +66,7 @@ public class MatchingController {
         if ("register".equals(sort)) {
             sortOrder = Sort.by("createTime").ascending();
         } else if ("due-date".equals(sort)) {
-            sortOrder = Sort.by("recruitDueDateTime").descending();
+            sortOrder = Sort.by("recruitDueDateTime").ascending();
         }
 
         PageRequest pageRequest = PageRequest.of(page, size, sortOrder);
