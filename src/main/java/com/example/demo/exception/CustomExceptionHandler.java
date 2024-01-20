@@ -41,7 +41,7 @@ public class CustomExceptionHandler {
         log.error("smsSendException", e);
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .code(ErrorCode.SMS_SEND_FAIL.getCode())
-                .message(ErrorCode.SMS_SEND_FAIL.getDescription() + e.getMessage())
+                .message(ErrorCode.SMS_SEND_FAIL.getDescription())
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.resolve(errorResponse.getCode()));
