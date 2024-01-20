@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    Optional<List<Notification>> findAllBySiteUser_Email(String email);
+    List<Notification> findAllBySiteUser_Email(String email);
     void deleteAllByCreateTimeBefore(LocalDateTime threeDaysBeforeNow);
 }

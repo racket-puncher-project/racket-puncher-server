@@ -1,7 +1,14 @@
 package com.example.demo.apply.service;
 
-import static com.example.demo.exception.type.ErrorCode.*;
-import static com.example.demo.util.dateformatter.DateFormatter.formForDate;
+import static com.example.demo.exception.type.ErrorCode.APPLY_ALREADY_CANCELED;
+import static com.example.demo.exception.type.ErrorCode.APPLY_ALREADY_EXISTED;
+import static com.example.demo.exception.type.ErrorCode.APPLY_NOT_FOUND;
+import static com.example.demo.exception.type.ErrorCode.MATCHING_ALREADY_CONFIRMED;
+import static com.example.demo.exception.type.ErrorCode.MATCHING_ALREADY_FINISHED;
+import static com.example.demo.exception.type.ErrorCode.PERMISSION_DENIED_TO_ACCEPTED_APPLIES;
+import static com.example.demo.exception.type.ErrorCode.RECRUIT_NUMBER_OVERED;
+import static com.example.demo.exception.type.ErrorCode.SELF_APPLY_CANCEL_DENIED;
+import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
 
 import com.example.demo.apply.dto.ApplyDto;
 import com.example.demo.apply.repository.ApplyRepository;
@@ -16,9 +23,7 @@ import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.PenaltyType;
 import com.example.demo.type.RecruitStatus;
-import com.example.demo.util.dateformatter.DateFormatter;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -45,7 +50,8 @@ public class ApplyServiceImpl implements ApplyService {
         validateRecruitNotConfirmed(matching);
 
         if (isAlreadyExisted(user.getId(), matchingId)) {
-            var existApply = applyRepository.findBySiteUser_IdAndMatching_Id(user.getId(), matchingId).get();
+            var existApply = applyRepository.findBySiteUser_IdAndMatching_Id(user.getId(), matchingId)
+                    .orElseThrow(() -> new RacketPuncherException(APPLY_NOT_FOUND));
             validateApplyDuplication(existApply);
             existApply.changeApplyStatus(ApplyStatus.PENDING); // 취소 신청 내역 있을 경우 상태만 변경
             return existApply;
@@ -59,7 +65,7 @@ public class ApplyServiceImpl implements ApplyService {
         var apply = applyRepository.save(Apply.fromDto(applyDto));
         notificationService.createAndSendNotification(organizer, matching, NotificationType.REQUEST_APPLY);
 
-        if (!LocalDate.now().format(formForDate).equals(matching.getDate())) {
+        if (!LocalDate.now().equals(matching.getDate())) {
             return apply;
         }
         var weatherDto = weatherService.getWeatherResponseDtoByMatching(matching);

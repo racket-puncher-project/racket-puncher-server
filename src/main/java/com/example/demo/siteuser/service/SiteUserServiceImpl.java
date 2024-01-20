@@ -112,7 +112,7 @@ public class SiteUserServiceImpl implements SiteUserService {
         siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
 
-        return notificationRepository.findAllBySiteUser_Email(email).get()
+        return notificationRepository.findAllBySiteUser_Email(email)
                 .stream().map(notification -> NotificationDto.fromEntity(notification))
                 .collect(Collectors.toList());
     }
@@ -123,7 +123,7 @@ public class SiteUserServiceImpl implements SiteUserService {
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
 
         return applyRepository
-                .findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED).get()
+                .findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED)
                 .stream().map(apply -> apply.getSiteUser())
                 .filter(siteUser -> siteUser != subjectUser)
                 .map(siteUser -> ReviewPageInfoDto.fromEntity(siteUser))

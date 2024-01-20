@@ -23,16 +23,16 @@ public interface MatchingRepository extends JpaRepository<Matching, Long>, Filte
 
     boolean existsByIdAndSiteUser(Long id, SiteUser siteUser);
 
-    Optional<List<Matching>> findAllByRecruitDueDateTime(LocalDateTime now);
+    List<Matching> findAllByRecruitDueDateTime(LocalDateTime now);
 
     @Query("SELECT m FROM Matching m WHERE m.recruitStatus = :recruitStatus AND m.date = :date "
             + "AND (m.endTime < :endTime OR m.endTime = :endTime)")
-    Optional<List<Matching>> findAllByRecruitStatusFinished(
+    List<Matching> findAllByRecruitStatusFinished(
             @Param("recruitStatus") RecruitStatus recruitStatus,
             @Param("date") LocalDate today,
             @Param("endTime") LocalTime currentTime);
 
-    Optional<List<Matching>> findAllByDate(LocalDate today);
+    List<Matching> findAllByDate(LocalDate today);
 
     Page<Matching> findByRecruitStatusAndRecruitDueDateTimeAfter(
             RecruitStatus OPEN, LocalDateTime LocalDateTime, Pageable pageable);
