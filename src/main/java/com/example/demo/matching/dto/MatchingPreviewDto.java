@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Getter
 @NoArgsConstructor
@@ -19,7 +18,10 @@ public class MatchingPreviewDto {
     private MatchingType matchingType;
     private Ntrp ntrp;
     private String title;
+    private String recruitDueDateTime;
     private String matchingStartDateTime;
+    private Double lat;
+    private Double lon;
 
     public static MatchingPreviewDto fromEntity(Matching matching){
         return MatchingPreviewDto.builder()
@@ -28,8 +30,11 @@ public class MatchingPreviewDto {
                 .matchingType(matching.getMatchingType())
                 .ntrp(matching.getNtrp())
                 .title(matching.getTitle())
+                .recruitDueDateTime(matching.getRecruitDueDateTime().toString())
                 .matchingStartDateTime(matching.getDate().toString()
                         + " "+ matching.getStartTime().toString())
+                .lat(matching.getLat())
+                .lon(matching.getLon())
                 .build();
     }
 }

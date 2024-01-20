@@ -2,13 +2,8 @@ package com.example.demo.matching.repository;
 
 import com.example.demo.entity.Matching;
 import com.example.demo.entity.SiteUser;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
+import com.example.demo.matching.repository.boundary.CustomRepositoryForBoundary;
+import com.example.demo.matching.repository.filtering.CustomRepositoryForFiltering;
 import com.example.demo.type.RecruitStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +12,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
 @Repository
-public interface MatchingRepository extends JpaRepository<Matching, Long>, FilteringRepositoryCustom {
+public interface MatchingRepository extends JpaRepository<Matching, Long>, CustomRepositoryForFiltering, CustomRepositoryForBoundary {
     List<Matching> findAllBySiteUser_Email(String email);
 
     boolean existsByIdAndSiteUser(Long id, SiteUser siteUser);
