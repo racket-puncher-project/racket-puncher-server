@@ -1,33 +1,33 @@
-package com.example.demo.matching.repository;
+package com.example.demo.matching.repository.filtering;
 
 import com.example.demo.entity.Matching;
 import com.example.demo.matching.dto.FilterRequestDto;
-import com.example.demo.matching.dto.LocationDto;
 import com.example.demo.matching.filter.Region;
-import com.querydsl.core.types.dsl.*;
+import com.example.demo.matching.repository.BaseCustomRepository;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.support.Querydsl;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static com.example.demo.entity.QMatching.matching;
 
-public class FilteringRepositoryCustomImpl implements FilteringRepositoryCustom {
-    private final JPAQueryFactory queryFactory;
-    private final EntityManager entityManager;
+@Repository
+public class CustomRepositoryForFilteringImpl extends BaseCustomRepository implements CustomRepositoryForFiltering {
 
-    public FilteringRepositoryCustomImpl(JPAQueryFactory queryFactory, EntityManager entityManager) {
-        this.queryFactory = queryFactory;
-        this.entityManager = entityManager;
+    public CustomRepositoryForFilteringImpl(JPAQueryFactory queryFactory, EntityManager entityManager) {
+        super(queryFactory, entityManager);
     }
 
     @Override
-    public PageImpl<Matching> searchWithFilter(FilterRequestDto filterRequestDto, Pageable pageable) {
+    public PageImpl<Matching> findAllByFilter(FilterRequestDto filterRequestDto, Pageable pageable) {
         JPQLQuery<Matching> matchingList;
         if(filterRequestDto.getLocation() == null){
             matchingList =  queryFactory.selectFrom(matching)
@@ -55,41 +55,7 @@ public class FilteringRepositoryCustomImpl implements FilteringRepositoryCustom 
         return getPageImpl(pageable, matchingList, Matching.class);
     }
 
-    private Querydsl getQuerydsl(Class clazz) {    // 1)
-        PathBuilder<Matching> builder = new PathBuilderFactory().create(clazz);
-        return new Querydsl(entityManager, builder);
-    }
-
-    private <T> PageImpl<T> getPageImpl(Pageable pageable, JPQLQuery<T> query, Class clazz) {    // 2)
-        long totalCount = query.fetchCount();
-        List<T> results = getQuerydsl(clazz).applyPagination(pageable, query).fetch();
-        return new PageImpl<>(results, pageable, totalCount);
-    }
-
-    @Override
-    public PageImpl<Matching> searchWithin(LocationDto center, LocationDto northEastBound, LocationDto southWestBound, Pageable pageable) {
-        String haversineFormula = "ST_Distance_Sphere(point({0}, {1}), point("
-                + center.getLon() + ", " + center.getLat() + "))";
-
-        JPQLQuery<Matching> matchingList =  queryFactory.selectFrom(matching)
-                .where(
-                        within(southWestBound.getLat(), northEastBound.getLat(), southWestBound.getLon(), northEastBound.getLon())
-                )
-                .orderBy(Expressions.stringTemplate(haversineFormula, matching.lon, matching.lat).asc());
-
-        JPQLQuery<Matching> total = queryFactory.selectFrom(matching)
-                .where(
-                        within(southWestBound.getLat(), northEastBound.getLat(), southWestBound.getLon(), northEastBound.getLon())
-                );
-
-        return getPageImpl(pageable, matchingList, Matching.class);
-    }
-
-    private BooleanExpression within(Double latLowerBound, Double latUpperBound, Double lonLeftBound, Double lonRightBound){
-        return matching.lat.between(latLowerBound, latUpperBound)
-                .and(matching.lon.between(lonLeftBound, lonRightBound));
-    }
-
+    //TODO: 리팩토링 전
     private BooleanExpression date(FilterRequestDto filterRequestDto){
         if(filterRequestDto.getFilters().getDate().length() == 0) {
             return null;
