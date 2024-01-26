@@ -82,8 +82,10 @@ public class SiteUserServiceImpl implements SiteUserService {
         List<Matching> hostedMatchingList = matchingRepository.findAllBySiteUser_Email(email);
         List<HostedMatchingDto> hostedMatchingDtos = new ArrayList<>();
         for(Matching hostedMatching : hostedMatchingList){
-            Apply apply = applyRepository.findBySiteUser_IdAndMatching_Id(siteUser.getId(), hostedMatching.getId()).get();
-            hostedMatchingDtos.add(HostedMatchingDto.makeHostedMatchingDto(hostedMatching, apply.getApplyStatus(), getUsersInSameMatching(apply)));
+            Apply apply = applyRepository.findBySiteUser_IdAndMatching_Id(siteUser.getId(), hostedMatching.getId())
+                    .orElseThrow(() -> new RacketPuncherException(APPLY_NOT_FOUND));
+            hostedMatchingDtos.add(HostedMatchingDto
+                    .makeHostedMatchingDto(hostedMatching, apply.getApplyStatus(), getUsersInSameMatching(apply)));
         }
         return hostedMatchingDtos;
     }
@@ -96,7 +98,8 @@ public class SiteUserServiceImpl implements SiteUserService {
 
         return applyList.stream()
                 .filter(apply -> !apply.getMatching().getSiteUser().getId().equals(siteUser.getId())) // 등록한 매칭은 제외
-                .map(apply -> AppliedMatchingDto.makeAppliedMatchingDto(apply.getMatching(), apply.getApplyStatus(), getUsersInSameMatching(apply)))
+                .map(apply -> AppliedMatchingDto.makeAppliedMatchingDto(apply.getMatching(),
+                        apply.getApplyStatus(), getUsersInSameMatching(apply)))
                 .toList();
     }
 
@@ -113,7 +116,7 @@ public class SiteUserServiceImpl implements SiteUserService {
                 .orElseThrow(() -> new RacketPuncherException(EMAIL_NOT_FOUND));
 
         return notificationRepository.findAllBySiteUser_Email(email)
-                .stream().map(notification -> NotificationDto.fromEntity(notification))
+                .stream().map(NotificationDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -124,9 +127,9 @@ public class SiteUserServiceImpl implements SiteUserService {
 
         return applyRepository
                 .findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED)
-                .stream().map(apply -> apply.getSiteUser())
+                .stream().map(Apply::getSiteUser)
                 .filter(siteUser -> siteUser != subjectUser)
-                .map(siteUser -> ReviewPageInfoDto.fromEntity(siteUser))
+                .map(ReviewPageInfoDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
