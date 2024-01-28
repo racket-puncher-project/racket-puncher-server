@@ -19,7 +19,7 @@ public enum ErrorCode {
     WRONG_PASSWORD(HttpStatus.BAD_REQUEST.value(), "비밀번호가 일치하지 않습니다."),
     APPLY_CANCEL_FAILED(HttpStatus.BAD_REQUEST.value(), "참가 신청 취소에 실패하였습니다."),
     APPLY_FAILED(HttpStatus.BAD_REQUEST.value(), "참가 신청에 실패하였습니다."),
-    JSON_PARSING_FAILED(HttpStatus.BAD_REQUEST.value(), "JsonParse 과정애서 예외가 발생하였습니다."),
+    JSON_PARSING_FAILED(HttpStatus.BAD_REQUEST.value(), "JsonParse 과정에서 예외가 발생하였습니다."),
     MATCHING_NOT_FOUND(HttpStatus.NOT_FOUND.value(),"해당 매칭을 찾을 수 없습니다."),
     LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED.value(), "로그인이 필요한 서비스입니다."),
     PERMISSION_DENIED_TO_EDIT_AND_DELETE_MATCHING(HttpStatus.BAD_REQUEST.value(), "매칭을 수정 및 삭제할 권한이 없습니다."),

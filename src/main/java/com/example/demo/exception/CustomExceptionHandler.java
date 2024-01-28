@@ -1,7 +1,6 @@
 package com.example.demo.exception;
 
 import com.example.demo.exception.type.ErrorCode;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import net.nurigo.sdk.message.exception.NurigoBadRequestException;
 import org.springframework.http.HttpStatus;
@@ -30,7 +29,7 @@ public class CustomExceptionHandler {
         log.error("jsonException", e);
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .code(ErrorCode.JSON_PARSING_FAILED.getCode())
-                .message(ErrorCode.JSON_PARSING_FAILED.getDescription())
+                .message(ErrorCode.JSON_PARSING_FAILED.getDescription() + " : "+ e.getMessage())
                 .build();
 
         return new ResponseEntity<>(errorResponse, HttpStatus.resolve(errorResponse.getCode()));
