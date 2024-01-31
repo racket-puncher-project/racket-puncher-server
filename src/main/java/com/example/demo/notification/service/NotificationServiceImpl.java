@@ -60,13 +60,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Transactional
     @Override
-    public Notification createNotification(NotificationDto notificationDto) {
-        return notificationRepository.save(Notification.fromDto(notificationDto));
-    }
-
-    @Transactional
-    @Override
-    public void createAndSendNotification(SiteUser siteUser, Matching matching, NotificationType notificationType) {
+    public Notification createNotification(SiteUser siteUser, Matching matching, NotificationType notificationType) {
         var notificationDto = NotificationDto.builder()
                 .siteUser(siteUser)
                 .matching(matching)
@@ -74,7 +68,13 @@ public class NotificationServiceImpl implements NotificationService {
                 .content(notificationType.getMessage())
                 .build();
 
-        var notification = createNotification(notificationDto);
+        return notificationRepository.save(Notification.fromDto(notificationDto));
+    }
+
+    @Transactional
+    @Override
+    public void createAndSendNotification(SiteUser siteUser, Matching matching, NotificationType notificationType) {
+        var notification = createNotification(siteUser, matching, notificationType);
         send(siteUser.getId(), notification);
     }
 }

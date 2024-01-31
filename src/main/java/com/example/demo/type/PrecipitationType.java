@@ -2,10 +2,11 @@ package com.example.demo.type;
 
 public enum PrecipitationType {
     RAIN("1", "비"),
-    RAIN_OR_SNOW("1", "눈"),
+    RAIN_OR_SNOW("2", "눈"),
     SNOW("3", "비 혹은 눈"),
     SHOWER("4", "소나기"),
-    OTHER("5", "우천");
+    OTHER("5", "우천"),
+    NICE("6", "맑음");
 
     private String code;
     private String message;

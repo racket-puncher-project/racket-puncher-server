@@ -50,7 +50,10 @@ public class WeatherServiceImpl implements WeatherService {
         String precipitationProbability = items.get(7).getFcstValue();
 
         if (Integer.valueOf(precipitationProbability) <= 0) {
-            return null;
+            return WeatherResponseDto.builder()
+                    .precipitationType(PrecipitationType.NICE)
+                    .precipitationProbability("0")
+                    .build();
         }
 
         return WeatherResponseDto.builder()
