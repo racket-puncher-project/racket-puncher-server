@@ -13,7 +13,7 @@ public interface NotificationService {
 
     void send(Long userId, Notification notification);
 
-    Notification createNotification(NotificationDto notificationDto);
+    Notification createNotification(SiteUser siteUser, Matching matching, NotificationType notificationType);
 
     void createAndSendNotification(SiteUser siteUser, Matching matching, NotificationType notificationType);
 }
