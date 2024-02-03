@@ -1,7 +1,7 @@
 package com.example.demo.matching.dto;
 
 import com.example.demo.entity.Matching;
-import com.example.demo.siteuser.dto.MyInfoDto;
+import com.example.demo.siteuser.dto.CreatorInfoDto;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.MatchingType;
 import com.example.demo.type.Ntrp;
@@ -34,7 +34,7 @@ public class MatchingDetailResponseDto {
     private MatchingType matchingType;
     private int confirmedNum;
     private String createTime;
-    private MyInfoDto creatorInfo;
+    private CreatorInfoDto creatorInfo;
 
     public static MatchingDetailResponseDto fromEntity(Matching matching) {
         return MatchingDetailResponseDto.builder()
@@ -58,7 +58,7 @@ public class MatchingDetailResponseDto {
                 .recruitStatus(matching.getRecruitStatus())
                 .matchingType(matching.getMatchingType())
                 .createTime(matching.getCreateTime().toString())
-                .creatorInfo(MyInfoDto.fromEntity(matching.getSiteUser()))
+                .creatorInfo(CreatorInfoDto.fromEntity(matching.getSiteUser()))
                 .build();
     }
 }
