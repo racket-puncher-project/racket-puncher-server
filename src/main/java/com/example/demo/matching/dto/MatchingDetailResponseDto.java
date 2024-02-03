@@ -1,6 +1,7 @@
 package com.example.demo.matching.dto;
 
 import com.example.demo.entity.Matching;
+import com.example.demo.siteuser.dto.MyInfoDto;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.MatchingType;
 import com.example.demo.type.Ntrp;
@@ -14,7 +15,6 @@ import lombok.*;
 @Builder
 public class MatchingDetailResponseDto {
     private long id;
-    private long creatorUserId;
     private String title;
     private String content;
     private String location;
@@ -34,11 +34,11 @@ public class MatchingDetailResponseDto {
     private MatchingType matchingType;
     private int confirmedNum;
     private String createTime;
+    private MyInfoDto creatorInfo;
 
     public static MatchingDetailResponseDto fromEntity(Matching matching) {
         return MatchingDetailResponseDto.builder()
                 .id(matching.getId())
-                .creatorUserId(matching.getSiteUser().getId())
                 .title(matching.getTitle())
                 .content(matching.getContent())
                 .location(matching.getLocation())
@@ -58,6 +58,7 @@ public class MatchingDetailResponseDto {
                 .recruitStatus(matching.getRecruitStatus())
                 .matchingType(matching.getMatchingType())
                 .createTime(matching.getCreateTime().toString())
+                .creatorInfo(MyInfoDto.fromEntity(matching.getSiteUser()))
                 .build();
     }
 }
