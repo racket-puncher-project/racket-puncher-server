@@ -242,21 +242,11 @@ public class MatchingServiceImpl implements MatchingService {
 
     private List<ApplyMember> findAcceptedMembers(long matchingId) {
         return applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED)
-                .stream().map((apply)
-                        -> ApplyMember.builder()
-                        .applyId(apply.getId())
-                        .siteUserId(apply.getSiteUser().getId())
-                        .nickname(apply.getSiteUser().getNickname())
-                        .build()).collect(Collectors.toList());
+                .stream().map(ApplyMember::from).collect(Collectors.toList());
     }
 
     private List<ApplyMember> findAppliedMembers(long matchingId) {
         return applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.PENDING)
-                .stream().map((apply)
-                        -> ApplyMember.builder()
-                        .applyId(apply.getId())
-                        .siteUserId(apply.getSiteUser().getId())
-                        .nickname(apply.getSiteUser().getNickname())
-                        .build()).collect(Collectors.toList());
+                .stream().map(ApplyMember::from).collect(Collectors.toList());
     }
 }

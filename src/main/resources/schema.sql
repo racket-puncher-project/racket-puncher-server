@@ -15,7 +15,7 @@ CREATE TABLE `SITE_USER`
     `NICKNAME`          varchar(50)   NOT NULL COMMENT '숫자와 문자로만',
     `EMAIL`             varchar(255)  NOT NULL,
     `PHONE_NUMBER`      varchar(50)   NOT NULL,
-    `MANNER_SCORE`      DOUBLE        NULL DEFAULT 0,
+    `MANNER_SCORE`      INT        NULL DEFAULT 0,
     `GENDER`            varchar(50)   NOT NULL COMMENT 'MALE, FEMALE',
     `NTRP`              VARCHAR(50)   NOT NULL,
     `ADDRESS`           VARCHAR(255)  NOT NULL,

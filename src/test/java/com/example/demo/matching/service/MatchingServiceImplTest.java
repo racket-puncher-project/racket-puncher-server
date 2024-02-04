@@ -372,6 +372,15 @@ class MatchingServiceImplTest {
                 .siteUser(SiteUser.builder()
                         .nickname("nickname1")
                         .id(2L)
+                        .siteUserName("siteUsername1")
+                        .email("email1")
+                        .mannerScore(1)
+                        .gender(GenderType.FEMALE)
+                        .ntrp(Ntrp.BEGINNER)
+                        .ageGroup(AgeGroup.TWENTIES)
+                        .address("address1")
+                        .zipCode("zipCode1")
+                        .profileImg("profile1")
                         .build())
                 .build();
 
@@ -380,6 +389,15 @@ class MatchingServiceImplTest {
                 .siteUser(SiteUser.builder()
                         .nickname("nickname2")
                         .id(3L)
+                        .siteUserName("siteUsername2")
+                        .email("email2")
+                        .mannerScore(1)
+                        .gender(GenderType.FEMALE)
+                        .ntrp(Ntrp.BEGINNER)
+                        .ageGroup(AgeGroup.TWENTIES)
+                        .address("address2")
+                        .zipCode("zipCode2")
+                        .profileImg("profile2")
                         .build())
                 .build();
 
@@ -397,6 +415,15 @@ class MatchingServiceImplTest {
                 .siteUser(SiteUser.builder()
                         .nickname("nickname3")
                         .id(1L)
+                        .siteUserName("siteUsername3")
+                        .email("email3")
+                        .mannerScore(1)
+                        .gender(GenderType.FEMALE)
+                        .ntrp(Ntrp.BEGINNER)
+                        .ageGroup(AgeGroup.TWENTIES)
+                        .address("address3")
+                        .zipCode("zipCode3")
+                        .profileImg("profile3")
                         .build())
                 .build();
 
@@ -405,6 +432,15 @@ class MatchingServiceImplTest {
                 .siteUser(SiteUser.builder()
                         .nickname("nickname4")
                         .id(5L)
+                        .siteUserName("siteUsername4")
+                        .email("email4")
+                        .mannerScore(1)
+                        .gender(GenderType.FEMALE)
+                        .ntrp(Ntrp.BEGINNER)
+                        .ageGroup(AgeGroup.TWENTIES)
+                        .address("address4")
+                        .zipCode("zipCode4")
+                        .profileImg("profile4")
                         .build())
                 .build();
 

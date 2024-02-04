@@ -21,6 +21,7 @@ import com.example.demo.siteuser.dto.UpdateSiteUserInfoDto;
 import com.example.demo.siteuser.repository.ReviewRepository;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.ApplyStatus;
+import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.MatchingType;
 import com.example.demo.type.NegativeReviewType;
@@ -233,12 +234,21 @@ public class SiteUserServiceTest {
                 .willReturn(getObjectUser1());
         given(findEntity.findUser(3L))
                 .willReturn(getObjectUser2());
+        given(applyRepository.findBySiteUser_IdAndMatching_Id(getSiteUser().getId(), 1L))
+                .willReturn(Optional.ofNullable(getApplyForFinishReview()));
 
         // when
         ArgumentCaptor<Review> captor = ArgumentCaptor.forClass(Review.class);
         siteUserService.review("email@naver.com", 1L, getInputReviewDtoList());
         // then
         verify(reviewRepository, times(2)).save(captor.capture());
+    }
+
+    private static Apply getApplyForFinishReview() {
+        return Apply.builder()
+                .id(1L)
+                .applyStatus(ApplyStatus.ACCEPTED)
+                .build();
     }
 
     @Test
@@ -347,6 +357,7 @@ public class SiteUserServiceTest {
                 .ageGroup(AgeGroup.TWENTIES)
                 .profileImg("img.png")
                 .createDate(LocalDateTime.now())
+                .authType(AuthType.GENERAL)
                 .build();
     }
 
