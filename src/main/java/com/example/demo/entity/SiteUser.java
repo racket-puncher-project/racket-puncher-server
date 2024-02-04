@@ -165,7 +165,7 @@ public class SiteUser implements UserDetails {
     }
 
     public void sumMannerScore(int positiveScore, int negativeScore) {
-        this.mannerScore = positiveScore + negativeScore;
+        this.mannerScore += positiveScore + negativeScore;
     }
 
     public void penalize(PenaltyType penaltyType) {

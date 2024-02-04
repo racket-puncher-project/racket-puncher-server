@@ -2,6 +2,7 @@ package com.example.demo.siteuser.dto;
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.type.AgeGroup;
+import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import lombok.*;
@@ -24,6 +25,7 @@ public class MyInfoDto {
     private String zipCode;
     private AgeGroup ageGroup;
     private String profileImg;
+    private AuthType authType;
 
     public static MyInfoDto fromEntity(SiteUser siteUser) {
 
@@ -40,6 +42,7 @@ public class MyInfoDto {
                 .zipCode(siteUser.getZipCode())
                 .ageGroup(siteUser.getAgeGroup())
                 .profileImg(siteUser.getProfileImg())
+                .authType(siteUser.getAuthType())
                 .build();
     }
 }
