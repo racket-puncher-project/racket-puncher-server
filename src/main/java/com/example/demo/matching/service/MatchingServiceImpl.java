@@ -222,9 +222,11 @@ public class MatchingServiceImpl implements MatchingService {
         var applyNum = applyRepository.countByMatching_IdAndApplyStatus(matchingId, ApplyStatus.PENDING).orElse(0);
         var appliedMembers = findAppliedMembers(matchingId);
         var acceptedMembers = findAcceptedMembers(matchingId);
+        var isApplied = applyRepository.findBySiteUser_IdAndMatching_Id(siteUser.getId(), matchingId).isPresent();
 
         if (isOrganizer(siteUser.getId(), matching)) {
             return ApplyContents.builder()
+                    .isApplied(isApplied)
                     .applyNum(applyNum)
                     .recruitNum(recruitNum)
                     .acceptedNum(acceptedNum)
@@ -234,6 +236,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
 
         return ApplyContents.builder()
+                .isApplied(isApplied)
                 .recruitNum(recruitNum)
                 .acceptedNum(acceptedNum)
                 .acceptedMembers(acceptedMembers)
@@ -242,21 +245,11 @@ public class MatchingServiceImpl implements MatchingService {
 
     private List<ApplyMember> findAcceptedMembers(long matchingId) {
         return applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.ACCEPTED)
-                .stream().map((apply)
-                        -> ApplyMember.builder()
-                        .applyId(apply.getId())
-                        .siteUserId(apply.getSiteUser().getId())
-                        .nickname(apply.getSiteUser().getNickname())
-                        .build()).collect(Collectors.toList());
+                .stream().map(ApplyMember::from).collect(Collectors.toList());
     }
 
     private List<ApplyMember> findAppliedMembers(long matchingId) {
         return applyRepository.findAllByMatching_IdAndApplyStatus(matchingId, ApplyStatus.PENDING)
-                .stream().map((apply)
-                        -> ApplyMember.builder()
-                        .applyId(apply.getId())
-                        .siteUserId(apply.getSiteUser().getId())
-                        .nickname(apply.getSiteUser().getNickname())
-                        .build()).collect(Collectors.toList());
+                .stream().map(ApplyMember::from).collect(Collectors.toList());
     }
 }

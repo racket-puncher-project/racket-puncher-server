@@ -2,7 +2,6 @@ package com.example.demo.siteuser.dto;
 
 import com.example.demo.entity.SiteUser;
 import com.example.demo.type.AgeGroup;
-import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
 import lombok.*;
@@ -12,37 +11,28 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MyInfoDto {
+public class CreatorInfoDto {
     private long id;
     private String siteUserName;
     private String nickname;
     private String email;
-    private String phoneNumber;
     private int mannerScore;
     private GenderType gender;
     private Ntrp ntrp;
-    private String address;
-    private String zipCode;
     private AgeGroup ageGroup;
     private String profileImg;
-    private AuthType authType;
 
-    public static MyInfoDto fromEntity(SiteUser siteUser) {
-
-        return MyInfoDto.builder()
+    public static CreatorInfoDto fromEntity(SiteUser siteUser) {
+        return CreatorInfoDto.builder()
                 .id(siteUser.getId())
                 .siteUserName(siteUser.getSiteUserName())
                 .nickname(siteUser.getNickname())
                 .email(siteUser.getEmail())
-                .phoneNumber(siteUser.getPhoneNumber())
                 .mannerScore(siteUser.getMannerScore())
                 .gender(siteUser.getGender())
                 .ntrp(siteUser.getNtrp())
-                .address(siteUser.getAddress())
-                .zipCode(siteUser.getZipCode())
                 .ageGroup(siteUser.getAgeGroup())
                 .profileImg(siteUser.getProfileImg())
-                .authType(siteUser.getAuthType())
                 .build();
     }
 }

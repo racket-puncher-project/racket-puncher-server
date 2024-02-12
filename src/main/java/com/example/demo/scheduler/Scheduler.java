@@ -1,5 +1,10 @@
 package com.example.demo.scheduler;
 
+import static com.example.demo.type.PrecipitationType.*;
+import static com.example.demo.util.dateformatter.DateFormatter.formForDate;
+import static com.example.demo.util.dateformatter.DateFormatter.formForDateTime;
+import static com.example.demo.util.dateformatter.DateFormatter.formForTime;
+
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.chat.service.ChatNotificationService;
 import com.example.demo.entity.Apply;
@@ -10,6 +15,7 @@ import com.example.demo.notification.service.NotificationService;
 import com.example.demo.openfeign.service.weather.WeatherService;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
+import com.example.demo.type.PrecipitationType;
 import com.example.demo.type.RecruitStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,8 +108,7 @@ public class Scheduler {
                 .findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED);
 
         for (Apply apply : applies) {
-            notificationService.connectNotification(apply.getSiteUser().getId());
-            notificationService.createAndSendNotification(apply.getSiteUser(), matching,
+            notificationService.createNotification(apply.getSiteUser(), matching,
                     NotificationType.MATCHING_FINISHED);
         }
     }
@@ -120,16 +125,14 @@ public class Scheduler {
                         log.info("matching succeed -> " + matching.getId());
 
                         for (Apply apply : applies) {
-                            notificationService.connectNotification(apply.getSiteUser().getId());
-                            notificationService.createAndSendNotification(apply.getSiteUser(), matching,
+                            notificationService.createNotification(apply.getSiteUser(), matching,
                                     NotificationType.MATCHING_CLOSED);
                         }
                     } if(RecruitStatus.OPEN.equals(matching.getRecruitStatus())) {
                         matching.changeRecruitStatus(RecruitStatus.FAILED);
                         log.info("matching failed -> " + matching.getId());
                         for (Apply apply : applies) {
-                            notificationService.connectNotification(apply.getSiteUser().getId());
-                            notificationService.createAndSendNotification(apply.getSiteUser(), matching,
+                            notificationService.createNotification(apply.getSiteUser(), matching,
                                     NotificationType.MATCHING_FAILED);
                         }
                     }
@@ -147,7 +150,7 @@ public class Scheduler {
                 = matchingRepository.findAllByDate(matchingDate);
 
         if (!CollectionUtils.isEmpty(matchesForWeatherNotification)) {
-            sendWeatherNotification(matchesForWeatherNotification);
+            saveWeatherNotification(matchesForWeatherNotification);
         }
     }
 
@@ -161,7 +164,7 @@ public class Scheduler {
         notificationRepository.deleteAllByCreateTimeBefore(threeDaysBeforeNow);
     }
 
-    private void sendWeatherNotification(List<Matching> matchesForWeatherNotification) {
+    private void saveWeatherNotification(List<Matching> matchesForWeatherNotification) {
         matchesForWeatherNotification.forEach(
                 matching -> {
                     var weatherDto = weatherService.getWeatherResponseDtoByMatching(matching);
@@ -169,22 +172,20 @@ public class Scheduler {
                     var applies = applyRepository
                             .findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED);
 
-                    if (weatherDto != null) {
+                    if (!NICE.equals(weatherDto.getPrecipitationType())) {
                         log.info("강수 확률: " + weatherDto.getPrecipitationProbability()
                                 + ", 예상 날씨: " + weatherDto.getPrecipitationType().getMessage());
                         matching.changeRecruitStatus(RecruitStatus.WEATHER_ISSUE);
 
                         for (Apply apply : applies) {
-                            notificationService.connectNotification(apply.getSiteUser().getId());
-                            notificationService.createAndSendNotification(apply.getSiteUser(), matching,
+                            notificationService.createNotification(apply.getSiteUser(), matching,
                                     NotificationType.makeWeatherIssueMessage(weatherDto));
                             return;
                         }
                     }
 
                     for (Apply apply : applies) {
-                        notificationService.connectNotification(apply.getSiteUser().getId());
-                        notificationService.createAndSendNotification(apply.getSiteUser(), matching,
+                        notificationService.createNotification(apply.getSiteUser(), matching,
                                 NotificationType.makeWeatherMessage());
                     }
                 }

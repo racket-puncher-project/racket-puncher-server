@@ -16,6 +16,15 @@ public class ApplyMemberSerializer extends JsonSerializer<ApplyMember> {
         gen.writeNumberField("applyId", applyMember.getApplyId());
         gen.writeNumberField("siteUserId", applyMember.getSiteUserId());
         gen.writeStringField("nickname", applyMember.getNickname());
+        gen.writeStringField("siteUsername", applyMember.getSiteUsername());
+        gen.writeStringField("email", applyMember.getEmail());
+        gen.writeNumberField("mannerScore", applyMember.getMannerScore());
+        gen.writeStringField("genderType", String.valueOf(applyMember.getGenderType()));
+        gen.writeStringField("ntrp", String.valueOf(applyMember.getNtrp()));
+        gen.writeStringField("ageGroup", String.valueOf(applyMember.getAgeGroup()));
+        gen.writeStringField("address", applyMember.getAddress());
+        gen.writeStringField("zipCode", applyMember.getZipCode());
+        gen.writeStringField("profileImg", applyMember.getProfileImg());
 
         gen.writeEndObject();
     }
