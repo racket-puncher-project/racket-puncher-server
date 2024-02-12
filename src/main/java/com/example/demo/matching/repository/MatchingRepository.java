@@ -36,4 +36,7 @@ public interface MatchingRepository extends JpaRepository<Matching, Long>, Custo
 
     Page<Matching> findByRecruitStatusAndRecruitDueDateTimeAfter(
             RecruitStatus OPEN, LocalDateTime LocalDateTime, Pageable pageable);
+
+    @Query("SELECT m FROM Matching m WHERE m.date = CURRENT_DATE AND (m.endTime <= CURRENT_TIME AND m.endTime > CURRENT_TIME - 1)")
+    List<Matching> findAllWithEndTimeWithinLastHour();
 }

@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum ErrorCode {
+    CHAT_ROOM_NOT_FOUND(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 채팅방입니다."),
+    USER_NOT_ACCEPTED_AT_MATCHING(HttpStatus.BAD_REQUEST.value(), "승인되지 않은 매칭입니다."),
+    INVALID_SESSION(HttpStatus.BAD_REQUEST.value(), "유효하지 않은 세션입니다."),
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND.value(), "주소가 존재하지 않습니다."),
     APPLY_ALREADY_CANCELED(HttpStatus.BAD_REQUEST.value(), "해당 매칭에 대한 참가 신청은 이미 취소되었습니다."),
     MATCHING_ALREADY_FINISHED(HttpStatus.BAD_REQUEST.value(), "이미 매칭이 종료된 경기입니다."),

@@ -4,6 +4,6 @@ import lombok.*;
 
 @Getter
 @Setter
-public class ChatMessageRequest {
+public class ChatMessageRequestDto {
     private String content;
 }

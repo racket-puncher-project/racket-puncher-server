@@ -88,8 +88,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/api/auth/password/reset");
         permitAllEndpoints.add("/ws");
         permitAllEndpoints.add("/ws/**");
-        permitAllEndpoints.add("/index.html");
-        permitAllEndpoints.add("/app.js");
+        //TODO: 아래 리스트는 채팅방 완성 후 삭제
+        permitAllEndpoints.add("/chat-room.html");
+        permitAllEndpoints.add("/chat-room.js");
+        permitAllEndpoints.add("/chat-list.html");
+        permitAllEndpoints.add("/chat-list.js");
         permitAllEndpoints.add("/favicon.ico");
 
         return permitAllEndpoints;

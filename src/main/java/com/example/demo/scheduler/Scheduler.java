@@ -1,10 +1,7 @@
 package com.example.demo.scheduler;
 
-import static com.example.demo.util.dateformatter.DateFormatter.formForDate;
-import static com.example.demo.util.dateformatter.DateFormatter.formForDateTime;
-import static com.example.demo.util.dateformatter.DateFormatter.formForTime;
-
 import com.example.demo.apply.repository.ApplyRepository;
+import com.example.demo.chat.service.ChatNotificationService;
 import com.example.demo.entity.Apply;
 import com.example.demo.entity.Matching;
 import com.example.demo.matching.repository.MatchingRepository;
@@ -14,11 +11,6 @@ import com.example.demo.openfeign.service.weather.WeatherService;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.RecruitStatus;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -26,6 +18,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Objects;
+
+import static com.example.demo.util.dateformatter.DateFormatter.*;
 
 @Slf4j
 @Component
@@ -37,6 +37,7 @@ public class Scheduler {
     private final ApplyRepository applyRepository;
     private final WeatherService weatherService;
     private final NotificationRepository notificationRepository;
+    private final ChatNotificationService chatNotificationService;
 
     @Async
     @Scheduled(cron = "${scheduler.cron.matches.confirm}") // 매일 정시에 수행
@@ -60,6 +61,9 @@ public class Scheduler {
                 = matchingRepository
                 .findAllByRecruitStatusFinished(RecruitStatus.WEATHER_ISSUE, today, currentTime);
 
+        List<Matching> matchesEndedWithinOneHour
+                = matchingRepository.findAllWithEndTimeWithinLastHour();
+
         if (!CollectionUtils.isEmpty(matchesForConfirm)) {
             changeStatusOfMatches(matchesForConfirm);
         }
@@ -70,6 +74,10 @@ public class Scheduler {
 
         if (!CollectionUtils.isEmpty(weatherIssueMatchesForFinish)) {
             changeRecruitStatusIfMatchingFinished(weatherIssueMatchesForFinish);
+        }
+
+        if (!CollectionUtils.isEmpty(matchesEndedWithinOneHour)) {
+            sendChatRoomWillClose(matchesEndedWithinOneHour);
         }
     }
 
@@ -181,5 +189,9 @@ public class Scheduler {
                     }
                 }
         );
+    }
+
+    private void sendChatRoomWillClose(List<Matching> matchesEndedWithinOneHour) {
+        matchesEndedWithinOneHour.forEach(m -> chatNotificationService.notifyChatRoomWillClose(String.valueOf(m.getId())));
     }
 }

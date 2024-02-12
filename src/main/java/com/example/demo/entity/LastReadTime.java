@@ -1,7 +1,7 @@
 package com.example.demo.entity;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
-import com.example.demo.chat.repository.ChatMessageId;
+import com.example.demo.chat.repository.LastReadTimeId;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
@@ -10,18 +10,14 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 @Setter
 @Getter
-@DynamoDBTable(tableName = "chat-history")
-public class ChatMessage {
+@DynamoDBTable(tableName = "last-read-time")
+public class LastReadTime {
     @Id
-    private ChatMessageId id;
+    private LastReadTimeId id;
 
     @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.S)
-    @DynamoDBAttribute(attributeName = "senderId")
-    private String senderId;
-
-    @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.S)
-    @DynamoDBAttribute(attributeName = "content")
-    private String content;
+    @DynamoDBAttribute(attributeName = "time")
+    private String time;
 
     @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.S)
     @DynamoDBHashKey(attributeName = "matchingId")
@@ -31,21 +27,21 @@ public class ChatMessage {
 
     public void setMatchingId(String matchingId) {
         if (this.id == null) {
-            this.id = new ChatMessageId();
+            this.id = new LastReadTimeId();
         }
         this.id.setMatchingId(matchingId);
     }
 
     @DynamoDBTyped(DynamoDBMapperFieldModel.DynamoDBAttributeType.S)
-    @DynamoDBRangeKey(attributeName = "time")
-    public String getTime(){
-        return id != null ? id.getTime() : null;
+    @DynamoDBRangeKey(attributeName = "siteUserId")
+    public String getSiteUserId(){
+        return id != null ? id.getSiteUserId() : null;
     }
 
-    public void setTime(String time) {
+    public void setSiteUserId(String time) {
         if (this.id == null) {
-            this.id = new ChatMessageId();
+            this.id = new LastReadTimeId();
         }
-        this.id.setTime(time);
+        this.id.setSiteUserId(time);
     }
 }

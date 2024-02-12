@@ -10,5 +10,5 @@ import lombok.*;
 public class GeneralSignInResponseDto {
     private String accessToken;
     private String refreshToken;
-    private AuthType authType = AuthType.GENERAL;
+    private final AuthType authType = AuthType.GENERAL;
 }

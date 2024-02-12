@@ -9,8 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class KakaoSignInResponseDto implements KakaoSignIn {
-    private Boolean registered = true;
+    private final Boolean registered = true;
     private String accessToken;
     private String refreshToken;
-    private AuthType authType = AuthType.KAKAO;
+    private final AuthType authType = AuthType.KAKAO;
 }

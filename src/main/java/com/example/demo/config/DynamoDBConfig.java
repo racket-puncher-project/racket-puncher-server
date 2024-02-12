@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 @Configuration
-@EnableDynamoDBRepositories(basePackages = "com.example.demo.chat.repository") // DynamoDB 리포지토리가 있는 패키지
+@EnableDynamoDBRepositories(basePackages = "com.example.demo.chat.repository")
 public class DynamoDBConfig {
 
     @Value("${cloud.aws.region.static}")
