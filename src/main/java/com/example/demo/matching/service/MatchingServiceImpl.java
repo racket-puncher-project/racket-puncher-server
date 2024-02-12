@@ -251,9 +251,11 @@ public class MatchingServiceImpl implements MatchingService {
         var applyNum = applyRepository.countByMatching_IdAndApplyStatus(matchingId, ApplyStatus.PENDING).orElse(0);
         var appliedMembers = findAppliedMembers(matchingId);
         var acceptedMembers = findAcceptedMembers(matchingId);
+        var isApplied = applyRepository.findBySiteUser_IdAndMatching_Id(siteUser.getId(), matchingId).isPresent();
 
         if (isOrganizer(siteUser.getId(), matching)) {
             return ApplyContents.builder()
+                    .isApplied(isApplied)
                     .applyNum(applyNum)
                     .recruitNum(recruitNum)
                     .acceptedNum(acceptedNum)
@@ -263,6 +265,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
 
         return ApplyContents.builder()
+                .isApplied(isApplied)
                 .recruitNum(recruitNum)
                 .acceptedNum(acceptedNum)
                 .acceptedMembers(acceptedMembers)

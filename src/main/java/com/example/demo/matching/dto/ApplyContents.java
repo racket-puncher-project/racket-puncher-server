@@ -16,6 +16,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonSerialize(using = ApplyContentsSerializer.class)
 public class ApplyContents {
+    private boolean isApplied;
     private int applyNum;
     private int recruitNum;
     private int acceptedNum;

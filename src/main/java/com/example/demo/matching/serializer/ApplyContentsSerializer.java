@@ -13,6 +13,7 @@ public class ApplyContentsSerializer extends JsonSerializer<ApplyContents> {
 
         gen.writeStartObject();
 
+        gen.writeBooleanField("isApplied", applyContents.isApplied());
         if (applyContents.getApplyNum() != 0) {
             gen.writeNumberField("applyNum", applyContents.getApplyNum());
         }

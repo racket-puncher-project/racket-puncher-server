@@ -98,6 +98,13 @@ public class ApplyServiceImpl implements ApplyService {
         }
     }
 
+    private static void validateRecruitNotConfirmedAndApplyAccepted(Matching matching, Apply apply) {
+        if (ApplyStatus.ACCEPTED.equals(apply.getApplyStatus())
+                && RecruitStatus.CONFIRMED.equals(matching.getRecruitStatus())) {
+            throw new RacketPuncherException(MATCHING_ALREADY_CONFIRMED);
+        }
+    }
+
     @Override
     @Transactional
     public Apply cancel(long applyId) {
@@ -109,7 +116,7 @@ public class ApplyServiceImpl implements ApplyService {
 
         validateNotYourOwnPosting(matching, apply);
         validateRecruitNotFinished(matching);
-        validateRecruitNotConfirmed(matching);
+        validateRecruitNotConfirmedAndApplyAccepted(matching, apply);
 
         if (ApplyStatus.ACCEPTED.equals(apply.getApplyStatus())) {
             matching.updateAcceptedNum(matching.getAcceptedNum() - 1);
