@@ -1,24 +1,17 @@
 package com.example.demo.auth.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-
 import com.example.demo.auth.dto.*;
-import com.example.demo.auth.service.KakaoOAuthService;
-import com.example.demo.auth.service.PhoneAuthService;
-import com.example.demo.entity.SiteUser;
 import com.example.demo.auth.security.JwtAuthenticationFilter;
 import com.example.demo.auth.security.SecurityConfiguration;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.auth.service.AuthService;
+import com.example.demo.auth.service.KakaoOAuthService;
+import com.example.demo.auth.service.PhoneAuthService;
+import com.example.demo.entity.SiteUser;
 import com.example.demo.type.AgeGroup;
 import com.example.demo.type.AuthType;
 import com.example.demo.type.GenderType;
 import com.example.demo.type.Ntrp;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +20,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 @WebMvcTest(AuthController.class)
 @Import(SecurityConfiguration.class)
@@ -313,7 +308,6 @@ class AuthControllerTest {
 
     private KakaoFirstSignInResponseDto getKakaoFirstSignInResponseDto(){
         return KakaoFirstSignInResponseDto.builder()
-                .registered(false)
                 .email("email@test.com")
                 .profileImageUrl("test.png")
                 .nickname("nickname")
@@ -322,7 +316,6 @@ class AuthControllerTest {
 
     private KakaoSignInResponseDto getKakaoSigninResponseDto(){
         return KakaoSignInResponseDto.builder()
-                .registered(true)
                 .accessToken("accessToken")
                 .refreshToken("refreshToken")
                 .build();
