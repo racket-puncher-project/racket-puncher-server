@@ -171,6 +171,13 @@ class MatchingServiceImplTest {
                 .willReturn(getApplyMember());
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.ACCEPTED))
                 .willReturn(getConfirmedMember());
+         given(applyRepository.findBySiteUser_IdAndMatching_Id(getSiteUser().getId(), 1L))
+                 .willReturn(Optional.ofNullable(Apply.builder()
+                         .siteUser(getSiteUser())
+                         .applyStatus(ApplyStatus.PENDING)
+                         .matching(getMatchingEntity(getSiteUser()))
+                         .id(1L)
+                         .build()));
 
         // when
         var result = matchingService.getApplyContents("example@example.com", 1L);
