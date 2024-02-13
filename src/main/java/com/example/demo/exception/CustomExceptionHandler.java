@@ -45,4 +45,10 @@ public class CustomExceptionHandler {
 
         return new ResponseEntity<>(errorResponse, HttpStatus.resolve(errorResponse.getCode()));
     }
+
+    @ExceptionHandler(Exception.class)
+    protected ResponseEntity<ErrorResponse> handelOtherException(Exception e) {
+        log.error("Exception", e);
+        return null;
+    }
 }

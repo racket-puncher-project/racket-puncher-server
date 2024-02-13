@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client"></script>
+  <title>Chat Room List</title>
+</head>
+<body>
+
+<h2>채팅방 목록</h2>
+
+<label for="accessToken">엑세스 토큰:</label>
+<input type="text" id="accessToken" name="accessToken">
+<button onclick="fetchChatRooms()">채팅방 불러오기</button>
+
+<div id="chatRooms"></div>
+
+<script src="chat-list.js"></script>
+</body>
+</html>

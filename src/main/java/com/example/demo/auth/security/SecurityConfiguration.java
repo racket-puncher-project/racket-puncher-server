@@ -1,6 +1,5 @@
 package com.example.demo.auth.security;
 
-import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +15,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 
 @Slf4j
 @Configuration
@@ -29,7 +30,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080", "http://localhost:8081"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "content-type"));
         configuration.setAllowCredentials(true);
@@ -48,14 +49,14 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequest
                         -> authorizeRequest
-
                         .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/reissue",
                                 "/api/auth/upload-profile-image",  "/api/matches/list/**",
                                 "/api/matches/detail/**", "/api/users/profile/**", "/api/aws/**",
                                 "/api/auth/check-nickname", "/api/auth/check-email", "/api/auth/redis",
                                 "/api/auth/kakao", "/api/matches/address", 
                                 "/api/auth/phone/send-code", "/api/auth/phone/verify-code",
-                                "/api/auth/find-id", "/api/auth/password/verify-user", "/api/auth/password/reset")
+                                "/api/auth/find-id", "/api/auth/password/verify-user", "/api/auth/password/reset",
+                                "/ws", "/ws/**", "/chat-room.html", "/chat-room.js","/chat-list.html","/chat-list.js",  "/favicon.ico", "/api/chat/previous")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

@@ -1,23 +1,6 @@
 package com.example.demo.auth.service;
 
-import static com.example.demo.exception.type.ErrorCode.EMAIL_ALREADY_EXISTED;
-import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.INVALID_TOKEN;
-import static com.example.demo.exception.type.ErrorCode.NICKNAME_ALREADY_EXISTED;
-import static com.example.demo.exception.type.ErrorCode.REFRESH_TOKEN_EXPIRED;
-import static com.example.demo.exception.type.ErrorCode.REGISTRATION_INFO_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.RESET_TOKEN_ALREADY_USED;
-import static com.example.demo.exception.type.ErrorCode.RESET_TOKEN_EXPIRED;
-import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.WRONG_PASSWORD;
-
-import com.example.demo.auth.dto.AccessTokenDto;
-import com.example.demo.auth.dto.FindEmailResponseDto;
-import com.example.demo.auth.dto.GeneralSignInResponseDto;
-import com.example.demo.auth.dto.ResetTokenDto;
-import com.example.demo.auth.dto.SignInDto;
-import com.example.demo.auth.dto.SignUpDto;
-import com.example.demo.auth.dto.StringResponseDto;
+import com.example.demo.auth.dto.*;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.entity.SiteUser;
 import com.example.demo.exception.RacketPuncherException;
@@ -34,6 +17,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+
+import static com.example.demo.exception.type.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -101,7 +86,6 @@ public class AuthService implements UserDetailsService {
         var refreshToken = tokenProvider.generateAndSaveRefreshToken(signInDto.getEmail());
 
         return GeneralSignInResponseDto.builder()
-                .authType(AuthType.GENERAL)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();

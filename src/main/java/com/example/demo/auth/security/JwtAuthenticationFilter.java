@@ -5,8 +5,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -17,6 +15,9 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+import java.util.HashSet;
 
 @Slf4j
 @Component
@@ -32,7 +33,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         AntPathMatcher pathMatcher = new AntPathMatcher();
-
         for (String endpoint : getPermitAllEndpoints()) {
             if (pathMatcher.match(endpoint, request.getRequestURI())) {
                 filterChain.doFilter(request, response);
@@ -86,6 +86,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         permitAllEndpoints.add("/api/auth/find-id");
         permitAllEndpoints.add("/api/auth/password/verify-user");
         permitAllEndpoints.add("/api/auth/password/reset");
+        permitAllEndpoints.add("/ws");
+        permitAllEndpoints.add("/ws/**");
+        //TODO: 아래 리스트는 채팅방 완성 후 삭제
+        permitAllEndpoints.add("/chat-room.html");
+        permitAllEndpoints.add("/chat-room.js");
+        permitAllEndpoints.add("/chat-list.html");
+        permitAllEndpoints.add("/chat-list.js");
+        permitAllEndpoints.add("/favicon.ico");
 
         return permitAllEndpoints;
     }

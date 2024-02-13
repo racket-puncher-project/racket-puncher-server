@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <title>채팅방</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client"></script>
+    <script type="text/javascript" src="chat-room.js"></script>
+    <meta charset="UTF-8">
+    <style>
+        /* CSS 스타일 수정 */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .chat-message {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background: #f9f9f9;
+        }
+        .message-info {
+            margin-bottom: 5px;
+        }
+        .message-text {
+            margin-top: 5px;
+        }
+        #response {
+            height: 400px;
+            overflow: auto;
+            border: 1px solid black;
+        }
+        button {
+            margin: 5px;
+        }
+        .profile-img {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <label for="matchingId">매칭 아이디:</label>
+    <input type="text" id="matchingId" placeholder="매칭 아이디를 입력하세요">
+</div>
+<div>
+    <label for="accessToken">엑세스 토큰:</label>
+    <input type="text" id="accessToken" placeholder="엑세스 토큰을 입력하세요">
+</div>
+<div>
+    <button onclick="connect();">연결</button>
+    <button onclick="disconnect();">연결 해제</button>
+</div>
+<div id="response"></div>
+<label for="messageInput"></label><input type="text" id="messageInput" placeholder="메시지를 입력하세요...">
+<button onclick="sendMessage();">보내기</button>
+</body>
+</html>

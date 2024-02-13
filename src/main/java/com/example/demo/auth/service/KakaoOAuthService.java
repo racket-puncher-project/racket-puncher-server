@@ -1,29 +1,18 @@
 package com.example.demo.auth.service;
 
-import static com.example.demo.exception.type.ErrorCode.EMAIL_NOT_FOUND;
-import static com.example.demo.exception.type.ErrorCode.KAKAO_ACCESS_TOKEN_FAIL;
-import static com.example.demo.exception.type.ErrorCode.KAKAO_USER_INFO_FAIL;
-
-import com.example.demo.auth.dto.KakaoFirstSignInResponseDto;
-import com.example.demo.auth.dto.KakaoSignIn;
-import com.example.demo.auth.dto.KakaoSignInResponseDto;
-import com.example.demo.auth.dto.KakaoTokenDto;
-import com.example.demo.auth.dto.KakaoUserInfoDto;
+import com.example.demo.auth.dto.*;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.exception.RacketPuncherException;
 import com.example.demo.siteuser.repository.SiteUserRepository;
-import com.example.demo.type.AuthType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import static com.example.demo.exception.type.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -110,10 +99,8 @@ public class KakaoOAuthService {
         var accessToken = tokenProvider.generateAccessToken(email);
         var refreshToken = tokenProvider.generateAndSaveRefreshToken(email);
         return KakaoSignInResponseDto.builder()
-                .registered(true)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .authType(AuthType.KAKAO)
                 .build();
     }
 }
