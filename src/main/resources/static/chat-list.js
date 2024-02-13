@@ -1,6 +1,6 @@
 let stompClient = null;
-const serverHttpUrl = 'http://localhost:8081/api/chat/list';
-const serverWsUrl = 'http://localhost:8081/ws';
+const serverHttpUrl = 'http://43.203.25.186:8081/api/chat/list'; // 백엔드 로컬 테스트에서는 localhost로 변경해야 함
+const serverWsUrl = 'http://43.203.25.186:8081/ws'; // 백엔드 로컬 테스트에서는 localhost로 변경해야 함
 
 function fetchChatRooms() {
     const accessToken = document.getElementById('accessToken').value;
