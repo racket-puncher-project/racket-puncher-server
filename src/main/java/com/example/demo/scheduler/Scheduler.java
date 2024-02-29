@@ -13,15 +13,17 @@ import com.example.demo.matching.repository.MatchingRepository;
 import com.example.demo.notification.repository.NotificationRepository;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.openfeign.service.weather.WeatherService;
+import com.example.demo.scheduler.dto.DateTimeInfo;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
-import com.example.demo.type.PrecipitationType;
 import com.example.demo.type.RecruitStatus;
+import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -30,8 +32,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
-
-import static com.example.demo.util.dateformatter.DateFormatter.*;
 
 @Slf4j
 @Component
@@ -46,26 +46,39 @@ public class Scheduler {
     private final ChatNotificationService chatNotificationService;
 
     @Async
-    @Scheduled(cron = "${scheduler.cron.matches.confirm}") // 매일 정시에 수행
-    public void confirmResultsOfMatchesAtDueDate() {
+    public CompletableFuture<DateTimeInfo> getTimes() {
         String now = LocalDateTime.now().format(formForDateTime);
         String date = LocalDate.now().format(formForDate);
         String time = LocalTime.now().format(formForTime);
+
         LocalDateTime recruitDueDateTime = LocalDateTime.parse(now, formForDateTime);
         LocalDate today = LocalDate.parse(date, formForDate);
         LocalTime currentTime = LocalTime.parse(time, formForTime);
-        log.info("scheduler is started at " + now);
+        DateTimeInfo dateTimeInfo = DateTimeInfo.builder()
+                .recruitDueDateTime(recruitDueDateTime)
+                .today(today)
+                .currentTime(currentTime)
+                .build();
+        return CompletableFuture.completedFuture(dateTimeInfo);
+    }
 
+    @Scheduled(cron = "${scheduler.cron.matches.confirm}")
+    public void confirmResultsOfMatchesAtDueDate() {
+        log.info("Schedule for confirming matching is started at  " + LocalDateTime.now().format(formForDateTime));
+        getTimes().thenAccept(this::confirmResultsOfMatches);
+    }
+
+    public void confirmResultsOfMatches(DateTimeInfo dateTimeInfo) {
         List<Matching> matchesForConfirm
-                = matchingRepository.findAllByRecruitDueDateTime(recruitDueDateTime);
+                = matchingRepository.findAllByRecruitDueDateTime(dateTimeInfo.getRecruitDueDateTime());
 
         List<Matching> confirmedMatchesForFinish
                 = matchingRepository
-                .findAllByRecruitStatusFinished(RecruitStatus.CONFIRMED, today, currentTime);
+                .findAllByRecruitStatusFinished(RecruitStatus.CONFIRMED, dateTimeInfo.getToday(), dateTimeInfo.getCurrentTime());
 
         List<Matching> weatherIssueMatchesForFinish
                 = matchingRepository
-                .findAllByRecruitStatusFinished(RecruitStatus.WEATHER_ISSUE, today, currentTime);
+                .findAllByRecruitStatusFinished(RecruitStatus.WEATHER_ISSUE, dateTimeInfo.getToday(), dateTimeInfo.getCurrentTime());
 
         List<Matching> matchesEndedWithinOneHour
                 = matchingRepository.findAllWithEndTimeWithinLastHour();
@@ -128,7 +141,8 @@ public class Scheduler {
                             notificationService.createNotification(apply.getSiteUser(), matching,
                                     NotificationType.MATCHING_CLOSED);
                         }
-                    } if(RecruitStatus.OPEN.equals(matching.getRecruitStatus())) {
+                    }
+                    if (RecruitStatus.OPEN.equals(matching.getRecruitStatus())) {
                         matching.changeRecruitStatus(RecruitStatus.FAILED);
                         log.info("matching failed -> " + matching.getId());
                         for (Apply apply : applies) {
@@ -139,7 +153,6 @@ public class Scheduler {
                 });
     }
 
-    @Async
     @Scheduled(cron = "${scheduler.cron.weather.notification}") // 매일 새벽 6시 30분에 수행
     public void checkWeatherAndSendNotification() {
         String now = LocalDate.now().format(formForDate);
@@ -154,7 +167,6 @@ public class Scheduler {
         }
     }
 
-    @Async
     @Scheduled(cron = "${scheduler.cron.notification.delete}") // 매일 00:30분에 수행
     public void deleteNotifications() {
         LocalDateTime threeDaysBeforeNow = LocalDateTime.now().minusDays(3);
@@ -193,6 +205,7 @@ public class Scheduler {
     }
 
     private void sendChatRoomWillClose(List<Matching> matchesEndedWithinOneHour) {
-        matchesEndedWithinOneHour.forEach(m -> chatNotificationService.notifyChatRoomWillClose(String.valueOf(m.getId())));
+        matchesEndedWithinOneHour.forEach(
+                m -> chatNotificationService.notifyChatRoomWillClose(String.valueOf(m.getId())));
     }
 }
