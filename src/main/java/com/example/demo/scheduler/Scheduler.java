@@ -36,7 +36,6 @@ import java.util.Objects;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Transactional
 public class Scheduler {
     private final MatchingRepository matchingRepository;
     private final NotificationService notificationService;
@@ -64,10 +63,12 @@ public class Scheduler {
 
     @Scheduled(cron = "${scheduler.cron.matches.confirm}")
     public void confirmResultsOfMatchesAtDueDate() {
-        log.info("Schedule for confirming matching is started at  " + LocalDateTime.now().format(formForDateTime));
-        getTimes().thenAccept(this::confirmResultsOfMatches);
+        DateTimeInfo dateTimeInfo = getTimes().join();
+        confirmResultsOfMatches(dateTimeInfo);
+        log.info("Schedule for confirming matching is finished at  " + LocalDateTime.now().format(formForDateTime));
     }
 
+    @Transactional
     public void confirmResultsOfMatches(DateTimeInfo dateTimeInfo) {
         List<Matching> matchesForConfirm
                 = matchingRepository.findAllByRecruitDueDateTime(dateTimeInfo.getRecruitDueDateTime());
@@ -153,6 +154,7 @@ public class Scheduler {
                 });
     }
 
+    @Transactional
     @Scheduled(cron = "${scheduler.cron.weather.notification}") // 매일 새벽 6시 30분에 수행
     public void checkWeatherAndSendNotification() {
         String now = LocalDate.now().format(formForDate);
@@ -167,6 +169,7 @@ public class Scheduler {
         }
     }
 
+    @Transactional
     @Scheduled(cron = "${scheduler.cron.notification.delete}") // 매일 00:30분에 수행
     public void deleteNotifications() {
         LocalDateTime threeDaysBeforeNow = LocalDateTime.now().minusDays(3);
