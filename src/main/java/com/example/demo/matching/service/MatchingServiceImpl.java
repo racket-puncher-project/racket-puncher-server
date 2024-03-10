@@ -222,7 +222,11 @@ public class MatchingServiceImpl implements MatchingService {
         var applyNum = applyRepository.countByMatching_IdAndApplyStatus(matchingId, ApplyStatus.PENDING).orElse(0);
         var appliedMembers = findAppliedMembers(matchingId);
         var acceptedMembers = findAcceptedMembers(matchingId);
-        var isApplied = applyRepository.findBySiteUser_IdAndMatching_Id(siteUser.getId(), matchingId).isPresent();
+        var isApplied = true;
+        var apply = applyRepository.findBySiteUser_IdAndMatching_Id(siteUser.getId(), matchingId);
+        if (apply.isEmpty() || ApplyStatus.CANCELED.equals(apply.get().getApplyStatus())) {
+            isApplied = false;
+        }
 
         if (isOrganizer(siteUser.getId(), matching)) {
             return ApplyContents.builder()

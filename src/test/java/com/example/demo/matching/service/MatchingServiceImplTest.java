@@ -166,7 +166,7 @@ class MatchingServiceImplTest {
                 .willReturn(getApplyMember());
         given(applyRepository.findAllByMatching_IdAndApplyStatus(1L, ApplyStatus.ACCEPTED))
                 .willReturn(getConfirmedMember());
-         given(applyRepository.findBySiteUser_IdAndMatching_Id(getSiteUser().getId(), 1L))
+        given(applyRepository.findBySiteUser_IdAndMatching_Id(getSiteUser().getId(), 1L))
                  .willReturn(Optional.ofNullable(Apply.builder()
                          .siteUser(getSiteUser())
                          .applyStatus(ApplyStatus.PENDING)
