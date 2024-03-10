@@ -275,7 +275,6 @@ class MatchingControllerTest {
 
     private ApplyContents makeApplyContents() {
         return ApplyContents.builder()
-                .isApplied(true)
                 .applyNum(1)
                 .recruitNum(4)
                 .acceptedNum(1)
