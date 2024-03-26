@@ -30,7 +30,8 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080", "http://localhost:8081"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080",
+                "http://localhost:8081", "https://racket-puncher-project.github.io/racket-puncher-client/"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "content-type"));
         configuration.setAllowCredentials(true);
@@ -56,7 +57,8 @@ public class SecurityConfiguration {
                                 "/api/auth/kakao", "/api/matches/address", 
                                 "/api/auth/phone/send-code", "/api/auth/phone/verify-code",
                                 "/api/auth/find-id", "/api/auth/password/verify-user", "/api/auth/password/reset",
-                                "/ws", "/ws/**", "/chat-room.html", "/chat-room.js","/chat-list.html","/chat-list.js",  "/favicon.ico", "/api/chat/previous")
+                                "/ws", "/ws/**", "/chat-room.html", "/chat-room.js","/chat-list.html",
+                                "/chat-list.js",  "/favicon.ico", "/api/chat/previous")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
