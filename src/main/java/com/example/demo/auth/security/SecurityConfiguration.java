@@ -31,7 +31,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080",
-                "http://localhost:8081", "https://racket-puncher-project.github.io/racket-puncher-client/"));
+                "http://localhost:8081", "https://racket-puncher-project.github.io"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "content-type"));
         configuration.setAllowCredentials(true);
