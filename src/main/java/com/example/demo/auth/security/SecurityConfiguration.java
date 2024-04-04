@@ -51,10 +51,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequest
                         -> authorizeRequest
                         .requestMatchers("/api/auth/sign-up", "/api/auth/sign-in/**", "/api/auth/reissue",
-                                "/api/auth/upload-profile-image",  "/api/matches/list/**",
-                                "/api/matches/detail/**", "/api/users/profile/**", "/api/aws/**",
-                                "/api/auth/check-nickname", "/api/auth/check-email", "/api/auth/redis",
-                                "/api/auth/kakao", "/api/matches/address", 
+                                "/api/auth/upload-profile-image", "/api/notifications/connect/**",
+                                "/api/matches/list/**", "/api/matches/detail/**", "/api/users/profile/**",
+                                "/api/aws/**", "/api/auth/check-nickname", "/api/auth/check-email",
+                                "/api/auth/redis", "/api/auth/kakao", "/api/matches/address",
                                 "/api/auth/phone/send-code", "/api/auth/phone/verify-code",
                                 "/api/auth/find-id", "/api/auth/password/verify-user", "/api/auth/password/reset",
                                 "/ws", "/ws/**", "/chat-room.html", "/chat-room.js","/chat-list.html",
