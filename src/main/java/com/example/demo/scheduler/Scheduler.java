@@ -1,10 +1,5 @@
 package com.example.demo.scheduler;
 
-import static com.example.demo.type.PrecipitationType.*;
-import static com.example.demo.util.dateformatter.DateFormatter.formForDate;
-import static com.example.demo.util.dateformatter.DateFormatter.formForDateTime;
-import static com.example.demo.util.dateformatter.DateFormatter.formForTime;
-
 import com.example.demo.apply.repository.ApplyRepository;
 import com.example.demo.chat.service.ChatNotificationService;
 import com.example.demo.entity.Apply;
@@ -17,13 +12,11 @@ import com.example.demo.scheduler.dto.DateTimeInfo;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.RecruitStatus;
-import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -32,6 +25,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+
+import static com.example.demo.type.PrecipitationType.NICE;
+import static com.example.demo.util.dateformatter.DateFormatter.*;
 
 @Slf4j
 @Component
