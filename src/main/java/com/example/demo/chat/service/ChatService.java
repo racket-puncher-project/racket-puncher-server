@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
+import static com.example.demo.util.dateformatter.DateFormatter.formForChatSentTime;
 import static com.example.demo.util.dateformatter.DateFormatter.formForDateTime;
 
 @Service
@@ -45,7 +46,7 @@ public class ChatService {
         SiteUser siteUser = siteUserRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
 
-        String sentTime = formForDateTime.format(LocalDateTime.now());
+        String sentTime = formForChatSentTime.format(LocalDateTime.now());
 
         ChatMessageResponseDto chatMessageResponseDto = ChatMessageResponseDto.builder()
                 .content(content)
