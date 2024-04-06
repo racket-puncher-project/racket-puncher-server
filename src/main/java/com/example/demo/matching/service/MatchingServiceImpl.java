@@ -16,6 +16,7 @@ import com.example.demo.siteuser.repository.SiteUserRepository;
 import com.example.demo.type.ApplyStatus;
 import com.example.demo.type.NotificationType;
 import com.example.demo.type.PenaltyType;
+import com.example.demo.type.PrecipitationType;
 import com.example.demo.type.RecruitStatus;
 import com.example.demo.util.geometry.GeometryUtil;
 import lombok.RequiredArgsConstructor;
@@ -71,7 +72,7 @@ public class MatchingServiceImpl implements MatchingService {
         }
         var weatherDto = weatherService.getWeatherResponseDtoByMatching(matching);
 
-        if (weatherDto != null) {
+        if (!PrecipitationType.NICE.equals(weatherDto.getPrecipitationType())) {
             matching.changeRecruitStatus(RecruitStatus.WEATHER_ISSUE);
             notificationService.createAndSendNotification(siteUser, matching,
                     NotificationType.makeWeatherIssueMessage(weatherDto));
