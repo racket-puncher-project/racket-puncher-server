@@ -37,7 +37,11 @@ public class NotificationServiceImpl implements NotificationService {
         sseEmitter.onTimeout(() -> emitterRepository.delete(userId));
         sseEmitter.onCompletion(() -> emitterRepository.delete(userId));
         try {
-            sseEmitter.send(SseEmitter.event().id("").name(NOTIFICATION_NAME).data("Connection succeed"));
+            sseEmitter
+                    .send(SseEmitter.event()
+                            .id("")
+                            .name(NOTIFICATION_NAME)
+                            .data("Connection succeed"));
         } catch (IOException e) {
             throw new RacketPuncherException(NOTIFICATION_CONNECTION_FAILED);
         }
