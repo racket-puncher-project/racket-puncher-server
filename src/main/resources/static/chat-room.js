@@ -1,6 +1,6 @@
 let stompClient = null;
-const serverWsUrl = 'http://43.203.25.186:8081/ws';
-const serverHttpUrl = 'http://43.203.25.186:8081/api/chat/previous';
+const serverWsUrl = 'https://racket-puncher.store/ws';
+const serverHttpUrl = 'https://racket-puncher.store/api/chat/previous';
 
 function connect() {
     const accessToken = document.getElementById('accessToken').value;

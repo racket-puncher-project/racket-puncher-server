@@ -1,6 +1,6 @@
 let stompClient = null;
-const serverHttpUrl = 'http://43.203.25.186:8081/api/chat/list'; // 백엔드 로컬 테스트에서는 localhost로 변경해야 함
-const serverWsUrl = 'http://43.203.25.186:8081/ws'; // 백엔드 로컬 테스트에서는 localhost로 변경해야 함
+const serverHttpUrl = 'https://racket-puncher.store/api/chat/list'; // 백엔드 로컬 테스트에서는 localhost로 변경해야 함
+const serverWsUrl = 'https://racket-puncher.store/ws'; // 백엔드 로컬 테스트에서는 localhost로 변경해야 함
 
 function fetchChatRooms() {
     const accessToken = document.getElementById('accessToken').value;
