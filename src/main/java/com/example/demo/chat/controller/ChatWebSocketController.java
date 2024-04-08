@@ -1,7 +1,6 @@
 package com.example.demo.chat.controller;
 
 import com.example.demo.chat.dto.ChatMessageRequestDto;
-import com.example.demo.chat.dto.LastReadTimeUpdateDto;
 import com.example.demo.chat.service.ChatService;
 import com.example.demo.exception.RacketPuncherException;
 import lombok.RequiredArgsConstructor;
@@ -38,13 +37,13 @@ public class ChatWebSocketController {
     }
 
     @MessageMapping("/readMessage/{matchingId}")
-    public void updateLastReadMessage(@DestinationVariable String matchingId, SimpMessageHeaderAccessor headerAccessor, LastReadTimeUpdateDto lastReadTimeUpdateDto) {
+    public void updateLastReadMessage(@DestinationVariable String matchingId, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
         SessionInformation sessionInfo = sessionRegistry.getSessionInformation(sessionId);
         if (sessionInfo == null){
             throw new RacketPuncherException(INVALID_SESSION);
         }
         Principal principal = (Principal) sessionInfo.getPrincipal();
-        chatService.updateLastReadTime(matchingId, principal.getName(), lastReadTimeUpdateDto.getReadTime());
+        chatService.updateLastReadTime(matchingId, principal.getName());
     }
 }
