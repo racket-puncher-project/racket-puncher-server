@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -102,7 +101,7 @@ public class ChatService {
                 .filter(apply -> apply.getApplyStatus() == ApplyStatus.ACCEPTED)
                 .map(Apply::getMatching) // 신청한 것 중 ACCEPTED 된 매칭
                 .filter(matching -> matching.getRecruitDueDateTime().isBefore(now)
-                        && matching.getEndTime().plusHours(24).isAfter(LocalTime.from(now)))
+                        && matching.getDate().atTime(matching.getEndTime().plusHours(24)).isAfter(LocalDateTime.from(now)))
                 .distinct() // 마감 시간이 지나고, 종료 시간 이후 24시간이 지나지 않은 매칭
                 .map(matching -> {
                     List<SiteUserInfoForListDto> acceptedUsers = applyRepository.findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED).stream()

@@ -16,9 +16,31 @@ function fetchChatRooms() {
             'Content-Type': 'application/json'
         }
     })
-        .then(response => response.json())
-        .then(data => displayChatRooms(data.response))
-        .catch(error => console.error('Error fetching chat rooms:', error));
+        .then(response => {
+            if (response.ok) {
+                return response.text(); // 먼저 텍스트로 응답을 받음
+            } else {
+                throw new Error(`Server responded with status: ${response.status}`);
+            }
+        })
+        .then(text => {
+            try {
+                return JSON.parse(text); // 텍스트를 수동으로 JSON으로 파싱
+            } catch (error) {
+                throw new Error('Failed to parse JSON response'); // JSON 파싱 실패 시 에러 처리
+            }
+        })
+        .then(data => {
+            if (data) { // 데이터가 실제로 존재하는지 검증
+                displayChatRooms(data.response);
+            } else {
+                throw new Error('No data received');
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching chat rooms:', error);
+            alert('채팅방을 불러오는 데 실패했습니다.'); // 사용자에게 피드백 제공
+        });
     connectWebSocket();
 }
 
@@ -57,18 +79,18 @@ function connectWebSocket() {
 
     const headers = {
         'Authorization': 'Bearer ' + accessToken,
-        'connectType' : 'list'
+        'connectType': 'list'
     };
 
-    stompClient.connect(headers, function(frame) {
+    stompClient.connect(headers, function (frame) {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/newMessageArrived', function(message) {
+        stompClient.subscribe('/topic/newMessageArrived', function (message) {
             const data = JSON.parse(message.body);
             if (data && data.matchingId) {
                 updateNewMessageNum(data.matchingId);
             }
         });
-    }, function(error) {
+    }, function (error) {
         console.log('STOMP connection error: ' + error);
     });
 }
