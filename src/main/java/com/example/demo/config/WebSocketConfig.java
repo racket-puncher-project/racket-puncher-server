@@ -35,7 +35,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("http://localhost:3000", "http://localhost:8080", "http://localhost:8081")
+                .setAllowedOriginPatterns(
+                        "http://localhost:3000", "http://localhost:8080", "http://localhost:8081",
+                        "https://racket-puncher.store", "https://racket-puncher-project.github.io")
                 .withSockJS();
     }
 
