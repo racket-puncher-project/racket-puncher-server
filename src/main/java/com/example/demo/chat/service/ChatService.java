@@ -101,7 +101,7 @@ public class ChatService {
                 .filter(apply -> apply.getApplyStatus() == ApplyStatus.ACCEPTED)
                 .map(Apply::getMatching) // 신청한 것 중 ACCEPTED 된 매칭
                 .filter(matching -> matching.getRecruitDueDateTime().isBefore(now)
-                        && matching.getDate().atTime(matching.getEndTime().plusHours(24)).isAfter(LocalDateTime.from(now)))
+                        && ((matching.getDate().atTime(matching.getEndTime())).plusHours(24)).isAfter(LocalDateTime.from(now)))
                 .distinct() // 마감 시간이 지나고, 종료 시간 이후 24시간이 지나지 않은 매칭
                 .map(matching -> {
                     List<SiteUserInfoForListDto> acceptedUsers = applyRepository.findAllByMatching_IdAndApplyStatus(matching.getId(), ApplyStatus.ACCEPTED).stream()
@@ -115,10 +115,10 @@ public class ChatService {
                         return ChatRoomDto.makeChatRoomDto(matching, newMessageNum, acceptedUsers);
                     } // 본 기록이 없으면 전체 갯수 리턴
 
-                    LocalDateTime lastReadDateTime = LocalDateTime.parse(lastReadTime.getTime(), formForDateTime);
+                    LocalDateTime lastReadDateTime = LocalDateTime.parse(lastReadTime.getTime(), formForChatSentTime);
                     List<ChatMessage> messages = chatMessageRepository.findAllByMatchingId(String.valueOf(matching.getId()));
                     long newMessageNum = messages.stream()
-                            .map(message -> LocalDateTime.parse(message.getTime(), formForDateTime))
+                            .map(message -> LocalDateTime.parse(message.getTime(), formForChatSentTime))
                             .filter(messageDateTime -> messageDateTime.isAfter(lastReadDateTime))
                             .count();
                     return ChatRoomDto.makeChatRoomDto(matching, newMessageNum, acceptedUsers);
