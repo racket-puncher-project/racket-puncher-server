@@ -23,13 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.example.demo.exception.type.ErrorCode.USER_NOT_FOUND;
 import static com.example.demo.util.dateformatter.DateFormatter.formForChatSentTime;
-import static com.example.demo.util.dateformatter.DateFormatter.formForDateTime;
 
 @Service
 @Transactional
@@ -77,13 +74,11 @@ public class ChatService {
                 }).toList();
     }
 
-    public void updateLastReadTime(String matchingId, String userEmail, String readTime) {
+    public void updateLastReadTime(String matchingId, String userEmail) {
         SiteUser siteUser = siteUserRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RacketPuncherException(USER_NOT_FOUND));
 
-        DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("yyyy. MM. dd. HH:mm:ss");
-        LocalDateTime dateTime = LocalDateTime.parse(readTime, originalFormatter);
-        String formattedString = dateTime.format(formForDateTime);
+        String formattedString = formForChatSentTime.format(LocalDateTime.now());
 
         LastReadTime lastReadTime = LastReadTime.builder()
                 .id(new LastReadTimeId(matchingId, String.valueOf(siteUser.getId())))
@@ -123,7 +118,7 @@ public class ChatService {
                             .count();
                     return ChatRoomDto.makeChatRoomDto(matching, newMessageNum, acceptedUsers);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void updateNewMessageNum(String matchingId) {
