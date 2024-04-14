@@ -3,6 +3,8 @@ package com.example.demo.notification.controller;
 import com.example.demo.auth.security.TokenProvider;
 import com.example.demo.common.ResponseDto;
 import com.example.demo.common.ResponseUtil;
+import com.example.demo.exception.RacketPuncherException;
+import com.example.demo.exception.type.ErrorCode;
 import com.example.demo.notification.service.NotificationService;
 import com.example.demo.siteuser.repository.SiteUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +25,11 @@ public class NotificationController {
     private final SiteUserRepository siteUserRepository;
     private final TokenProvider tokenProvider;
     @GetMapping(value = "/connect/{accessToken}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public ResponseDto<SseEmitter> connect(@PathVariable(value = "accessToken") String accessToken) {
+    public SseEmitter connect(@PathVariable(value = "accessToken") String accessToken) {
 
         String email = tokenProvider.getUserEmail(accessToken);
-        var siteUser = siteUserRepository.findByEmail(email);
-        var result = notificationService.connectNotification(siteUser.get().getId());
-        return ResponseUtil.SUCCESS(result);
+        var siteUser = siteUserRepository.findByEmail(email)
+                .orElseThrow(() -> new RacketPuncherException(ErrorCode.USER_NOT_FOUND));
+        return notificationService.connectNotification(siteUser.getId());
     }
 }
