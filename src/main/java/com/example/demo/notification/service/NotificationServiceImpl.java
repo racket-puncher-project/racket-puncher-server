@@ -22,7 +22,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
-    private final static Long DEFAULT_TIMEOUT = 3600000L;
+    private final static Long DEFAULT_TIMEOUT = 3600000L * 3;
     private final static String NOTIFICATION_NAME = "notify";
 
     private final EmitterRepository emitterRepository;
@@ -53,8 +53,9 @@ public class NotificationServiceImpl implements NotificationService {
         emitterRepository.get(userId).ifPresentOrElse(sseEmitter -> {
             try {
                 sseEmitter.send(SseEmitter.event().id(notification.getId().toString())
-                        .name(notification.getNotificationType().toString())
+                        .name(NOTIFICATION_NAME)
                         .data(notification.getNotificationType().getMessage()));
+                log.info("emitter send succeed");
             } catch (IOException e) {
                 emitterRepository.delete(userId);
                 throw new RacketPuncherException(NOTIFICATION_CONNECTION_FAILED);

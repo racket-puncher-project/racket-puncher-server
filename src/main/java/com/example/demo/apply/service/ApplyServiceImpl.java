@@ -55,6 +55,7 @@ public class ApplyServiceImpl implements ApplyService {
                     .orElseThrow(() -> new RacketPuncherException(APPLY_NOT_FOUND));
             validateApplyDuplication(existApply);
             existApply.changeApplyStatus(ApplyStatus.PENDING); // 취소 신청 내역 있을 경우 상태만 변경
+            notificationService.createAndSendNotification(organizer, matching, NotificationType.REQUEST_APPLY);
             return existApply;
         }
 
