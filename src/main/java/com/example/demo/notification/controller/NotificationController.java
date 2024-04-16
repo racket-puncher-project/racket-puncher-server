@@ -25,6 +25,7 @@ public class NotificationController {
     private final SiteUserRepository siteUserRepository;
     private final TokenProvider tokenProvider;
 
+    @CrossOrigin(origins = "http://localhost:8080")
     @GetMapping(value = "/connect/{accessToken}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> connect(@PathVariable(value = "accessToken") String accessToken) {
 
