@@ -33,6 +33,7 @@ public class NotificationController {
         var siteUser = siteUserRepository.findByEmail(email)
                 .orElseThrow(() -> new RacketPuncherException(ErrorCode.USER_NOT_FOUND));
         var result = notificationService.connectNotification(siteUser.getId());
+
         return ResponseEntity.ok(result);
     }
 }
