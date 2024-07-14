@@ -4,6 +4,7 @@ import com.example.demo.entity.Matching;
 import com.example.demo.matching.dto.FilterDto;
 import com.example.demo.matching.filter.Region;
 import com.example.demo.matching.repository.BaseCustomRepository;
+import com.example.demo.type.RecruitStatus;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringExpression;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.example.demo.entity.QMatching.matching;
@@ -29,12 +31,13 @@ public class CustomRepositoryForFilteringImpl extends BaseCustomRepository imple
     @Override
     public PageImpl<Matching> findAllByFilter(FilterDto filterDto, Pageable pageable) {
         JPQLQuery<Matching> matchingList = queryFactory.selectFrom(matching)
-                    .where(
-                            date(filterDto),
-                            region(filterDto),
-                            matchingType(filterDto),
-                            ageGroup(filterDto),
-                            ntrp(filterDto)
+                    .where(date(filterDto)
+                            .and(region(filterDto))
+                            .and(matchingType(filterDto))
+                            .and(ageGroup(filterDto))
+                            .and(ntrp(filterDto))
+                            .and(matching.recruitStatus.eq(RecruitStatus.OPEN))
+                            .and(matching.recruitDueDateTime.after(LocalDateTime.now()))
                     );
 
         return getPageImpl(pageable, matchingList, Matching.class);
@@ -42,7 +45,7 @@ public class CustomRepositoryForFilteringImpl extends BaseCustomRepository imple
 
     private BooleanExpression date(FilterDto filterDto){
         if(filterDto.getDate().isEmpty()) {
-            return null;
+            return Expressions.asBoolean(true).isTrue();
         }
         LocalDate dateOfFilter = LocalDate.parse(filterDto.getDate());
         return matching.date.eq(dateOfFilter);
@@ -50,14 +53,14 @@ public class CustomRepositoryForFilteringImpl extends BaseCustomRepository imple
 
     private BooleanExpression ageGroup(FilterDto filterDto){
         if(filterDto.getAgeGroups().isEmpty()) {
-            return null;
+            return Expressions.asBoolean(true).isTrue();
         }
         return matching.age.in(filterDto.getAgeGroups());
     }
 
     private BooleanExpression region(FilterDto filterDto){
         if(filterDto.getRegions().isEmpty()) {
-            return null;
+            return Expressions.asBoolean(true).isTrue();
         }
 
         List<String> regions = filterDto.getRegions().stream()
@@ -72,14 +75,14 @@ public class CustomRepositoryForFilteringImpl extends BaseCustomRepository imple
 
     private BooleanExpression matchingType(FilterDto filterDto){
         if(filterDto.getMatchingTypes().isEmpty()) {
-            return null;
+            return Expressions.asBoolean(true).isTrue();
         }
         return matching.matchingType.in(filterDto.getMatchingTypes());
     }
 
     private BooleanExpression ntrp(FilterDto filterDto){
         if(filterDto.getNtrps().isEmpty()) {
-            return null;
+            return Expressions.asBoolean(true).isTrue();
         }
         return matching.ntrp.in(filterDto.getNtrps());
     }
