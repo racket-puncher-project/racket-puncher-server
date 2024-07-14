@@ -36,6 +36,9 @@ public class S3Uploader {
 
         //content type을 지정해서 올려주지 않으면 자동으로 "application/octet-stream"으로 고정이 되서 링크 클릭시 웹에서 열리는게 아니라 자동 다운이 시작됨.
         switch (ext) {
+            case "jpg":
+                contentType = "image/jpg";
+                break;
             case "jpeg":
                 contentType = "image/jpeg";
                 break;
